@@ -2,18 +2,21 @@
 @implements IDisposable
 @inject TodayService Today
 @inject FavoriteService Favorites
+@inject RecurrenceService Recurrences
+@inject IStringLocalizer<Strings> L
 @inject PlanEvents Events
 
 @* Alta de tarea nueva (formulario rápido). Lo usan la página /tarea/nueva y la pestaña Nueva de Planificar. *@
 @if (_view is not null)
 {
-    <TaskForm @key="_formKey" Groups="_view.Groups" InitialLevelId="InitialLevelId" FullLevelId="_fullLevelId"
+    <TaskForm @key="_formKey" Groups="_view.Groups" InitialLevelId="InitialLevelId" FullLevelId="_fullLevelId" TodayDate="_view.Date" Error="@_error"
               OnSave="SaveAsync" OnSendToPool="SaveToPoolAsync" OnCancel="() => OnDone.InvokeAsync()" />
 }
 
 @code {
     private TodayView? _view;
     private Guid? _fullLevelId;
+    private string? _error;
     private Guid _formKey = Guid.NewGuid();
 
     [Parameter] public Guid? InitialLevelId { get; set; }
@@ -35,17 +38,32 @@
 
     private async Task SaveAsync(NewTaskRequest request)
     {
+        if (!ValidRecurrence(request)) return;
         var result = await Today.AddAsync(request);
         if (result.Outcome == AddTaskOutcome.LevelFull) { _fullLevelId = request.LevelId; return; }
         await FinishAsync(request, result);
     }
 
-    private async Task SaveToPoolAsync(NewTaskRequest request) => await FinishAsync(request, await Today.AddAsync(request));
+    private async Task SaveToPoolAsync(NewTaskRequest request)
+    {
+        if (!ValidRecurrence(request)) return;
+        await FinishAsync(request, await Today.AddAsync(request));
+    }
+
+    private bool ValidRecurrence(NewTaskRequest request)
+    {
+        _error = null;
+        if (request.Recurrence?.Validate(_view!.Date) is not { } invalid) return true;
+        _error = RecurrenceText.Error(L, invalid);
+        return false;
+    }
 
     private async Task FinishAsync(NewTaskRequest request, AddTaskResult result)
     {
         if (!result.Succeeded) return;
         if (request.MarkFavorite && result.Task is not null) await Favorites.MarkAsync(result.Task.Id);
+        // La tarea recién creada pasa a ser la primera instancia de la regla elegida (si hay).
+        if (request.Recurrence is { } spec && result.Task is not null) await Recurrences.CreateFromTaskAsync(result.Task.Id, spec);
         _fullLevelId = null;
         _formKey = Guid.NewGuid();
         _view = await Today.GetAsync();

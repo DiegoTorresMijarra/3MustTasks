@@ -232,18 +232,12 @@
     private Task SubmitAsync()
     {
         if (string.IsNullOrWhiteSpace(_title)) return Task.CompletedTask;
-        return IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(_when)) : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId, IsPinned: _pinned, MarkFavorite: _favorite));
-    }
-
-    private Task SendToPoolAsync() =>
-        IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(TaskWhen.Pool))
-               : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool, _pinned, MarkFavorite: _favorite));
-        return IsEdit ? SaveEditAsync(_when) : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId, IsPinned: _pinned, Recurrence: _recurrence));
+        return IsEdit ? SaveEditAsync(_when) : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId, IsPinned: _pinned, MarkFavorite: _favorite, Recurrence: _recurrence));
     }
 
     private Task SendToPoolAsync() =>
         IsEdit ? SaveEditAsync(TaskWhen.Pool)
-               : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool, _pinned, _recurrence));
+               : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool, _pinned, MarkFavorite: _favorite, Recurrence: _recurrence));
 
     private Task SaveEditAsync(TaskWhen when)
     {

@@ -20,6 +20,7 @@ public sealed record TodayView(
 public enum AddDestination { Today, Pool }
 
 /// <param name="MarkFavorite">Además de crear la tarea, guardarla como favorita (lo aplica quien llama, vía <see cref="FavoriteService"/>).</param>
+/// <param name="Recurrence">Si se da, quien llama convierte la tarea creada en recurrente con RecurrenceService; AddAsync no lo usa.</param>
 public sealed record NewTaskRequest(
     string Title,
     Guid LevelId,
@@ -28,10 +29,8 @@ public sealed record NewTaskRequest(
     Guid? CategoryId = null,
     TimeOnly? DueTime = null,
     TimeSpan? ReminderOffset = null,
-    bool MarkFavorite = false);
-/// <param name="Recurrence">Si se da, la página convierte la tarea creada en recurrente con RecurrenceService; AddAsync no lo usa.</param>
-public sealed record NewTaskRequest(
-    string Title, Guid LevelId, AddDestination Destination = AddDestination.Today, bool IsPinned = false, RecurrenceSpec? Recurrence = null);
+    bool MarkFavorite = false,
+    RecurrenceSpec? Recurrence = null);
 
 public enum AddTaskOutcome { AddedToToday, AddedToPool, LevelFull, InvalidTitle, UnknownLevel }
 

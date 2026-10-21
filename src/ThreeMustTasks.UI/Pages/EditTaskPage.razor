@@ -59,7 +59,7 @@ else if (_task is not null && _view is not null)
     {
         _fullLevelId = null;
         _error = null;
-        ApplyEdit(request, await Editor.UpdateAsync(request));
+        await ApplyEditAsync(request, await Editor.UpdateAsync(request));
     }
 
     private async Task SaveRecurringAsync(RecurringEdit edit)
@@ -68,12 +68,16 @@ else if (_task is not null && _view is not null)
         _error = null;
         var result = await Recurrences.UpdateTaskAsync(edit.Request, edit.Scope, edit.Spec);
         if (result.Edit is null) _error = RecurrenceText.Error(L, result.Recurrence);
-        else if (!result.Edit.Succeeded) ApplyEdit(edit.Request, result.Edit);
+        else if (!result.Edit.Succeeded) await ApplyEditAsync(edit.Request, result.Edit);
         else if (result.Recurrence != RecurrenceOutcome.Saved) _error = RecurrenceText.Error(L, result.Recurrence);
-        else GoBack();
+        else
+        {
+            if (edit.Request.MarkFavorite) await Favorites.MarkAsync(edit.Request.TaskId);
+            GoBack();
+        }
     }
 
-    private void ApplyEdit(EditTaskRequest request, EditTaskResult result)
+    private async Task ApplyEditAsync(EditTaskRequest request, EditTaskResult result)
     {
         switch (result.Outcome)
         {

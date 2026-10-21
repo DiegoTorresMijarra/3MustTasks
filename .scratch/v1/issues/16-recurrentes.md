@@ -1,6 +1,6 @@
 # 16 · Tareas recurrentes
 
-Status: in-review
+Status: resolved
 Blocked by: 08, 10
 Cubre: 3MT-24, 25
 
@@ -32,3 +32,5 @@ El usuario define una regla (diaria, laborables, días de la semana, cada N día
   - "Esta y las siguientes" actualiza la plantilla de la regla (título, nivel, categoría, hora) y, si se cambió, la frecuencia; la regla no guarda notas ni recordatorio (spec §3), así que esos campos solo valen para "solo esta". Una instancia no ofrece "No se repite": para parar una serie se pausa o se borra en Ajustes > Tareas recurrentes.
   - Borrar una regla desvincula (`RecurrenceRuleId = null`) las instancias ya generadas; siguen siendo tareas normales.
   - Fuera de alcance: `EndDate` no tiene control en la UI (el modelo y el generador lo respetan); exportar como RRULE (issue de .ics) y backup JSON de reglas.
+- pm-2: integrado en main (22, 14, 16) y revisado en bloque. Conflictos semánticos 14/16 resueltos a mano: NewTaskRequest (campos de ambos, Recurrence al final), TaskForm, EditTaskPage (favorita + recurrente) y la lógica de recurrencia de NewTaskPage portada a NewTaskPanel (con TodayDate/Error). build -warnaserror 0 avisos; tests Core 186, Infra 90, UI 116 en verde. Resolved.
+- pm-2 (16): pendiente propuesto: añadir IsPaused a la spec §3 (RecurrenceRule) y controles UI de EndDate/Interval>1 (no cubiertos). Sin test de rollback del cierre con generación.
