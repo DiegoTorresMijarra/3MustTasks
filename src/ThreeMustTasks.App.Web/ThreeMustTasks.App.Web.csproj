@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ThreeMustTasks.UI\ThreeMustTasks.UI.csproj" />
     <ProjectReference Include="..\ThreeMustTasks.Core\ThreeMustTasks.Core.csproj" />
+    <ProjectReference Include="..\ThreeMustTasks.Infrastructure.Browser\ThreeMustTasks.Infrastructure.Browser.csproj" />
     <ProjectReference Include="..\ThreeMustTasks.Infrastructure.Shared\ThreeMustTasks.Infrastructure.Shared.csproj" />
   </ItemGroup>
 
