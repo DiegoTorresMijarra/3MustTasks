@@ -1,6 +1,6 @@
 # 07 · Tachar tareas, progreso por nivel y banner de mínimos
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 06
 Cubre: 3MT-10, 13, parte de 48
 
@@ -21,3 +21,5 @@ El usuario tacha y destacha tareas con un toque, ve el progreso 'completadas X/m
 - 06-anadir-tarea-hoy-por-nivel
 
 ## Comments
+
+- pm-1: asignado a worker-4 (reutilizado, ~25 % de contexto), rama issue/07-tachar-progreso-banner. Camino crítico.
