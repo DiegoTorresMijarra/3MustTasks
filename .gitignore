@@ -8,3 +8,5 @@ obj/
 TestResults/
 coverage/
 .vs/
+
+publish/

@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\ThreeMustTasks.Core\ThreeMustTasks.Core.csproj" />
     <ProjectReference Include="..\..\src\ThreeMustTasks.Infrastructure.Shared\ThreeMustTasks.Infrastructure.Shared.csproj" />
+    <ProjectReference Include="..\..\src\ThreeMustTasks.Infrastructure.Sqlite\ThreeMustTasks.Infrastructure.Sqlite.csproj" />
   </ItemGroup>
 
 </Project>
