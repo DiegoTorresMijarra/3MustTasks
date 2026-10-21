@@ -1,6 +1,6 @@
 # 04 · Esqueleto Android: host MAUI con SQLite
 
-Status: in-review
+Status: resolved
 Blocked by: 03
 Cubre: 3MT-05, parte de 07
 
@@ -36,3 +36,4 @@ Host MAUI Blazor Hybrid que arranca en emulador Android mostrando el mismo shell
   - Sin niveles ni ajustes sembrados: la migración solo crea el esquema.
   - `ApplicationId` = `com.threemusttasks.app` (a confirmar). Iconos y splash son los de la plantilla MAUI con color #3f51b5; sin permisos de notificaciones (issues posteriores).
   - `dotnet-ef` se usó desde una ruta temporal; no hay `dotnet-tools.json`.
+- pm-1: revisado e integrado en main por instrucción del coordinador (el usuario duerme). Core 49, Infrastructure 41 y UI 44 tests en verde con -warnaserror. Pendientes anotados que NO bloquean, sin marcar como cumplidos: (1) arranque en emulador/dispositivo, (2) comprobar en dispositivo que la BD queda en AppDataDirectory, (3) primera ejecución real de android.yml en GitHub. App.Maui queda fuera de la .sln y con workflow aparte (aceptado). Queda trazabilidad para una prueba manual.
