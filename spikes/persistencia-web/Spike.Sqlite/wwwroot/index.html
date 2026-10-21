@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>Spike.Sqlite</title>
+    <base href="/" />
+    <link rel="preload" id="webassembly" />
+    <script type="importmap"></script>
+</head>
+<body>
+    <pre id="out">cargando...</pre>
+    <script>
+      window.spikeReport = (json) => {
+        window.spikeResult = JSON.parse(json);
+        window.spikeResult.msSinceNavStart = performance.now();
+        document.getElementById('out').textContent = json;
+      };
+    </script>
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+</body>
+</html>
