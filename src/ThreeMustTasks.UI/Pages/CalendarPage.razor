@@ -1,6 +1,106 @@
 @page "/calendario"
+@page "/calendario/{DateText}"
+@using System.Globalization
+@using ThreeMustTasks.Core.Domain
+@using ThreeMustTasks.Core.Services
+@using ThreeMustTasks.UI.Services
 @inject IStringLocalizer<Strings> L
+@inject HistoryService History
 
 <PageTitle>@L["App_Name"] · @L["Calendar_Title"]</PageTitle>
 <MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Calendar_Title"]</MudText>
-<MudText Color="Color.Secondary">@L["Calendar_Empty"]</MudText>
+
+@if (_metrics is not null && _day is not null)
+{
+    <div class="tmt-history-metrics" data-testid="history-metrics">
+        <div class="tmt-metric">
+            <strong data-testid="metric-compliance">@(_metrics.CompliancePercent is { } p ? $"{p} %" : "–")</strong>
+            <span>@L["History_Compliance"]</span>
+        </div>
+        <div class="tmt-metric">
+            <strong data-testid="metric-current">@DaysText(_metrics.CurrentStreak)</strong>
+            <span>@L["History_CurrentStreak"]</span>
+        </div>
+        <div class="tmt-metric">
+            <strong data-testid="metric-best">@DaysText(_metrics.BestStreak)</strong>
+            <span>@L["History_BestStreak"]</span>
+        </div>
+    </div>
+
+    <div class="tmt-day-nav">
+        <a href="calendario/@Iso(_day.Date.AddDays(-1))" data-testid="day-prev" aria-label="@L["History_Prev"]">
+            <MudIcon Icon="@Icons.Material.Filled.ChevronLeft" />
+        </a>
+        <MudText Typo="Typo.subtitle1" data-testid="day-title">@SpanishDate.Format(_day.Date)</MudText>
+        @if (_day.Date.AddDays(1) < _today)
+        {
+            <a href="calendario/@Iso(_day.Date.AddDays(1))" data-testid="day-next" aria-label="@L["History_Next"]">
+                <MudIcon Icon="@Icons.Material.Filled.ChevronRight" />
+            </a>
+        }
+        else
+        {
+            <span class="disabled" data-testid="day-next-disabled" aria-hidden="true"><MudIcon Icon="@Icons.Material.Filled.ChevronRight" /></span>
+        }
+    </div>
+
+    @if (!_day.Summary.HasPlan)
+    {
+        <MudText Color="Color.Secondary" data-testid="day-no-plan">@L["History_NoPlan"]</MudText>
+    }
+    else
+    {
+        <MudText Class="mb-2" data-testid="day-status">
+            @(_day.Summary.Fulfilled == true ? L["History_Fulfilled"] : L["History_NotFulfilled"])
+            @if (_day.Summary.Percent is { } pct)
+            {
+                <span data-testid="day-summary"> · @L["History_Summary", _day.Summary.Completed, _day.Summary.Planned, pct]</span>
+            }
+        </MudText>
+        <ul class="tmt-task-list">
+            @foreach (var item in _day.Items)
+            {
+                var done = item.Outcome == AssignmentOutcome.Completed;
+                <li class="tmt-task @(done ? "done" : "")" data-testid="history-item" data-outcome="@item.Outcome">
+                    <span class="tmt-task-title" data-testid="history-title">@item.Task.Title</span>
+                    @if (item.Level is not null)
+                    {
+                        <span class="tmt-level-tag" style="--level-color:@item.Level.Color">@item.Level.Name</span>
+                    }
+                    <span class="tmt-outcome" data-testid="history-outcome">@OutcomeText(item.Outcome)</span>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    [Parameter] public string? DateText { get; set; }
+
+    private DateOnly _today;
+    private DayDetail? _day;
+    private HistoryMetrics? _metrics;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _today = History.Today;
+        var yesterday = _today.AddDays(-1);
+        var date = DateOnly.TryParseExact(DateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) && d <= yesterday
+            ? d
+            : yesterday;
+        _day = await History.GetDayAsync(date);
+        _metrics = await History.GetMetricsAsync(yesterday.AddDays(-29), yesterday);
+    }
+
+    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+    private string DaysText(int n) => n == 1 ? L["History_DayOne"] : L["History_Days", n];
+
+    private string OutcomeText(AssignmentOutcome o) => o switch
+    {
+        AssignmentOutcome.Completed => L["History_Completed"],
+        AssignmentOutcome.NotCompleted => L["History_NotCompleted"],
+        AssignmentOutcome.Removed => L["History_Removed"],
+        _ => L["History_Pending"],
+    };
+}

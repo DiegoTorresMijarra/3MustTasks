@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<CategoryService>();
         services.AddScoped<PoolService>();
         services.AddScoped<LevelService>();
+        services.AddScoped<HistoryService>();
         return services;
     }
 }
