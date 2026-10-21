@@ -71,4 +71,19 @@ html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Se
 .tmt-progress { display: flex; align-items: center; gap: 4px; margin: -4px 0 8px; font-size: 0.8125rem; color: var(--mud-palette-text-secondary); }
 .tmt-banner { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; padding: 12px; border-radius: 10px; border: 1px solid var(--mud-palette-warning); background: var(--mud-palette-surface); }
 .tmt-banner-text { flex: 1 1 auto; font-weight: 600; }
+.tmt-chips { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 8px; padding-bottom: 4px; }
+.tmt-chip { min-height: 44px; padding: 0 14px; border-radius: 22px; white-space: nowrap; cursor: pointer; font-weight: 600; border: 1px solid var(--mud-palette-lines-default); background: var(--mud-palette-surface); color: var(--mud-palette-text-primary); }
+.tmt-chip[aria-pressed="true"] { background: var(--mud-palette-text-primary); color: var(--mud-palette-surface); }
+.tmt-pool-filters { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-size: 0.8125rem; color: var(--mud-palette-text-secondary); }
+.tmt-pool-filters select { min-height: 44px; margin-left: 6px; }
+.tmt-pool-item { padding: 0; }
+.tmt-pool-item.selected { border: 2px solid var(--mud-palette-text-primary); }
+.tmt-pool-label { flex: 1; min-height: 60px; display: flex; align-items: center; gap: 12px; padding: 8px 14px; cursor: pointer; }
+.tmt-pool-label input { width: 22px; height: 22px; margin: 0; }
+.tmt-pool-text { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.tmt-pool-meta { font-size: 0.75rem; color: var(--mud-palette-text-secondary); }
+.tmt-level-tag { padding: 4px 8px; border-radius: 6px; font-size: 0.6875rem; font-weight: 800; color: var(--level-color); border: 1px solid var(--level-color); }
+.tmt-action-bar { position: fixed; left: 12px; right: 12px; bottom: calc(92px + env(safe-area-inset-bottom)); z-index: 11; display: flex; gap: 8px; padding: 10px; border-radius: 20px; background: #15171C; box-shadow: 0 10px 24px rgba(21,23,28,0.3); }
+.tmt-action { flex: 1; min-height: 48px; border-radius: 14px; border: 1px solid #5B6170; background: transparent; color: #FFFFFF; font-weight: 700; cursor: pointer; }
+.tmt-action.primary { flex: 1.4; background: #FFFFFF; color: #15171C; font-weight: 800; }
 .tmt-banner-action { min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; font-weight: 600; color: var(--mud-palette-primary); text-decoration: none; }

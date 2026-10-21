@@ -65,4 +65,26 @@
   <data name="Today_Optional" xml:space="preserve"><value>Opcional</value></data>
   <data name="Today_Check" xml:space="preserve"><value>Tachar {0}</value></data>
   <data name="Today_Uncheck" xml:space="preserve"><value>Destachar {0}</value></data>
+  <data name="Pool_Summary" xml:space="preserve"><value>{0} pendientes · {1} seleccionadas</value></data>
+  <data name="Pool_NoMatches" xml:space="preserve"><value>Ninguna tarea cumple los filtros.</value></data>
+  <data name="Pool_All" xml:space="preserve"><value>Todas</value></data>
+  <data name="Pool_SortPostponed" xml:space="preserve"><value>Más pospuestas</value></data>
+  <data name="Pool_FilterLevel" xml:space="preserve"><value>Filtrar por nivel</value></data>
+  <data name="Pool_FilterCategory" xml:space="preserve"><value>Categoría</value></data>
+  <data name="Pool_FilterAge" xml:space="preserve"><value>Antigüedad</value></data>
+  <data name="Pool_FilterPostponed" xml:space="preserve"><value>Pospuesta</value></data>
+  <data name="Pool_Any" xml:space="preserve"><value>Cualquiera</value></data>
+  <data name="Pool_AgeAtLeast" xml:space="preserve"><value>{0} días o más</value></data>
+  <data name="Pool_PostponedAtLeast" xml:space="preserve"><value>{0} veces o más</value></data>
+  <data name="Pool_AgeToday" xml:space="preserve"><value>Hoy</value></data>
+  <data name="Pool_AgeYesterday" xml:space="preserve"><value>Ayer</value></data>
+  <data name="Pool_AgeDays" xml:space="preserve"><value>Hace {0} días</value></data>
+  <data name="Pool_PostponedOne" xml:space="preserve"><value>pospuesta 1 vez</value></data>
+  <data name="Pool_PostponedMany" xml:space="preserve"><value>pospuesta {0} veces</value></data>
+  <data name="Pool_Select" xml:space="preserve"><value>Seleccionar {0}</value></data>
+  <data name="Pool_Recover" xml:space="preserve"><value>Recuperar a hoy</value></data>
+  <data name="Pool_Archive" xml:space="preserve"><value>Archivar</value></data>
+  <data name="Pool_Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Pool_RejectedFull" xml:space="preserve"><value>No cabe "{0}": el nivel {1} está lleno hoy.</value></data>
+  <data name="Pool_RejectedGone" xml:space="preserve"><value>"{0}" ya no está en el pool.</value></data>
 </root>

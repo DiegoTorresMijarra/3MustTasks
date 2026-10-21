@@ -136,7 +136,7 @@ public sealed class TodayService(
         QuotaPolicy.Evaluate(levels, plan.Select(p => new PlanEntry(p.Task.LevelId, p.Outcome == AssignmentOutcome.Completed)));
 
     /// <summary>Anota la primera vez que se cumple cada mínimo del día; no se borra si luego deja de cumplirse.</summary>
-    private async Task RecordMilestonesAsync(DateOnly today, CancellationToken ct)
+    internal async Task RecordMilestonesAsync(DateOnly today, CancellationToken ct)
     {
         var status = Evaluate(await GetLevelsAsync(ct), await LoadPlanAsync(today, ct));
         var log = await days.GetLogAsync(today, ct) ?? new DayLog(today, null, null, null, null);

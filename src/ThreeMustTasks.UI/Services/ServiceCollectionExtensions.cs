@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<DayRolloverService>();
         services.AddSingleton<StreakCalculator>();
         services.AddScoped<TodayService>();
+        services.AddScoped<PoolService>();
         return services;
     }
 }
