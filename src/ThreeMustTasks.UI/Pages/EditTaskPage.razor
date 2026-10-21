@@ -1,0 +1,85 @@
+@page "/tarea/{TaskId:guid}"
+@using ThreeMustTasks.Core.Services
+@inject IStringLocalizer<Strings> L
+@inject TodayService Today
+@inject TaskEditService Editor
+@inject CategoryService Categories
+@inject NavigationManager Navigation
+
+<PageTitle>@L["App_Name"] · @L["Form_EditTitle"]</PageTitle>
+<MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Form_EditTitle"]</MudText>
+
+@if (_loaded && _task is null)
+{
+    <MudText Color="Color.Secondary" data-testid="task-missing">@L["Form_NotFound"]</MudText>
+    <MudButton Variant="Variant.Text" OnClick="GoBack">@L["Form_Back"]</MudButton>
+}
+else if (_task is { ReadOnly: true })
+{
+    <div class="tmt-readonly" data-testid="task-readonly">
+        <MudAlert Severity="Severity.Info" Class="mb-3">@L["Form_ReadOnly"]</MudAlert>
+        <MudText Typo="Typo.h6" data-testid="readonly-title">@_task.Task.Title</MudText>
+        @if (!string.IsNullOrWhiteSpace(_task.Task.Notes))
+        {
+            <MudText Color="Color.Secondary">@_task.Task.Notes</MudText>
+        }
+        <MudButton Variant="Variant.Text" OnClick="GoBack" Class="mt-3">@L["Form_Back"]</MudButton>
+    </div>
+}
+else if (_task is not null && _view is not null)
+{
+    <TaskForm Groups="_view.Groups" Existing="_task" Categories="_categories" TodayDate="_view.Date"
+              FullLevelId="_fullLevelId" Error="@_error"
+              OnSaveEdit="SaveAsync" OnDelete="DeleteAsync" OnCancel="GoBack" />
+}
+
+@code {
+    private TodayView? _view;
+    private EditableTask? _task;
+    private IReadOnlyList<Category> _categories = [];
+    private Guid? _fullLevelId;
+    private string? _error;
+    private bool _loaded;
+
+    [Parameter] public Guid TaskId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _view = await Today.GetAsync();
+        _categories = await Categories.ListAsync();
+        _task = await Editor.GetAsync(TaskId);
+        _loaded = true;
+    }
+
+    private async Task SaveAsync(EditTaskRequest request)
+    {
+        _fullLevelId = null;
+        _error = null;
+        var result = await Editor.UpdateAsync(request);
+        switch (result.Outcome)
+        {
+            case EditTaskOutcome.Saved: GoBack(); break;
+            case EditTaskOutcome.LevelFull: _fullLevelId = request.LevelId; break;
+            default: _error = ErrorText(result.Outcome); break;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (await Editor.DeleteAsync(TaskId)) GoBack();
+    }
+
+    private string ErrorText(EditTaskOutcome outcome) => outcome switch
+    {
+        EditTaskOutcome.InvalidTitle => L["Err_InvalidTitle"],
+        EditTaskOutcome.TitleTooLong => L["Err_TitleTooLong", TaskEditService.MaxTitleLength],
+        EditTaskOutcome.NotesTooLong => L["Err_NotesTooLong", TaskEditService.MaxNotesLength],
+        EditTaskOutcome.ReminderWithoutTime => L["Err_ReminderWithoutTime"],
+        EditTaskOutcome.InvalidDate => L["Err_InvalidDate"],
+        EditTaskOutcome.CannotMoveCompleted => L["Err_CannotMoveCompleted"],
+        EditTaskOutcome.ReadOnly => L["Form_ReadOnly"],
+        _ => L["Err_Generic"],
+    };
+
+    private void GoBack() => Navigation.NavigateTo("");
+}

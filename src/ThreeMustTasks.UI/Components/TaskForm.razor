@@ -1,10 +1,15 @@
 @using ThreeMustTasks.Core.Services
 @inject IStringLocalizer<Strings> L
 
-@* Formulario de tarea. Hoy solo título y nivel; las demás secciones del mock (categoría, hora, notas...) llegan con sus issues. *@
+@* Formulario de tarea. Nueva: título y nivel. Edición (Existing != null): además categoría, cuándo, hora, recordatorio y notas. *@
 <form class="tmt-form" @onsubmit="SubmitAsync" @onsubmit:preventDefault data-testid="task-form">
+    @if (!string.IsNullOrEmpty(Error))
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-3" data-testid="form-error">@Error</MudAlert>
+    }
+
     <MudTextField T="string" @bind-Value="_title" Immediate="true" Label="@L["Form_Title"]" Variant="Variant.Outlined"
-                  data-testid="title-input" AutoFocus="true" />
+                  data-testid="title-input" AutoFocus="true" MaxLength="120" />
 
     <div class="tmt-form-label">@L["Form_Level"]</div>
     <div class="tmt-level-picker" role="radiogroup" aria-label="@L["Form_Level"]">
@@ -21,6 +26,67 @@
         }
     </div>
 
+    @if (IsEdit)
+    {
+        <div class="tmt-form-label">@L["Form_Category"]</div>
+        <div class="tmt-chip-row" role="radiogroup" aria-label="@L["Form_Category"]">
+            <button type="button" role="radio" aria-checked="@(_categoryId is null ? "true" : "false")"
+                    class="tmt-chip @(_categoryId is null ? "selected" : "")" data-testid="category-none"
+                    @onclick="() => _categoryId = null">@L["Form_NoCategory"]</button>
+            @foreach (var c in Categories)
+            {
+                var sel = c.Id == _categoryId;
+                <button type="button" role="radio" aria-checked="@(sel ? "true" : "false")"
+                        class="tmt-chip @(sel ? "selected" : "")" style="--chip-color:@c.Color"
+                        data-testid="category-@c.Name" @onclick="() => _categoryId = c.Id">
+                    <span class="tmt-dot" aria-hidden="true"></span>@c.Name
+                </button>
+            }
+            <a class="tmt-chip tmt-chip-link" href="ajustes/categorias" data-testid="manage-categories">@L["Form_ManageCategories"]</a>
+        </div>
+
+        <div class="tmt-form-label">@L["Form_When"]</div>
+        <div class="tmt-chip-row" role="radiogroup" aria-label="@L["Form_When"]">
+            <button type="button" role="radio" aria-checked="@(_when == TaskWhen.Today ? "true" : "false")"
+                    class="tmt-chip @(_when == TaskWhen.Today ? "selected" : "")" data-testid="when-today"
+                    @onclick="() => _when = TaskWhen.Today">@L["Form_WhenToday"]</button>
+            <button type="button" role="radio" aria-checked="@(_when == TaskWhen.OtherDay ? "true" : "false")"
+                    class="tmt-chip @(_when == TaskWhen.OtherDay ? "selected" : "")" data-testid="when-other"
+                    @onclick="() => _when = TaskWhen.OtherDay">@L["Form_WhenOther"]</button>
+            <button type="button" role="radio" aria-checked="@(_when == TaskWhen.Pool ? "true" : "false")"
+                    class="tmt-chip @(_when == TaskWhen.Pool ? "selected" : "")" data-testid="when-pool"
+                    @onclick="() => _when = TaskWhen.Pool">@L["Form_WhenPool"]</button>
+        </div>
+        @if (_when == TaskWhen.OtherDay)
+        {
+            <label class="tmt-field">
+                <span>@L["Form_Date"]</span>
+                <input type="date" @bind="_date" min="@TodayDate.AddDays(1).ToString("yyyy-MM-dd")" data-testid="date-input" />
+            </label>
+        }
+
+        <div class="tmt-form-label">@L["Form_TimeReminder"]</div>
+        <div class="tmt-field-row">
+            <label class="tmt-field">
+                <span>@L["Form_Time"]</span>
+                <input type="time" @bind="_time" @bind:format="HH:mm" data-testid="time-input" />
+            </label>
+            <label class="tmt-field">
+                <span>@L["Form_Reminder"]</span>
+                <select @bind="_reminderMinutes" disabled="@(_time is null)" data-testid="reminder-select">
+                    <option value="">@L["Form_ReminderNone"]</option>
+                    @foreach (var m in ReminderOptions)
+                    {
+                        <option value="@m">@(m == 0 ? L["Form_ReminderAtTime"].Value : L["Form_ReminderBefore", m].Value)</option>
+                    }
+                </select>
+            </label>
+        </div>
+
+        <div class="tmt-form-label">@L["Form_Notes"]</div>
+        <textarea class="tmt-notes" rows="3" maxlength="1000" @bind="_notes" @bind:event="oninput" data-testid="notes-input"></textarea>
+    }
+
     @if (FullLevelId is { } fullId && fullId == _levelId)
     {
         <MudAlert Severity="Severity.Warning" Class="mt-3" data-testid="full-alert">
@@ -31,16 +97,41 @@
         </MudAlert>
     }
 
+    @if (_confirmDelete)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-3" data-testid="delete-confirm">
+            @L["Form_DeleteConfirm"]
+            <div class="mt-2 tmt-confirm-actions">
+                <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => OnDelete.InvokeAsync()" data-testid="delete-yes">@L["Form_DeleteYes"]</MudButton>
+                <MudButton Variant="Variant.Text" OnClick="() => _confirmDelete = false" data-testid="delete-no">@L["Form_Cancel"]</MudButton>
+            </div>
+        </MudAlert>
+    }
+
     <div class="tmt-form-actions">
         <MudButton Variant="Variant.Text" OnClick="() => OnCancel.InvokeAsync()" data-testid="cancel">@L["Form_Cancel"]</MudButton>
+        @if (IsEdit && OnDelete.HasDelegate)
+        {
+            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => _confirmDelete = true" data-testid="delete">@L["Form_Delete"]</MudButton>
+        }
         <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
                    Disabled="@string.IsNullOrWhiteSpace(_title)" data-testid="save">@L["Form_Save"]</MudButton>
     </div>
 </form>
 
 @code {
+    private static readonly int[] ReminderOptions = [0, 5, 15, 30, 60];
+
     private string? _title;
     private Guid? _selectedLevel;
+    private Guid? _categoryId;
+    private TaskWhen _when = TaskWhen.Today;
+    private DateOnly? _date;
+    private TimeOnly? _time;
+    private int? _reminderMinutes;
+    private string? _notes;
+    private bool _confirmDelete;
+    private bool _loadedExisting;
 
     /// <summary>Niveles activos con su ocupación de hoy.</summary>
     [Parameter, EditorRequired] public IReadOnlyList<LevelGroup> Groups { get; set; } = [];
@@ -51,9 +142,24 @@
     /// <summary>Nivel que el host ha rechazado por estar lleno: se ofrece mandar la tarea al pool.</summary>
     [Parameter] public Guid? FullLevelId { get; set; }
 
+    /// <summary>Mensaje de validación devuelto por el host.</summary>
+    [Parameter] public string? Error { get; set; }
+
+    /// <summary>Si no es null el formulario está en modo edición con todos los campos.</summary>
+    [Parameter] public EditableTask? Existing { get; set; }
+
+    [Parameter] public IReadOnlyList<Category> Categories { get; set; } = [];
+
+    /// <summary>Día lógico actual (para el mínimo del selector de fecha).</summary>
+    [Parameter] public DateOnly TodayDate { get; set; }
+
     [Parameter] public EventCallback<NewTaskRequest> OnSave { get; set; }
+    [Parameter] public EventCallback<EditTaskRequest> OnSaveEdit { get; set; }
     [Parameter] public EventCallback<NewTaskRequest> OnSendToPool { get; set; }
+    [Parameter] public EventCallback OnDelete { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+
+    private bool IsEdit => Existing is not null;
 
     private Guid _levelId
     {
@@ -63,9 +169,33 @@
 
     private string SelectedName => Groups.FirstOrDefault(g => g.Level.Id == _levelId)?.Level.Name ?? "";
 
-    private Task SubmitAsync() =>
-        string.IsNullOrWhiteSpace(_title) ? Task.CompletedTask : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId));
+    protected override void OnParametersSet()
+    {
+        if (Existing is null || _loadedExisting) return;
+        _loadedExisting = true;
+        var t = Existing.Task;
+        _title = t.Title;
+        _selectedLevel = t.LevelId;
+        _categoryId = t.CategoryId;
+        _when = Existing.When;
+        _date = t.ScheduledDate is { } d && d > TodayDate ? d : null;
+        _time = t.DueTime;
+        _reminderMinutes = t.ReminderOffset is { } r ? (int)r.TotalMinutes : null;
+        _notes = t.Notes;
+    }
+
+    private Task SubmitAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_title)) return Task.CompletedTask;
+        return IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(_when)) : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId));
+    }
 
     private Task SendToPoolAsync() =>
-        OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool));
+        IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(TaskWhen.Pool))
+               : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool));
+
+    private EditTaskRequest BuildEdit(TaskWhen when) => new(
+        Existing!.Task.Id, _title ?? "", _levelId, _categoryId, _time,
+        _time is not null && _reminderMinutes is { } m ? TimeSpan.FromMinutes(m) : null,
+        _notes, when, when == TaskWhen.OtherDay ? _date : null);
 }

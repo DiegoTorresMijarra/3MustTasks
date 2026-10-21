@@ -18,6 +18,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<LogicalDayCalculator>();
         services.AddScoped<PlanEvents>();
         services.AddScoped<TodayService>();
+        services.AddScoped<TaskEditService>();
+        services.AddScoped<CategoryService>();
         return services;
     }
 }

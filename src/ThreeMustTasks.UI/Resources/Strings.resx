@@ -65,4 +65,46 @@
   <data name="Today_Optional" xml:space="preserve"><value>Opcional</value></data>
   <data name="Today_Check" xml:space="preserve"><value>Tachar {0}</value></data>
   <data name="Today_Uncheck" xml:space="preserve"><value>Destachar {0}</value></data>
+  <data name="Form_EditTitle" xml:space="preserve"><value>Editar tarea</value></data>
+  <data name="Form_Category" xml:space="preserve"><value>Categoría</value></data>
+  <data name="Form_NoCategory" xml:space="preserve"><value>Sin categoría</value></data>
+  <data name="Form_ManageCategories" xml:space="preserve"><value>Gestionar categorías</value></data>
+  <data name="Form_When" xml:space="preserve"><value>¿Cuándo?</value></data>
+  <data name="Form_WhenToday" xml:space="preserve"><value>Hoy</value></data>
+  <data name="Form_WhenOther" xml:space="preserve"><value>Otro día</value></data>
+  <data name="Form_WhenPool" xml:space="preserve"><value>Al pool</value></data>
+  <data name="Form_Date" xml:space="preserve"><value>Fecha</value></data>
+  <data name="Form_TimeReminder" xml:space="preserve"><value>Hora y recordatorio</value></data>
+  <data name="Form_Time" xml:space="preserve"><value>Hora</value></data>
+  <data name="Form_Reminder" xml:space="preserve"><value>Recordatorio</value></data>
+  <data name="Form_ReminderNone" xml:space="preserve"><value>Sin recordatorio</value></data>
+  <data name="Form_ReminderAtTime" xml:space="preserve"><value>A la hora</value></data>
+  <data name="Form_ReminderBefore" xml:space="preserve"><value>{0} min antes</value></data>
+  <data name="Form_Notes" xml:space="preserve"><value>Notas</value></data>
+  <data name="Form_Delete" xml:space="preserve"><value>Eliminar</value></data>
+  <data name="Form_DeleteConfirm" xml:space="preserve"><value>¿Eliminar esta tarea definitivamente? No se puede deshacer.</value></data>
+  <data name="Form_DeleteYes" xml:space="preserve"><value>Sí, eliminar</value></data>
+  <data name="Form_NotFound" xml:space="preserve"><value>Esta tarea ya no existe.</value></data>
+  <data name="Form_Back" xml:space="preserve"><value>Volver</value></data>
+  <data name="Form_ReadOnly" xml:space="preserve"><value>Esta tarea pertenece al historial y no se puede editar.</value></data>
+  <data name="Err_InvalidTitle" xml:space="preserve"><value>Escribe un título.</value></data>
+  <data name="Err_TitleTooLong" xml:space="preserve"><value>El título admite como máximo {0} caracteres.</value></data>
+  <data name="Err_NotesTooLong" xml:space="preserve"><value>Las notas admiten como máximo {0} caracteres.</value></data>
+  <data name="Err_ReminderWithoutTime" xml:space="preserve"><value>Para usar un recordatorio indica una hora.</value></data>
+  <data name="Err_InvalidDate" xml:space="preserve"><value>Elige una fecha posterior a hoy.</value></data>
+  <data name="Err_CannotMoveCompleted" xml:space="preserve"><value>Una tarea completada hoy no se puede mover a otro día ni al pool. Destáchala primero.</value></data>
+  <data name="Err_Generic" xml:space="preserve"><value>No se pudo guardar. Inténtalo de nuevo.</value></data>
+  <data name="Settings_Organization" xml:space="preserve"><value>Organización</value></data>
+  <data name="Categories_Title" xml:space="preserve"><value>Categorías</value></data>
+  <data name="Categories_Empty" xml:space="preserve"><value>Aún no hay categorías.</value></data>
+  <data name="Categories_New" xml:space="preserve"><value>Nueva categoría</value></data>
+  <data name="Categories_Editing" xml:space="preserve"><value>Editar categoría</value></data>
+  <data name="Categories_Name" xml:space="preserve"><value>Nombre</value></data>
+  <data name="Categories_Color" xml:space="preserve"><value>Color</value></data>
+  <data name="Categories_Edit" xml:space="preserve"><value>Editar {0}</value></data>
+  <data name="Categories_Delete" xml:space="preserve"><value>Borrar {0}</value></data>
+  <data name="Categories_ErrName" xml:space="preserve"><value>Escribe un nombre.</value></data>
+  <data name="Categories_ErrLong" xml:space="preserve"><value>El nombre admite como máximo {0} caracteres.</value></data>
+  <data name="Categories_ErrDuplicate" xml:space="preserve"><value>Ya existe una categoría con ese nombre.</value></data>
+  <data name="Categories_ErrColor" xml:space="preserve"><value>Elige un color válido.</value></data>
 </root>
