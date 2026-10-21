@@ -7,6 +7,7 @@ namespace ThreeMustTasks.Core.Services;
 public enum TaskWhen { Today, OtherDay, Pool }
 
 /// <param name="Date">Solo para <see cref="TaskWhen.OtherDay"/>: debe ser posterior a hoy.</param>
+/// <param name="IsPinned">Fijar o desfijar; null deja la marca como está.</param>
 public sealed record EditTaskRequest(
     Guid TaskId,
     string Title,
@@ -16,7 +17,8 @@ public sealed record EditTaskRequest(
     TimeSpan? ReminderOffset,
     string? Notes,
     TaskWhen When,
-    DateOnly? Date = null);
+    DateOnly? Date = null,
+    bool? IsPinned = null);
 
 public enum EditTaskOutcome
 {
@@ -97,6 +99,7 @@ public sealed class TaskEditService(
             ReminderOffset = r.DueTime is null ? null : r.ReminderOffset,
             Notes = notes,
             ScheduledDate = scheduled,
+            IsPinned = r.IsPinned ?? current.Task.IsPinned,
             UpdatedAt = time.GetUtcNow(),
         };
         await tasks.UpsertAsync(updated, ct);

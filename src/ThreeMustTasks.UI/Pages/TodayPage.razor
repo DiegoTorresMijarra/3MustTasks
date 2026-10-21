@@ -70,7 +70,34 @@
                                          Style="@($"color:{level.Color}")" />
                             </button>
                             <a class="tmt-task-title" href="tarea/@t.Task.Id" data-testid="task-title">@t.Task.Title</a>
+                            @if (t.PinnedDay is { } day)
+                            {
+                                <span class="tmt-pinned" data-testid="pinned-badge">
+                                    <MudIcon Icon="@Icons.Material.Filled.PushPin" Size="Size.Small" />
+                                    @L["Today_PinnedDay", day]
+                                </span>
+                            }
+                            @if (!done)
+                            {
+                                <button type="button" class="tmt-task-menu-btn" data-testid="task-menu-button"
+                                        aria-haspopup="menu" aria-expanded="@(_menuFor == id ? "true" : "false")"
+                                        aria-label="@L["Today_TaskMenu", t.Task.Title]"
+                                        @onclick="() => _menuFor = _menuFor == id ? null : id">
+                                    <MudIcon Icon="@Icons.Material.Filled.MoreVert" />
+                                </button>
+                            }
                         </li>
+                        @if (_menuFor == id && !done)
+                        {
+                            var pin = !t.Task.IsPinned;
+                            var taskId = t.Task.Id;
+                            <li class="tmt-task-menu" role="none">
+                                <div role="menu" data-testid="task-menu">
+                                    <button type="button" role="menuitem" data-testid="@(pin ? "menu-pin" : "menu-unpin")"
+                                            @onclick="() => SetPinnedAsync(taskId, pin)">@(pin ? L["Today_Pin"] : L["Today_Unpin"])</button>
+                                </div>
+                            </li>
+                        }
                     }
                 </ul>
             }
@@ -104,6 +131,13 @@
 
 @code {
     private TodayView? _view;
+    private Guid? _menuFor;
+
+    private async Task SetPinnedAsync(Guid taskId, bool pinned)
+    {
+        _menuFor = null;
+        await Today.SetPinnedAsync(taskId, pinned);
+    }
 
     protected override async Task OnInitializedAsync()
     {

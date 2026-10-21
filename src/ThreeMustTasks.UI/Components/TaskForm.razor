@@ -87,6 +87,11 @@
         <textarea class="tmt-notes" rows="3" maxlength="1000" @bind="_notes" @bind:event="oninput" data-testid="notes-input"></textarea>
     }
 
+    <label class="tmt-pin-option">
+        <input type="checkbox" @bind="_pinned" data-testid="pin-input" />
+        <span>@L["Form_Pin"]</span>
+    </label>
+
     @if (FullLevelId is { } fullId && fullId == _levelId)
     {
         <MudAlert Severity="Severity.Warning" Class="mt-3" data-testid="full-alert">
@@ -130,6 +135,7 @@
     private TimeOnly? _time;
     private int? _reminderMinutes;
     private string? _notes;
+    private bool _pinned;
     private bool _confirmDelete;
     private bool _loadedExisting;
 
@@ -182,20 +188,21 @@
         _time = t.DueTime;
         _reminderMinutes = t.ReminderOffset is { } r ? (int)r.TotalMinutes : null;
         _notes = t.Notes;
+        _pinned = t.IsPinned;
     }
 
     private Task SubmitAsync()
     {
         if (string.IsNullOrWhiteSpace(_title)) return Task.CompletedTask;
-        return IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(_when)) : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId));
+        return IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(_when)) : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId, IsPinned: _pinned));
     }
 
     private Task SendToPoolAsync() =>
         IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(TaskWhen.Pool))
-               : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool));
+               : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool, _pinned));
 
     private EditTaskRequest BuildEdit(TaskWhen when) => new(
         Existing!.Task.Id, _title ?? "", _levelId, _categoryId, _time,
         _time is not null && _reminderMinutes is { } m ? TimeSpan.FromMinutes(m) : null,
-        _notes, when, when == TaskWhen.OtherDay ? _date : null);
+        _notes, when, when == TaskWhen.OtherDay ? _date : null, _pinned);
 }
