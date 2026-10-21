@@ -119,6 +119,12 @@ public sealed class SqliteConfigRepository(Factory factory) : IConfigRepository
         await ctx.UpsertAsync(level, q => q.AnyAsync(l => l.Id == level.Id, ct), ct);
     }
 
+    public async Task<bool> DeleteLevelAsync(Guid id, CancellationToken ct = default)
+    {
+        await using var ctx = await factory.CreateDbContextAsync(ct);
+        return await ctx.Levels.Where(l => l.Id == id).ExecuteDeleteAsync(ct) > 0;
+    }
+
     public async Task<IReadOnlyList<Category>> ListCategoriesAsync(CancellationToken ct = default)
     {
         await using var ctx = await factory.CreateDbContextAsync(ct);

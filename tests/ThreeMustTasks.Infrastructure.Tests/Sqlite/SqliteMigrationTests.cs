@@ -27,7 +27,7 @@ public sealed class SqliteMigrationTests : IDisposable
         using var ctx = new ThreeMustTasksDbContext(
             new DbContextOptionsBuilder<ThreeMustTasksDbContext>().UseSqlite("Data Source=:memory:").Options);
 
-        Assert.Contains("InitialCreate", ctx.Database.GetMigrations().Single());
+        Assert.Contains(ctx.Database.GetMigrations(), m => m.Contains("InitialCreate"));
         Assert.False(ctx.Database.HasPendingModelChanges(), "El modelo cambió: falta añadir una migración.");
     }
 

@@ -1,7 +1,9 @@
 @page "/ajustes"
+@using ThreeMustTasks.Core.Ports
 @implements IDisposable
 @inject IStringLocalizer<Strings> L
 @inject ThemeService Theme
+@inject ISettingsStore Store
 
 <PageTitle>@L["App_Name"] · @L["Settings_Title"]</PageTitle>
 <MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Settings_Title"]</MudText>
@@ -13,11 +15,72 @@
     <MudRadio T="ThemeMode" Value="ThemeMode.Dark" Color="Color.Primary" data-testid="theme-dark">@L["Theme_Dark"]</MudRadio>
 </MudRadioGroup>
 
+<MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Settings_General"]</MudText>
+<div class="tmt-form">
+    <label class="tmt-field">
+        <span>@L["Settings_DayStart"]</span>
+        <input type="time" value="@_dayStart" @onchange="OnDayStart" data-testid="setting-daystart" />
+        <span class="tmt-level-hint">@L["Settings_DayStartHint"]</span>
+    </label>
+    <label class="tmt-field">
+        <span>@L["Settings_FirstDay"]</span>
+        <select value="@((int)_s.FirstDayOfWeek)" @onchange="OnFirstDay" data-testid="setting-firstday">
+            @foreach (var d in _weekDays)
+            {
+                <option value="@((int)d)">@L[$"Day_{d}"]</option>
+            }
+        </select>
+    </label>
+    <label class="tmt-field tmt-check-row">
+        <span>@L["Settings_Strict"]</span>
+        <input type="checkbox" checked="@_s.StrictMode" @onchange="e => Update(s => s with { StrictMode = (bool)e.Value! })" data-testid="setting-strict" />
+    </label>
+    <label class="tmt-field tmt-check-row">
+        <span>@L["Settings_AutoAdd"]</span>
+        <input type="checkbox" checked="@_s.AutoAddScheduled" @onchange="e => Update(s => s with { AutoAddScheduled = (bool)e.Value! })" data-testid="setting-autoadd" />
+    </label>
+    <label class="tmt-field tmt-check-row">
+        <span>@L["Settings_VTodo"]</span>
+        <input type="checkbox" checked="@_s.ExportVTodo" @onchange="e => Update(s => s with { ExportVTodo = (bool)e.Value! })" data-testid="setting-vtodo" />
+    </label>
+</div>
+
 <MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Settings_Organization"]</MudText>
+<a class="tmt-settings-link" href="ajustes/niveles" data-testid="levels-link">@L["Settings_Levels"]</a><br />
 <a class="tmt-settings-link" href="ajustes/categorias" data-testid="categories-link">@L["Categories_Title"]</a>
 
 @code {
-    protected override void OnInitialized() => Theme.OnChange += OnChanged;
+    private static readonly DayOfWeek[] _weekDays =
+        [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday];
+
+    private AppSettings _s = new();
+    private string _dayStart = "00:00";
+
+    protected override void OnInitialized()
+    {
+        Theme.OnChange += OnChanged;
+        _s = Store.Load();
+        _dayStart = _s.DayStartsAt.ToString("HH:mm");
+    }
+
     private void OnChanged() => InvokeAsync(StateHasChanged);
     public void Dispose() => Theme.OnChange -= OnChanged;
+
+    private void Update(Func<AppSettings, AppSettings> change)
+    {
+        // Se relee antes de guardar para no pisar otros cambios (p. ej. el tema).
+        _s = change(Store.Load());
+        Store.Save(_s);
+    }
+
+    private void OnDayStart(ChangeEventArgs e)
+    {
+        // Un valor vacío o inválido se ignora y se conserva el anterior.
+        if (!TimeOnly.TryParseExact(e.Value?.ToString(), "HH:mm", out var time)) return;
+        _dayStart = e.Value!.ToString()!;
+        Update(s => s with { DayStartsAt = time });
+    }
+
+    private void OnFirstDay(ChangeEventArgs e) =>
+        Update(s => s with { FirstDayOfWeek = (DayOfWeek)int.Parse(e.Value!.ToString()!) });
 }

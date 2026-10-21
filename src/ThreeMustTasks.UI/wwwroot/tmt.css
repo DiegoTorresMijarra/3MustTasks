@@ -86,4 +86,7 @@ html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Se
 .tmt-notes { width: 100%; resize: vertical; }
 .tmt-confirm-actions { display: flex; gap: 8px; }
 .tmt-task-title { flex: 1; color: inherit; text-decoration: none; padding: 8px 0; }
+.tmt-check-row { flex-direction: row; align-items: center; justify-content: space-between; }
+.tmt-check-row input { min-width: 24px; width: 24px; min-height: 24px; height: 24px; flex: none; }
+.tmt-level-off { opacity: 0.6; }
 .tmt-settings-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--mud-palette-primary); }

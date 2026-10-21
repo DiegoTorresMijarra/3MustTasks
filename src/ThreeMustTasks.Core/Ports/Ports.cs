@@ -33,6 +33,8 @@ public interface IConfigRepository
 {
     Task<IReadOnlyList<Level>> ListLevelsAsync(CancellationToken ct = default);
     Task UpsertLevelAsync(Level level, CancellationToken ct = default);
+    /// <summary>Devuelve false si no existía. No toca las tareas: el llamador comprueba que no esté en uso.</summary>
+    Task<bool> DeleteLevelAsync(Guid id, CancellationToken ct = default);
     Task<IReadOnlyList<Category>> ListCategoriesAsync(CancellationToken ct = default);
     Task UpsertCategoryAsync(Category category, CancellationToken ct = default);
     Task<bool> DeleteCategoryAsync(Guid id, CancellationToken ct = default);

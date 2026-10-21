@@ -107,4 +107,54 @@
   <data name="Categories_ErrLong" xml:space="preserve"><value>El nombre admite como máximo {0} caracteres.</value></data>
   <data name="Categories_ErrDuplicate" xml:space="preserve"><value>Ya existe una categoría con ese nombre.</value></data>
   <data name="Categories_ErrColor" xml:space="preserve"><value>Elige un color válido.</value></data>
+  <data name="Settings_Levels" xml:space="preserve"><value>Niveles y cupos</value></data>
+  <data name="Settings_General" xml:space="preserve"><value>General</value></data>
+  <data name="Settings_DayStart" xml:space="preserve"><value>Inicio del día</value></data>
+  <data name="Settings_DayStartHint" xml:space="preserve"><value>Hasta esa hora, lo que hagas cuenta para el día anterior.</value></data>
+  <data name="Settings_FirstDay" xml:space="preserve"><value>Primer día de la semana</value></data>
+  <data name="Settings_Strict" xml:space="preserve"><value>Modo estricto</value></data>
+  <data name="Settings_AutoAdd" xml:space="preserve"><value>Añadir a Hoy las tareas a futuro cuando llegue su día</value></data>
+  <data name="Settings_VTodo" xml:space="preserve"><value>Incluir tareas (VTODO) al exportar el calendario</value></data>
+  <data name="Day_Monday" xml:space="preserve"><value>Lunes</value></data>
+  <data name="Day_Tuesday" xml:space="preserve"><value>Martes</value></data>
+  <data name="Day_Wednesday" xml:space="preserve"><value>Miércoles</value></data>
+  <data name="Day_Thursday" xml:space="preserve"><value>Jueves</value></data>
+  <data name="Day_Friday" xml:space="preserve"><value>Viernes</value></data>
+  <data name="Day_Saturday" xml:space="preserve"><value>Sábado</value></data>
+  <data name="Day_Sunday" xml:space="preserve"><value>Domingo</value></data>
+  <data name="Levels_Title" xml:space="preserve"><value>Niveles y cupos</value></data>
+  <data name="Levels_Summary" xml:space="preserve"><value>Añadir {0} · completar {1} · máx. {2}</value></data>
+  <data name="Levels_NoMax" xml:space="preserve"><value>sin tope</value></data>
+  <data name="Levels_Disabled" xml:space="preserve"><value>Desactivado</value></data>
+  <data name="Levels_Edit" xml:space="preserve"><value>Editar {0}</value></data>
+  <data name="Levels_Delete" xml:space="preserve"><value>Borrar {0}</value></data>
+  <data name="Levels_MoveUp" xml:space="preserve"><value>Subir {0}</value></data>
+  <data name="Levels_MoveDown" xml:space="preserve"><value>Bajar {0}</value></data>
+  <data name="Levels_DragHint" xml:space="preserve"><value>Arrastra para reordenar, o usa las flechas.</value></data>
+  <data name="Levels_New" xml:space="preserve"><value>Nuevo nivel</value></data>
+  <data name="Levels_Editing" xml:space="preserve"><value>Editar nivel</value></data>
+  <data name="Levels_Name" xml:space="preserve"><value>Nombre</value></data>
+  <data name="Levels_Color" xml:space="preserve"><value>Color</value></data>
+  <data name="Levels_Icon" xml:space="preserve"><value>Icono</value></data>
+  <data name="Levels_MinToAdd" xml:space="preserve"><value>Mín. a añadir</value></data>
+  <data name="Levels_MinToComplete" xml:space="preserve"><value>Mín. a completar</value></data>
+  <data name="Levels_Max" xml:space="preserve"><value>Máximo (vacío = sin tope)</value></data>
+  <data name="Levels_Enabled" xml:space="preserve"><value>Activo</value></data>
+  <data name="Levels_Restore" xml:space="preserve"><value>Restaurar valores por defecto</value></data>
+  <data name="Levels_RestoreHint" xml:space="preserve"><value>Vuelve Must, Recommended y Maybe a su configuración original. Los niveles propios se conservan pero quedan desactivados.</value></data>
+  <data name="Levels_ErrName" xml:space="preserve"><value>Escribe un nombre.</value></data>
+  <data name="Levels_ErrLong" xml:space="preserve"><value>El nombre admite como máximo {0} caracteres.</value></data>
+  <data name="Levels_ErrDuplicate" xml:space="preserve"><value>Ya existe un nivel con ese nombre.</value></data>
+  <data name="Levels_ErrColor" xml:space="preserve"><value>Elige un color válido.</value></data>
+  <data name="Levels_ErrIcon" xml:space="preserve"><value>Elige un icono.</value></data>
+  <data name="Levels_ErrQuota" xml:space="preserve"><value>Los cupos deben cumplir: mín. completar ≤ mín. añadir ≤ máximo (el máximo, si lo pones, es al menos 1).</value></data>
+  <data name="Levels_ErrNoActive" xml:space="preserve"><value>Tiene que quedar al menos un nivel activo.</value></data>
+  <data name="Levels_ErrInUse" xml:space="preserve"><value>Ese nivel tiene tareas, favoritas o recurrencias: desactívalo en lugar de borrarlo.</value></data>
+  <data name="Levels_ErrLastActive" xml:space="preserve"><value>No puedes borrar el único nivel activo.</value></data>
+  <data name="Icon_flag" xml:space="preserve"><value>Bandera</value></data>
+  <data name="Icon_star" xml:space="preserve"><value>Estrella</value></data>
+  <data name="Icon_lightbulb" xml:space="preserve"><value>Bombilla</value></data>
+  <data name="Icon_bolt" xml:space="preserve"><value>Rayo</value></data>
+  <data name="Icon_heart" xml:space="preserve"><value>Corazón</value></data>
+  <data name="Icon_bookmark" xml:space="preserve"><value>Marcador</value></data>
 </root>

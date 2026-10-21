@@ -1,0 +1,212 @@
+@page "/ajustes/niveles"
+@using ThreeMustTasks.Core.Services
+@inject IStringLocalizer<Strings> L
+@inject LevelService Service
+
+<PageTitle>@L["App_Name"] · @L["Levels_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="mb-2 tmt-title">@L["Levels_Title"]</MudText>
+<MudText Typo="Typo.caption" Class="mb-3" Color="Color.Secondary">@L["Levels_DragHint"]</MudText>
+
+@if (_error is not null && _editingForm is false)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-3" data-testid="level-error">@_error</MudAlert>
+}
+
+<ul class="tmt-task-list" data-testid="level-list">
+    @for (var i = 0; i < _levels.Count; i++)
+    {
+        var index = i;
+        var lvl = _levels[i];
+        <li class="tmt-task @(lvl.Enabled ? "" : "tmt-level-off")" data-testid="level-row" draggable="true"
+            @ondragstart="() => _dragId = lvl.Id"
+            @ondragover="() => { }" @ondragover:preventDefault
+            @ondrop="() => DropOnAsync(index)" @ondrop:preventDefault>
+            <MudIcon Icon="@LevelIcons.Resolve(lvl.Icon)" Style="@($"color:{lvl.Color}")" Class="mx-2" />
+            <span class="tmt-task-title">
+                <span data-testid="level-name">@lvl.Name</span>
+                <span class="tmt-level-hint" data-testid="level-summary">
+                    @L["Levels_Summary", lvl.MinToAdd, lvl.MinToComplete, lvl.Max?.ToString() ?? L["Levels_NoMax"].Value]
+                </span>
+                @if (!lvl.Enabled)
+                {
+                    <span class="tmt-level-hint" data-testid="level-disabled">· @L["Levels_Disabled"]</span>
+                }
+            </span>
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" aria-label="@L["Levels_MoveUp", lvl.Name]"
+                           Disabled="@(index == 0)" OnClick="() => MoveAsync(lvl.Id, index - 1)" data-testid="level-up" />
+            <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" aria-label="@L["Levels_MoveDown", lvl.Name]"
+                           Disabled="@(index == _levels.Count - 1)" OnClick="() => MoveAsync(lvl.Id, index + 1)" data-testid="level-down" />
+            <MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="@L["Levels_Edit", lvl.Name]"
+                           OnClick="() => StartEdit(lvl)" data-testid="level-edit" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="@L["Levels_Delete", lvl.Name]"
+                           OnClick="() => DeleteAsync(lvl)" data-testid="level-delete" />
+        </li>
+    }
+</ul>
+
+<form class="tmt-form" @onsubmit="SaveAsync" @onsubmit:preventDefault data-testid="level-form">
+    @if (_error is not null && _editingForm)
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-3" data-testid="level-form-error">@_error</MudAlert>
+    }
+    <div class="tmt-form-label">@(_editingId is null ? L["Levels_New"] : L["Levels_Editing"])</div>
+    <MudTextField T="string" @bind-Value="_name" Immediate="true" Label="@L["Levels_Name"]" Variant="Variant.Outlined"
+                  data-testid="level-name-input" MaxLength="30" />
+    <div class="tmt-field-row">
+        <label class="tmt-field">
+            <span>@L["Levels_Color"]</span>
+            <input type="color" @bind="_color" @bind:event="oninput" data-testid="level-color-input" />
+        </label>
+        <label class="tmt-field">
+            <span>@L["Levels_Icon"]</span>
+            <select @bind="_icon" data-testid="level-icon-input">
+                @foreach (var n in LevelIcons.Names)
+                {
+                    <option value="@n">@L[$"Icon_{n}"]</option>
+                }
+            </select>
+        </label>
+    </div>
+    <div class="tmt-field-row">
+        <label class="tmt-field">
+            <span>@L["Levels_MinToAdd"]</span>
+            <input type="number" min="0" @bind="_minToAdd" @bind:event="oninput" data-testid="level-minadd-input" />
+        </label>
+        <label class="tmt-field">
+            <span>@L["Levels_MinToComplete"]</span>
+            <input type="number" min="0" @bind="_minToComplete" @bind:event="oninput" data-testid="level-mincomplete-input" />
+        </label>
+        <label class="tmt-field">
+            <span>@L["Levels_Max"]</span>
+            <input type="number" min="1" @bind="_max" @bind:event="oninput" data-testid="level-max-input" />
+        </label>
+    </div>
+    <label class="tmt-field">
+        <span>@L["Levels_Enabled"]</span>
+        <input type="checkbox" @bind="_enabled" data-testid="level-enabled-input" />
+    </label>
+    <div class="tmt-form-actions">
+        @if (_editingId is not null)
+        {
+            <MudButton Variant="Variant.Text" OnClick="Reset" data-testid="level-cancel">@L["Form_Cancel"]</MudButton>
+        }
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
+                   Disabled="@string.IsNullOrWhiteSpace(_name)" data-testid="level-save">@L["Form_Save"]</MudButton>
+    </div>
+</form>
+
+<div class="tmt-form-label">@L["Levels_Restore"]</div>
+<MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">@L["Levels_RestoreHint"]</MudText>
+<MudButton Variant="Variant.Outlined" OnClick="RestoreAsync" data-testid="levels-restore">@L["Levels_Restore"]</MudButton>
+
+@code {
+    private IReadOnlyList<Level> _levels = [];
+    private Guid? _editingId;
+    private Guid? _dragId;
+    private string? _name;
+    private string _color = "#2559C7";
+    private string _icon = "star";
+    private string? _minToAdd = "0";
+    private string? _minToComplete = "0";
+    private string? _max;
+    private bool _enabled = true;
+    private string? _error;
+    private bool _editingForm;
+
+    protected override async Task OnInitializedAsync() => _levels = await Service.ListAsync();
+
+    private async Task RefreshAsync() => _levels = await Service.ListAsync();
+
+    private void StartEdit(Level l)
+    {
+        _editingId = l.Id;
+        _name = l.Name;
+        _color = l.Color;
+        _icon = l.Icon;
+        _minToAdd = l.MinToAdd.ToString();
+        _minToComplete = l.MinToComplete.ToString();
+        _max = l.Max?.ToString();
+        _enabled = l.Enabled;
+        _error = null;
+    }
+
+    private void Reset()
+    {
+        _editingId = null;
+        _name = null;
+        _color = "#2559C7";
+        _icon = "star";
+        _minToAdd = "0";
+        _minToComplete = "0";
+        _max = null;
+        _enabled = true;
+        _error = null;
+    }
+
+    private async Task SaveAsync()
+    {
+        _editingForm = true;
+        if (!int.TryParse(_minToAdd, out var add) || !int.TryParse(_minToComplete, out var complete)
+            || (!string.IsNullOrWhiteSpace(_max) && !int.TryParse(_max, out _)))
+        {
+            _error = L["Levels_ErrQuota"];
+            return;
+        }
+        int? max = string.IsNullOrWhiteSpace(_max) ? null : int.Parse(_max);
+
+        var result = await Service.SaveAsync(_editingId, new LevelInput(_name ?? "", _color, _icon, add, complete, max, _enabled));
+        if (result.Succeeded)
+        {
+            Reset();
+            await RefreshAsync();
+            return;
+        }
+        _error = result.Outcome switch
+        {
+            SaveLevelOutcome.DuplicateName => L["Levels_ErrDuplicate"],
+            SaveLevelOutcome.InvalidColor => L["Levels_ErrColor"],
+            SaveLevelOutcome.InvalidIcon => L["Levels_ErrIcon"],
+            SaveLevelOutcome.NameTooLong => L["Levels_ErrLong", LevelService.MaxNameLength],
+            SaveLevelOutcome.InvalidQuota => L["Levels_ErrQuota"],
+            SaveLevelOutcome.NoActiveLevel => L["Levels_ErrNoActive"],
+            SaveLevelOutcome.NotFound => L["Err_Generic"],
+            _ => L["Levels_ErrName"],
+        };
+    }
+
+    private async Task DeleteAsync(Level l)
+    {
+        _editingForm = false;
+        var outcome = await Service.DeleteAsync(l.Id);
+        _error = outcome switch
+        {
+            DeleteLevelOutcome.InUse => L["Levels_ErrInUse"].Value,
+            DeleteLevelOutcome.LastActive => L["Levels_ErrLastActive"].Value,
+            _ => null,
+        };
+        if (outcome == DeleteLevelOutcome.Deleted && _editingId == l.Id) Reset();
+        await RefreshAsync();
+    }
+
+    private async Task MoveAsync(Guid id, int newIndex)
+    {
+        await Service.MoveAsync(id, newIndex);
+        await RefreshAsync();
+    }
+
+    private async Task DropOnAsync(int targetIndex)
+    {
+        var id = _dragId;
+        _dragId = null;
+        if (id is null) return;
+        await MoveAsync(id.Value, targetIndex);
+    }
+
+    private async Task RestoreAsync()
+    {
+        _editingForm = false;
+        await Service.RestoreDefaultsAsync();
+        Reset();
+        await RefreshAsync();
+    }
+}

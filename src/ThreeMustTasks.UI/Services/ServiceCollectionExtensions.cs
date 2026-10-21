@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<TodayService>();
         services.AddScoped<TaskEditService>();
         services.AddScoped<CategoryService>();
+        services.AddScoped<LevelService>();
         return services;
     }
 }

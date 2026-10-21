@@ -28,6 +28,9 @@ namespace ThreeMustTasks.Infrastructure.Sqlite.Migrations
                     b.Property<TimeOnly>("DayStartsAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("ExportVTodo")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("FirstDayOfWeek")
                         .HasColumnType("INTEGER");
 
