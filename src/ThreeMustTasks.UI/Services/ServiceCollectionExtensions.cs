@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(TimeProvider.System);
         services.AddScoped<ThemeService>();
         services.AddScoped<LogicalDayCalculator>();
+        services.AddScoped<PlanEvents>();
         services.AddScoped<TodayService>();
         return services;
     }

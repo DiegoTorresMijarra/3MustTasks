@@ -56,4 +56,13 @@
   <data name="Form_SendToPool" xml:space="preserve"><value>Mandar al pool</value></data>
   <data name="Form_Cancel" xml:space="preserve"><value>Cancelar</value></data>
   <data name="Form_Save" xml:space="preserve"><value>Guardar</value></data>
+  <data name="Today_Banner" xml:space="preserve"><value>Te falta añadir {0}</value></data>
+  <data name="Today_BannerAction" xml:space="preserve"><value>Planificar ahora</value></data>
+  <data name="Today_And" xml:space="preserve"><value> y </value></data>
+  <data name="Today_Progress" xml:space="preserve"><value>Completadas {0}/{1}</value></data>
+  <data name="Today_ProgressDone" xml:space="preserve"><value>Mínimo completado</value></data>
+  <data name="Today_Done" xml:space="preserve"><value>{0}/{1} hechas</value></data>
+  <data name="Today_Optional" xml:space="preserve"><value>Opcional</value></data>
+  <data name="Today_Check" xml:space="preserve"><value>Tachar {0}</value></data>
+  <data name="Today_Uncheck" xml:space="preserve"><value>Destachar {0}</value></data>
 </root>

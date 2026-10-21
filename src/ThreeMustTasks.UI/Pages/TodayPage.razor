@@ -1,7 +1,9 @@
 @page "/"
 @using ThreeMustTasks.Core.Services
+@implements IDisposable
 @inject IStringLocalizer<Strings> L
 @inject TodayService Today
+@inject PlanEvents Events
 
 <PageTitle>@L["App_Name"] · @L["Today_Title"]</PageTitle>
 <MudText Typo="Typo.h5" Class="tmt-title">@L["Today_Title"]</MudText>
@@ -9,6 +11,15 @@
 @if (_view is not null)
 {
     <MudText Color="Color.Secondary" Class="mb-4" data-testid="today-date">@SpanishDate.Format(_view.Date)</MudText>
+
+    @if (!_view.Quota.IsPlanMinimumMet)
+    {
+        <div class="tmt-banner" role="status" data-testid="plan-banner">
+            <MudIcon Icon="@Icons.Material.Filled.WarningAmber" />
+            <span class="tmt-banner-text" data-testid="plan-banner-text">@BannerText(_view.Quota)</span>
+            <a class="tmt-banner-action" href="@PlanUrl(_view.Quota)" data-testid="plan-banner-action">@L["Today_BannerAction"]</a>
+        </div>
+    }
 
     @if (_view.Groups.All(g => g.Tasks.Count == 0))
     {
@@ -24,13 +35,42 @@
                 <span class="tmt-level-name">@level.Name</span>
                 <span class="tmt-group-count" data-testid="count-@level.Name">@(g.Slots > 0 ? $"{g.Tasks.Count}/{g.Slots}" : g.Tasks.Count.ToString())</span>
             </h2>
+            <div class="tmt-progress" data-testid="progress-@level.Name">
+                @if (level.MinToComplete > 0)
+                {
+                    <span>@L["Today_Progress", g.Completed, level.MinToComplete]</span>
+                    @if (g.Completed >= level.MinToComplete)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Title="@L["Today_ProgressDone"]" />
+                    }
+                }
+                else if (g.Tasks.Count > 0)
+                {
+                    <span>@L["Today_Done", g.Completed, g.Tasks.Count]</span>
+                }
+                else
+                {
+                    <span>@L["Today_Optional"]</span>
+                }
+            </div>
 
             @if (g.Tasks.Count > 0)
             {
                 <ul class="tmt-task-list">
                     @foreach (var t in g.Tasks)
                     {
-                        <li class="tmt-task" data-testid="task">@t.Task.Title</li>
+                        var done = t.Outcome == AssignmentOutcome.Completed;
+                        var id = t.AssignmentId;
+                        <li class="tmt-task @(done ? "done" : "")" data-testid="task">
+                            <button type="button" role="checkbox" aria-checked="@(done ? "true" : "false")"
+                                    class="tmt-check" data-testid="toggle"
+                                    aria-label="@(done ? L["Today_Uncheck", t.Task.Title] : L["Today_Check", t.Task.Title])"
+                                    @onclick="() => ToggleAsync(id, done)">
+                                <MudIcon Icon="@(done ? Icons.Material.Filled.CheckCircle : Icons.Material.Outlined.RadioButtonUnchecked)"
+                                         Style="@($"color:{level.Color}")" />
+                            </button>
+                            <span class="tmt-task-title" data-testid="task-title">@t.Task.Title</span>
+                        </li>
                     }
                 </ul>
             }
@@ -65,7 +105,38 @@
 @code {
     private TodayView? _view;
 
-    protected override async Task OnInitializedAsync() => _view = await Today.GetAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        Events.PlanChanged += OnPlanChanged;
+        _view = await Today.GetAsync();
+    }
+
+    private void OnPlanChanged(DateOnly _) => InvokeAsync(async () =>
+    {
+        _view = await Today.GetAsync();
+        StateHasChanged();
+    });
+
+    private Task<bool> ToggleAsync(Guid assignmentId, bool isDone) =>
+        isDone ? Today.UncompleteAsync(assignmentId) : Today.CompleteAsync(assignmentId);
 
     private static string NewTaskUrl(Guid levelId) => $"tarea/nueva?nivel={levelId}";
+
+    /// <summary>
+    /// Destino provisional del banner: la pantalla Planificar llega con el issue 14, así que por ahora abre
+    /// el formulario de nueva tarea en el primer nivel al que le falte algo. Cambiar solo aquí cuando exista.
+    /// </summary>
+    internal static string PlanUrl(QuotaStatus quota) =>
+        quota.MissingToAdd.Count > 0 ? NewTaskUrl(quota.MissingToAdd[0].Level.Id) : "tarea/nueva";
+
+    private string BannerText(QuotaStatus quota)
+    {
+        var parts = quota.MissingToAdd.Select(m => $"{m.Missing} {m.Level.Name}").ToList();
+        var list = parts.Count <= 1
+            ? string.Join("", parts)
+            : string.Join(", ", parts.Take(parts.Count - 1)) + L["Today_And"].Value + parts[^1];
+        return L["Today_Banner", list];
+    }
+
+    public void Dispose() => Events.PlanChanged -= OnPlanChanged;
 }
