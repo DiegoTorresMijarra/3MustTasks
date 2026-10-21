@@ -1,6 +1,6 @@
 # 03 · Esqueleto andante: solución, CI y PWA con navegación vacía
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: ninguno
 Cubre: 3MT-01, 02, 03, parte de 04 y 07
 
@@ -21,3 +21,5 @@ Solución .NET 10 con los proyectos de la spec, puertos de persistencia con una 
 None - can start immediately
 
 ## Comments
+
+- pm-1: asignado a worker-1 (rama issue/03-esqueleto-web, worktree propio). 2026-10-21.
