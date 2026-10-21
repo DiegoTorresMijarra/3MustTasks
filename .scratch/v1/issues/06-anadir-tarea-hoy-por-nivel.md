@@ -1,6 +1,6 @@
 # 06 · Añadir una tarea a Hoy y verla agrupada por nivel
 
-Status: in-review
+Status: resolved
 Blocked by: 03
 Cubre: 3MT-08, 09, parte de 10, 11 y 12
 
@@ -32,3 +32,4 @@ Primer recorrido completo: el usuario abre Hoy, añade una tarea con título y n
   - Para 07 y 10: `TaskForm` (componente) es reutilizable y solo tiene título + nivel; `TodayService`/`TodayView`/`LevelGroup` exponen el plan agrupado con `AssignmentId` y `Outcome` por tarea.
 
 - pm-1: asignado a worker-4 (rama issue/06-anadir-tarea-hoy-por-nivel). Camino crítico.
+- pm-1: revisado y aceptado (bloque 06 cerrado antes por ser camino crítico). Build -warnaserror y 87 tests en verde; integrado en main. Aceptada la interpretación Max=null (sin tope, PRD §5.1) y la firma QuotaPolicy.Evaluate(niveles, entradas); ajustar spec §4.2 queda como nota para el PM.
