@@ -1,6 +1,71 @@
 @page "/"
+@using ThreeMustTasks.Core.Services
 @inject IStringLocalizer<Strings> L
+@inject TodayService Today
 
 <PageTitle>@L["App_Name"] · @L["Today_Title"]</PageTitle>
-<MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Today_Title"]</MudText>
-<MudText Color="Color.Secondary">@L["Today_Empty"]</MudText>
+<MudText Typo="Typo.h5" Class="tmt-title">@L["Today_Title"]</MudText>
+
+@if (_view is not null)
+{
+    <MudText Color="Color.Secondary" Class="mb-4" data-testid="today-date">@SpanishDate.Format(_view.Date)</MudText>
+
+    @if (_view.Groups.All(g => g.Tasks.Count == 0))
+    {
+        <MudText Color="Color.Secondary" Class="mb-4" data-testid="today-empty">@L["Today_Empty"]</MudText>
+    }
+
+    @foreach (var g in _view.Groups)
+    {
+        var level = g.Level;
+        <section class="tmt-group" data-testid="group-@level.Name" style="--level-color:@level.Color">
+            <h2 class="tmt-group-header">
+                <MudIcon Icon="@LevelIcons.Resolve(level.Icon)" Style="@($"color:{level.Color}")" />
+                <span class="tmt-level-name">@level.Name</span>
+                <span class="tmt-group-count" data-testid="count-@level.Name">@(g.Slots > 0 ? $"{g.Tasks.Count}/{g.Slots}" : g.Tasks.Count.ToString())</span>
+            </h2>
+
+            @if (g.Tasks.Count > 0)
+            {
+                <ul class="tmt-task-list">
+                    @foreach (var t in g.Tasks)
+                    {
+                        <li class="tmt-task" data-testid="task">@t.Task.Title</li>
+                    }
+                </ul>
+            }
+
+            @for (var i = 0; i < g.EmptySlots; i++)
+            {
+                <a class="tmt-slot" href="@NewTaskUrl(level.Id)" data-testid="empty-slot">
+                    <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                    <span>@L["Today_EmptySlot", level.Name]</span>
+                </a>
+            }
+
+            @if (g.EmptySlots == 0 && !g.IsFull)
+            {
+                <a class="tmt-slot tmt-slot-optional" href="@NewTaskUrl(level.Id)" data-testid="add-optional">
+                    <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                    <span>@L["Today_AddOptional", level.Name]</span>
+                </a>
+            }
+
+            @if (g.IsFull)
+            {
+                <span class="tmt-full-note" data-testid="full-@level.Name">@L["Today_LevelFull"]</span>
+            }
+        </section>
+    }
+}
+
+<MudFab Href="tarea/nueva" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+        Class="tmt-fab" aria-label="@L["Today_AddTask"]" data-testid="fab-add" />
+
+@code {
+    private TodayView? _view;
+
+    protected override async Task OnInitializedAsync() => _view = await Today.GetAsync();
+
+    private static string NewTaskUrl(Guid levelId) => $"tarea/nueva?nivel={levelId}";
+}

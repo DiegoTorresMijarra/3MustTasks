@@ -44,3 +44,22 @@ html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Se
 }
 
 .tmt-nav-item.active { color: var(--mud-palette-primary); font-weight: 600; }
+
+/* Hoy: grupos por nivel */
+.tmt-group { margin-bottom: 20px; border-left: 4px solid var(--level-color); padding-left: 12px; }
+.tmt-group-header { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 1rem; font-weight: 700; }
+.tmt-group-count { margin-left: auto; font-size: 0.875rem; font-weight: 600; color: var(--mud-palette-text-secondary); }
+.tmt-task-list { list-style: none; margin: 0 0 8px; padding: 0; }
+.tmt-task { min-height: 44px; display: flex; align-items: center; padding: 8px 12px; margin-bottom: 6px; border-radius: 8px; background: var(--mud-palette-surface); border: 1px solid var(--mud-palette-lines-default); }
+.tmt-slot { min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; margin-bottom: 6px; border-radius: 8px; border: 2px dashed var(--level-color); color: var(--mud-palette-text-secondary); text-decoration: none; box-sizing: border-box; }
+.tmt-slot-optional { border-style: dotted; opacity: 0.8; }
+.tmt-fab { position: fixed !important; right: 16px; bottom: calc(80px + env(safe-area-inset-bottom)); z-index: 11; }
+
+/* Formulario de tarea */
+.tmt-form-label { margin: 16px 0 8px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--mud-palette-text-secondary); }
+.tmt-level-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+.tmt-level-option { flex: 1 1 30%; min-height: 56px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px; border-radius: 10px; border: 2px solid var(--mud-palette-lines-default); background: var(--mud-palette-surface); color: var(--mud-palette-text-primary); cursor: pointer; }
+.tmt-level-option.selected { border-color: var(--level-color); }
+.tmt-level-hint { font-size: 0.75rem; color: var(--mud-palette-text-secondary); }
+.tmt-form-actions { display: flex; justify-content: space-between; margin-top: 24px; }
+.tmt-full-note { font-size: 0.75rem; color: var(--mud-palette-text-secondary); }
