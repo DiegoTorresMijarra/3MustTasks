@@ -101,6 +101,10 @@
 `area:ui` `type:feature` `prio:P0` · **M** · deps: 10
 - [ ] Campos: título*, nivel*, categoría, hora, recordatorio, notas, fecha (hoy / futura / sin fecha).
 - [ ] Bloquea el guardado en hoy si el nivel está lleno, y ofrece guardarla en el pool.
+- [ ] Modo edición: se abre al tocar el texto de una tarea desde Hoy, Pool, A futuro o Archivadas (en el historial pasado, solo lectura).
+- [ ] Cambiar el nivel o la fecha revalida el cupo.
+- [ ] Recurrentes: "solo esta" / "esta y las siguientes".
+- [ ] Eliminar desde el formulario (con confirmación).
 - [ ] Validaciones y tests bUnit.
 
 ### 3MT-13 · Banner de mínimo no cumplido

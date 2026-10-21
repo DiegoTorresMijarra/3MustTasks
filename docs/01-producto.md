@@ -81,6 +81,8 @@ No es un gestor de tareas genérico. La gracia es la **restricción**: pocas tar
 ```
 
 - **Tachar** es reversible el mismo día (destachar).
+- **Editar**: cualquier tarea de hoy, del pool, de días futuros o archivada se puede editar (título, nivel, categoría, hora, recordatorio, notas, fecha, recurrencia). Al cambiar el nivel se valida el cupo. Tocar el círculo tacha la tarea; tocar el texto abre la edición. Los días pasados del historial son de solo lectura.
+- **Editar una recurrente**: se pregunta si el cambio afecta solo a esta instancia o también a las siguientes.
 - Al **cerrar el día**, cada tarea no completada queda registrada en el historial de ese día como *"no completada"* y vuelve al pool, conservando cuántas veces se ha arrastrado (`vecesPospuesta`).
 - **Recuperar** asigna una tarea del pool al día actual, respetando los cupos.
 - **Archivar** la saca del pool sin marcarla como completada. Se puede consultar en "Archivadas" y desarchivar.
