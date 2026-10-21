@@ -20,6 +20,7 @@ public class TodayServiceTests
             .AddInMemoryPersistence()
             .AddSingleton<TimeProvider>(new FakeTimeProvider(Now))
             .AddSingleton<LogicalDayCalculator>()
+            .AddSingleton<PlanEvents>()
             .AddSingleton<TodayService>()
             .BuildServiceProvider();
         _service = _sp.GetRequiredService<TodayService>();
@@ -173,6 +174,7 @@ public class TodayServiceTests
             .AddInMemoryPersistence()
             .AddSingleton<TimeProvider>(new FakeTimeProvider(new DateTimeOffset(2026, 10, 21, 2, 0, 0, TimeSpan.Zero)))
             .AddSingleton<LogicalDayCalculator>()
+            .AddSingleton<PlanEvents>()
             .AddSingleton<TodayService>()
             .BuildServiceProvider();
         sp.GetRequiredService<ISettingsStore>().Save(new AppSettings { DayStartsAt = new TimeOnly(4, 0) });

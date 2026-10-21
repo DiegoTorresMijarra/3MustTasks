@@ -8,9 +8,11 @@ public sealed record TodayTask(Guid AssignmentId, TaskItem Task, AssignmentOutco
 /// <param name="Slots">Cupo visible del nivel: su máximo, o su mínimo a añadir si no tiene máximo.</param>
 /// <param name="EmptySlots">Huecos que quedan por rellenar hasta <paramref name="Slots"/>.</param>
 /// <param name="IsFull">El nivel ha alcanzado su máximo: no admite más tareas en Hoy.</param>
-public sealed record LevelGroup(Level Level, IReadOnlyList<TodayTask> Tasks, int Slots, int EmptySlots, bool IsFull);
+/// <param name="Completed">Tareas tachadas del nivel hoy (para "completadas X/mín.").</param>
+public sealed record LevelGroup(Level Level, IReadOnlyList<TodayTask> Tasks, int Slots, int EmptySlots, bool IsFull, int Completed);
 
-public sealed record TodayView(DateOnly Date, IReadOnlyList<LevelGroup> Groups);
+/// <param name="Quota">Estado de los mínimos a añadir y a completar (alimenta el banner y el progreso).</param>
+public sealed record TodayView(DateOnly Date, IReadOnlyList<LevelGroup> Groups, QuotaStatus Quota);
 
 public enum AddDestination { Today, Pool }
 
@@ -31,7 +33,8 @@ public sealed class TodayService(
     ISettingsStore settings,
     IUnitOfWork unit,
     LogicalDayCalculator calendar,
-    TimeProvider time)
+    TimeProvider time,
+    PlanEvents events)
 {
     /// <summary>Niveles activos; siembra los de por defecto si aún no hay ninguno.</summary>
     public async Task<IReadOnlyList<Level>> GetLevelsAsync(CancellationToken ct = default)
@@ -57,10 +60,93 @@ public sealed class TodayService(
             var items = plan.Where(p => p.Task.LevelId == level.Id).ToList();
             var slots = level.Max ?? level.MinToAdd;
             var full = !QuotaPolicy.CanAdd(level, items.Count);
-            return new LevelGroup(level, items, slots, Math.Max(0, slots - items.Count), full);
+            var done = items.Count(i => i.Outcome == AssignmentOutcome.Completed);
+            return new LevelGroup(level, items, slots, Math.Max(0, slots - items.Count), full, done);
         }).ToList();
 
-        return new TodayView(today, groups);
+        return new TodayView(today, groups, Evaluate(levels, plan));
+    }
+
+    /// <summary>Tacha una tarea de hoy. Devuelve false si no existe en el plan de hoy.</summary>
+    public Task<bool> CompleteAsync(Guid assignmentId, CancellationToken ct = default) =>
+        MutateAsync(assignmentId, AssignmentOutcome.Planned, async (a, task) =>
+        {
+            var now = time.GetUtcNow();
+            await days.UpsertAssignmentAsync(a with { Outcome = AssignmentOutcome.Completed, CompletedAt = now }, ct);
+            await tasks.UpsertAsync(task with { Status = TaskItemStatus.Completed, UpdatedAt = now }, ct);
+        }, ct);
+
+    /// <summary>Destacha una tarea completada de hoy.</summary>
+    public Task<bool> UncompleteAsync(Guid assignmentId, CancellationToken ct = default) =>
+        MutateAsync(assignmentId, AssignmentOutcome.Completed, async (a, task) =>
+        {
+            await days.UpsertAssignmentAsync(a with { Outcome = AssignmentOutcome.Planned, CompletedAt = null }, ct);
+            await tasks.UpsertAsync(task with { Status = TaskItemStatus.Active, UpdatedAt = time.GetUtcNow() }, ct);
+        }, ct);
+
+    /// <summary>Quita una tarea pendiente del plan de hoy: vuelve al pool (sin fecha). Las completadas no se pueden quitar.</summary>
+    public Task<bool> RemoveFromTodayAsync(Guid assignmentId, CancellationToken ct = default) =>
+        MutateAsync(assignmentId, AssignmentOutcome.Planned, async (a, task) =>
+        {
+            await days.UpsertAssignmentAsync(a with { Outcome = AssignmentOutcome.Removed }, ct);
+            var scheduledToday = task.ScheduledDate == a.LogicalDate;
+            await tasks.UpsertAsync(
+                task with { ScheduledDate = scheduledToday ? null : task.ScheduledDate, UpdatedAt = time.GetUtcNow() }, ct);
+        }, ct);
+
+    /// <summary>
+    /// Reordena el plan de hoy: las asignaciones indicadas pasan a ocupar, en ese orden, las posiciones que
+    /// ocupaban; el resto de asignaciones de hoy conserva su sitio. Ids desconocidos o repetidos se ignoran.
+    /// </summary>
+    public async Task ReorderAsync(IReadOnlyList<Guid> assignmentIdsInOrder, CancellationToken ct = default)
+    {
+        var today = calendar.Today(settings.Load());
+        var current = (await days.GetAssignmentsAsync(today, ct)).ToList();
+        var requested = assignmentIdsInOrder.Distinct().Where(id => current.Any(a => a.Id == id)).ToList();
+        if (requested.Count == 0) return;
+
+        var slots = current.Where(a => requested.Contains(a.Id)).Select(a => a.Order).OrderBy(o => o).ToList();
+        for (var i = 0; i < requested.Count; i++)
+        {
+            var a = current.Single(x => x.Id == requested[i]);
+            if (a.Order != slots[i]) await days.UpsertAssignmentAsync(a with { Order = slots[i] }, ct);
+        }
+
+        await unit.SaveChangesAsync(ct);
+        events.RaisePlanChanged(today);
+    }
+
+    private async Task<bool> MutateAsync(
+        Guid assignmentId, AssignmentOutcome expected, Func<DayAssignment, TaskItem, Task> apply, CancellationToken ct)
+    {
+        var today = calendar.Today(settings.Load());
+        var a = (await days.GetAssignmentsAsync(today, ct)).FirstOrDefault(x => x.Id == assignmentId);
+        if (a is null || a.Outcome != expected) return false;
+        var task = await tasks.GetAsync(a.TaskId, ct);
+        if (task is null) return false;
+
+        await apply(a, task);
+        await RecordMilestonesAsync(today, ct);
+        await unit.SaveChangesAsync(ct);
+        events.RaisePlanChanged(today);
+        return true;
+    }
+
+    private static QuotaStatus Evaluate(IEnumerable<Level> levels, IEnumerable<TodayTask> plan) =>
+        QuotaPolicy.Evaluate(levels, plan.Select(p => new PlanEntry(p.Task.LevelId, p.Outcome == AssignmentOutcome.Completed)));
+
+    /// <summary>Anota la primera vez que se cumple cada mínimo del día; no se borra si luego deja de cumplirse.</summary>
+    private async Task RecordMilestonesAsync(DateOnly today, CancellationToken ct)
+    {
+        var status = Evaluate(await GetLevelsAsync(ct), await LoadPlanAsync(today, ct));
+        var log = await days.GetLogAsync(today, ct) ?? new DayLog(today, null, null, null, null);
+        var now = time.GetUtcNow();
+        var updated = log with
+        {
+            PlanMinimumMetAt = log.PlanMinimumMetAt ?? (status.IsPlanMinimumMet ? now : null),
+            CompletionMinimumMetAt = log.CompletionMinimumMetAt ?? (status.IsCompletionMinimumMet ? now : null),
+        };
+        if (updated != log) await days.UpsertLogAsync(updated, ct);
     }
 
     public async Task<AddTaskResult> AddAsync(NewTaskRequest request, CancellationToken ct = default)
@@ -95,9 +181,11 @@ public sealed class TodayService(
             var order = existing.Count == 0 ? 0 : existing.Max(a => a.Order) + 1;
             await days.UpsertAssignmentAsync(
                 new DayAssignment(Guid.NewGuid(), task.Id, today, AssignmentOutcome.Planned, null, order), ct);
+            await RecordMilestonesAsync(today, ct);
         }
 
         await unit.SaveChangesAsync(ct);
+        if (toToday) events.RaisePlanChanged(today);
         return new(toToday ? AddTaskOutcome.AddedToToday : AddTaskOutcome.AddedToPool, task);
     }
 
