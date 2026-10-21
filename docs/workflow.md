@@ -25,9 +25,9 @@ Documentos relacionados: [waves.md](waves.md) (qué issues se pueden hacer a la 
 | `ready-for-human` | Lo decide o hace el usuario; el PM no lo asigna | — |
 | `claimed` | Un worker lo está haciendo (se anota quién en `## Comments`) | PM, al asignar |
 | `in-review` | El worker ha entregado y espera revisión | worker, al entregar |
-| `resolved` | Revisado y aceptado | PM |
+| `resolved` | Revisado (al cerrar la ola o el bloque) y aceptado | PM |
 
-Si la revisión pide cambios, el PM devuelve el issue a `claimed` con los comentarios en `## Comments`.
+Si la revisión del bloque pide cambios, el PM devuelve el issue a `claimed` con los comentarios en `## Comments`.
 
 ## Ciclo de un issue
 
@@ -38,13 +38,13 @@ Si la revisión pide cambios, el PM devuelve el issue a `claimed` con los coment
    - la rama a usar y que debe trabajar en un worktree propio.
 3. **Implementación.** `worker-[n]` crea la rama `issue/NN-slug` desde la rama de integración, implementa, escribe los tests y marca los criterios de aceptación (`- [x]`). Si algo del issue es ambiguo o se contradice con la spec, lo anota en `## Comments` y se lo pregunta al PM; no improvisa.
 4. **Entrega.** El worker deja build y tests en verde, hace commit, pone `Status: in-review` y responde al PM con: resumen de lo hecho, criterios cumplidos, tests ejecutados, cosas que quedaron fuera o dudas, y **una estimación de su ocupación de contexto**.
-5. **Revisión.** `pm-[n]` comprueba, como mínimo:
+5. **Revisión por bloques.** El PM **no revisa issue a issue** ni supervisa a los workers mientras trabajan. Al recibir una entrega solo toma nota (el issue queda `in-review`) y asigna el siguiente si hay plaza. La revisión se hace **al terminar la ola** o al cerrar un **bloque** que el PM haya fijado de antemano (p. ej. 2 o 3 issues relacionados, o los que desbloquean el camino crítico). En la revisión, `pm-[n]` comprueba, como mínimo:
    - cada criterio de aceptación contra el código y los tests (no solo contra lo que dice el worker);
-   - que compila y que los tests pasan;
+   - que compila y que los tests pasan, también con las ramas del bloque integradas entre sí;
    - que respeta el PRD, la spec técnica y los ADR, y que no introduce alcance extra.
    
-   Si todo está bien: integra la rama, pone `Status: resolved` y reevalúa qué issues se han desbloqueado. Si no: devuelve el issue al worker con comentarios concretos.
-6. **Siguiente.** El PM sigue con el siguiente issue disponible según las reglas de concurrencia y de cuota.
+   Si todo está bien: integra las ramas, pone `Status: resolved` a los issues del bloque y reevalúa qué issues se han desbloqueado. Si no: devuelve ese issue al worker con comentarios concretos. La revisión es proporcionada: se centra en criterios, tests y encaje con la spec, no en estilo línea a línea.
+6. **Siguiente.** Los issues de la ola siguiente se lanzan cuando sus bloqueantes están `resolved`, es decir, tras la revisión del bloque o ola que los contiene. Si esperar al final de la ola frenaría el camino crítico, el PM cierra antes un bloque más pequeño. Después sigue con el siguiente issue disponible según las reglas de concurrencia y de cuota.
 
 ## Concurrencia
 - **Por defecto, 2 o 3 workers a la vez** (2 si los issues tocan zonas parecidas del código).
@@ -57,7 +57,12 @@ Si la revisión pide cambios, el PM devuelve el issue a `claimed` con los coment
 - Con más del 50 %, se da por terminado y se spawnea uno nuevo (`worker-[n+1]`) con un brief limpio.
 - El worker informa de su ocupación al entregar. Si no puede medirla con precisión, informa una estimación honesta y el PM, ante la duda, no lo reutiliza.
 - Conviene reasignar a un worker un issue **del mismo ámbito** que el anterior (aprovecha lo que ya conoce).
-- El PM aplica las mismas reglas a sí mismo: si su contexto se acerca al 50 %, deja el estado actualizado en los issues (el `Status:` y `## Comments` bastan) y el usuario o él lanza `pm-[n+1]`, que reconstruye todo desde los ficheros.
+- **Traspaso del PM.** Si `pm-[n]` alcanza el 50 % de contexto, **no corta a mitad de fase**: termina la ola o el bloque en curso (incluida su revisión) y entonces levanta a `pm-[n+1]`. Al spawnearlo le pasa un mensaje con:
+  - el **estado actual**: qué issues están `resolved`, `in-review`, `claimed` o bloqueados, qué workers siguen vivos y su ocupación de contexto, y decisiones o incidencias abiertas;
+  - los **siguientes pasos**: la próxima ola o bloque, qué issues lanzar y en qué orden, y qué esperar del usuario (spikes, decisiones);
+  - el consumo de cuota que lleva la sesión.
+
+  Deja además el `Status:` y los `## Comments` de los issues al día, para que `pm-[n+1]` pueda verificar el mensaje contra los ficheros. Tras el traspaso, `pm-[n]` no vuelve a asignar ni a revisar.
 
 ## Cuota de la sesión
 - El PM vigila el uso de cuota de la sesión.

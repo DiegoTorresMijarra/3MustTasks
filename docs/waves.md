@@ -2,6 +2,8 @@
 
 Agrupa los 30 issues de [`.scratch/v1/issues/`](../.scratch/v1/issues/) en **olas**. Los issues de una misma ola no dependen entre sí y se pueden hacer en paralelo; una ola solo arranca cuando las dependencias de sus issues están `resolved` (no hace falta que toda la ola anterior haya terminado).
 
+> **Revisión:** el PM revisa y marca `resolved` al terminar cada ola o bloque (ver [workflow.md](workflow.md)), así que en la práctica una ola siguiente arranca tras esa revisión.
+>
 > **Fuente de verdad:** la línea `Status:` y `Blocked by:` de cada issue. Este documento es una vista derivada de esas dependencias; si cambian, hay que regenerarlo. El flujo de ejecución está en [workflow.md](workflow.md).
 
 Los números son los de fichero (`NN-slug.md`). 🧑 = `ready-for-human`: lo decide el usuario, el PM no lo asigna a un worker.
