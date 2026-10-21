@@ -22,3 +22,4 @@ El usuario abre el Pool, filtra y ordena las tareas no completadas, selecciona v
 
 ## Comments
 - pm-1: asignado a worker-6 (reutilizado, ~25 %; rama issue/11-pool-ver-recuperar). Camino crítico.
+- pm-2 (nota del 10): la lista del Pool debe enlazar cada tarea a `tarea/{id}` (edición ya existe, TaskEditService). Las tareas Completed/Archived sin asignación hoy son solo lectura en esa edición hasta que 12 lo relaje.

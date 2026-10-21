@@ -1,6 +1,6 @@
 # 15 · Ajustes: niveles, cupos y opciones generales
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 07
 Cubre: 3MT-21, 26
 
@@ -21,3 +21,4 @@ El usuario personaliza niveles (nombre, color, icono, mínimos, máximo, orden, 
 - 07-tachar-progreso-banner
 
 ## Comments
+- pm-2: asignado a worker-8 (nuevo; rama issue/15-ajustes-niveles-cupos). Toca Ajustes y modelo de niveles; el 10 ya añadió el enlace a categorías en SettingsPage.

@@ -20,3 +20,4 @@ El usuario consulta un día pasado en solo lectura, navega con ←/→ y ve % de
 - 08-cierre-de-dia
 
 ## Comments
+- pm-2 (nota del 10): borrar una tarea deja asignaciones huérfanas en días pasados; el historial debe ignorar las que apunten a una tarea inexistente.

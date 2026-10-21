@@ -1,6 +1,6 @@
 # 09 · Tareas fijadas que sobreviven al cierre de día
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 08
 Cubre: 3MT-47
 
@@ -21,3 +21,5 @@ El usuario fija una tarea; si no la completa, al cerrar el día pasa al plan del
 - 08-cierre-de-dia
 
 ## Comments
+- pm-2 (nota del 08): asunción abierta: las fijadas suman TimesPostponed al cerrar el día y replanificar fijadas no comprueba Max; revisar y decidir aquí. TodayService.GetAsync no invoca el cierre con la app en primer plano (mejora propuesta, no bloqueante).
+- pm-2: asignado a worker-7 (nuevo; rama issue/09-tareas-fijadas). No en paralelo con 16.

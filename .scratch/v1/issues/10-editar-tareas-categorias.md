@@ -1,6 +1,6 @@
 # 10 · Editar cualquier tarea y categorías con color
 
-Status: in-review
+Status: resolved
 Blocked by: 07
 Cubre: 3MT-12 (edición), 22
 
@@ -31,3 +31,4 @@ Tocar el texto de una tarea abre su edición completa desde Hoy (después tambi�
   - **Categorías**: `/ajustes/categorias` (enlazada desde Ajustes y desde el formulario). Nombre único sin distinguir mayúsculas, máx. 30, color `#RRGGBB`. Borrar una pone a null la categoría de tareas, favoritas y recurrencias que la usaban.
   - Validaciones de edición: título obligatorio y máx. 120, notas máx. 1000, recordatorio solo con hora, fecha posterior a hoy. Cambiar nivel o pasar a Hoy revalida el cupo (excluyendo a la propia tarea); si está lleno se ofrece "Mandar al pool".
   - Pendiente para otros issues: abrir la edición desde Pool, A futuro y Archivadas (11/12/13) enlazando a `tarea/{id}`; el "+ Nueva" categoría inline del mock se sustituyó por el enlace "Gestionar categorías".
+- pm-2: revisado e integrado en main (merge de issue/10-editar-tareas-categorias): criterios contra código/tests OK; build -warnaserror 0 avisos; tests 85+51+59 en verde. Resolved.

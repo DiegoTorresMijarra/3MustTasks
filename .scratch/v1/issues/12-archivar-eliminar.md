@@ -20,3 +20,4 @@ El usuario archiva tareas del pool sin darlas por completadas, las consulta en A
 - 11-pool-ver-recuperar
 
 ## Comments
+- pm-2 (nota del 10): Archivadas debe enlazar a `tarea/{id}`; hoy `TaskEditService.GetAsync` trata las Archived como solo lectura: relajar esa regla aquí.

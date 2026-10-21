@@ -19,3 +19,4 @@ El usuario asigna una fecha futura a una tarea; espera en la sección 'Programad
 - 11-pool-ver-recuperar
 
 ## Comments
+- pm-2 (nota del 10): A futuro debe enlazar a `tarea/{id}` (edición ya implementada, con selector de fecha).
