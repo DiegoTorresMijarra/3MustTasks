@@ -1,6 +1,6 @@
 # 07 · Tachar tareas, progreso por nivel y banner de mínimos
 
-Status: in-review
+Status: resolved
 Blocked by: 06
 Cubre: 3MT-10, 13, parte de 48
 
@@ -30,3 +30,4 @@ El usuario tacha y destacha tareas con un toque, ve el progreso 'completadas X/m
   - `ReorderAsync(ids)`: las asignaciones indicadas ocupan, en ese orden, las posiciones que ya tenían. Sin UI de reordenar ni de "quitar de hoy" (el issue solo pide los casos de uso; la UI llegará con 10/12).
   - `PlanMinimumMetAt`/`CompletionMinimumMetAt` se anotan en mutaciones (no al abrir la app) y no se borran si luego deja de cumplirse.
   - `TodayView` ahora lleva `Quota` y `LevelGroup.Completed` (cambio de forma de los records de 06).
+- pm-1: revisado y aceptado. Tests en verde; integrado en main. Nota para 14: el banner enlaza provisionalmente a tarea/nueva?nivel= (TodayPage.PlanUrl) hasta que exista Planificar.
