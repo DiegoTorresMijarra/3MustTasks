@@ -1,6 +1,6 @@
 # 06 · Añadir una tarea a Hoy y verla agrupada por nivel
 
-Status: claimed
+Status: in-review
 Blocked by: 03
 Cubre: 3MT-08, 09, parte de 10, 11 y 12
 
