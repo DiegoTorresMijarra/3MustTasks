@@ -43,4 +43,17 @@
   <data name="Theme_Dark" xml:space="preserve"><value>Oscuro</value></data>
   <data name="NotFound_Title" xml:space="preserve"><value>Página no encontrada</value></data>
   <data name="NotFound_Text" xml:space="preserve"><value>La página que buscas no existe.</value></data>
+  <data name="Today_EmptySlot" xml:space="preserve"><value>Hueco libre · añadir {0}</value></data>
+  <data name="Today_AddOptional" xml:space="preserve"><value>Añadir {0} (opcional)</value></data>
+  <data name="Today_LevelFull" xml:space="preserve"><value>Nivel lleno</value></data>
+  <data name="Today_AddTask" xml:space="preserve"><value>Añadir tarea</value></data>
+  <data name="Form_NewTitle" xml:space="preserve"><value>Nueva tarea</value></data>
+  <data name="Form_Title" xml:space="preserve"><value>Tarea</value></data>
+  <data name="Form_Level" xml:space="preserve"><value>Nivel de exigencia</value></data>
+  <data name="Form_LevelToday" xml:space="preserve"><value>{0} hoy</value></data>
+  <data name="Form_LevelFull" xml:space="preserve"><value>Lleno</value></data>
+  <data name="Form_FullMessage" xml:space="preserve"><value>El nivel {0} está lleno y no cabe en Hoy. Puedes mandar la tarea al pool o elegir otro nivel.</value></data>
+  <data name="Form_SendToPool" xml:space="preserve"><value>Mandar al pool</value></data>
+  <data name="Form_Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Form_Save" xml:space="preserve"><value>Guardar</value></data>
 </root>

@@ -1,0 +1,71 @@
+@using ThreeMustTasks.Core.Services
+@inject IStringLocalizer<Strings> L
+
+@* Formulario de tarea. Hoy solo título y nivel; las demás secciones del mock (categoría, hora, notas...) llegan con sus issues. *@
+<form class="tmt-form" @onsubmit="SubmitAsync" @onsubmit:preventDefault data-testid="task-form">
+    <MudTextField T="string" @bind-Value="_title" Immediate="true" Label="@L["Form_Title"]" Variant="Variant.Outlined"
+                  data-testid="title-input" AutoFocus="true" />
+
+    <div class="tmt-form-label">@L["Form_Level"]</div>
+    <div class="tmt-level-picker" role="radiogroup" aria-label="@L["Form_Level"]">
+        @foreach (var g in Groups)
+        {
+            var selected = g.Level.Id == _levelId;
+            <button type="button" role="radio" aria-checked="@(selected ? "true" : "false")"
+                    class="tmt-level-option @(selected ? "selected" : "")" style="--level-color:@g.Level.Color"
+                    data-testid="level-@g.Level.Name" @onclick="() => _levelId = g.Level.Id">
+                <MudIcon Icon="@LevelIcons.Resolve(g.Level.Icon)" Style="@($"color:{g.Level.Color}")" />
+                <span class="tmt-level-name">@g.Level.Name</span>
+                <span class="tmt-level-hint">@(g.IsFull ? L["Form_LevelFull"].Value : L["Form_LevelToday", g.Tasks.Count].Value)</span>
+            </button>
+        }
+    </div>
+
+    @if (FullLevelId is { } fullId && fullId == _levelId)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mt-3" data-testid="full-alert">
+            @L["Form_FullMessage", SelectedName]
+            <div class="mt-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SendToPoolAsync" data-testid="send-to-pool">@L["Form_SendToPool"]</MudButton>
+            </div>
+        </MudAlert>
+    }
+
+    <div class="tmt-form-actions">
+        <MudButton Variant="Variant.Text" OnClick="() => OnCancel.InvokeAsync()" data-testid="cancel">@L["Form_Cancel"]</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
+                   Disabled="@string.IsNullOrWhiteSpace(_title)" data-testid="save">@L["Form_Save"]</MudButton>
+    </div>
+</form>
+
+@code {
+    private string? _title;
+    private Guid? _selectedLevel;
+
+    /// <summary>Niveles activos con su ocupación de hoy.</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<LevelGroup> Groups { get; set; } = [];
+
+    /// <summary>Nivel preseleccionado; si no, el primero.</summary>
+    [Parameter] public Guid? InitialLevelId { get; set; }
+
+    /// <summary>Nivel que el host ha rechazado por estar lleno: se ofrece mandar la tarea al pool.</summary>
+    [Parameter] public Guid? FullLevelId { get; set; }
+
+    [Parameter] public EventCallback<NewTaskRequest> OnSave { get; set; }
+    [Parameter] public EventCallback<NewTaskRequest> OnSendToPool { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private Guid _levelId
+    {
+        get => _selectedLevel ?? InitialLevelId ?? Groups.FirstOrDefault()?.Level.Id ?? Guid.Empty;
+        set => _selectedLevel = value;
+    }
+
+    private string SelectedName => Groups.FirstOrDefault(g => g.Level.Id == _levelId)?.Level.Name ?? "";
+
+    private Task SubmitAsync() =>
+        string.IsNullOrWhiteSpace(_title) ? Task.CompletedTask : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId));
+
+    private Task SendToPoolAsync() =>
+        OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool));
+}
