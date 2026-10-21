@@ -46,7 +46,7 @@
 | `ThreeMustTasks.Core` | classlib | Entidades, reglas (`QuotaPolicy`), servicios de dominio, interfaces. Sin dependencias de UI ni de plataforma. |
 | `ThreeMustTasks.Infrastructure.Shared` | classlib | `IcsExporter`/`IcsImporter` (Ical.Net) y `BackupService` (System.Text.Json). |
 | `ThreeMustTasks.Infrastructure.Sqlite` | classlib | `DbContext` de EF Core, migraciones y repositorios. |
-| `ThreeMustTasks.Infrastructure.Browser` | RCL | Repositorios sobre IndexedDB (JS interop con un módulo `idb` pequeño propio) y `localStorage` para ajustes. |
+| `ThreeMustTasks.Infrastructure.Browser` | RCL | Repositorios sobre IndexedDB (JS interop con un módulo `idb` pequeño propio) y `localStorage` para ajustes. Un object store por entidad, documentos JSON con el mismo serializador que el backup, índices por `status` y `logicalDate`, `IUnitOfWork` = una transacción IndexedDB por `SaveChangesAsync`; migración por `onupgradeneeded`. Ver ADR 0001. |
 | `ThreeMustTasks.UI` | RCL | Páginas, componentes, tema MudBlazor y recursos de texto (`.resx`). |
 | `ThreeMustTasks.App.Maui` | MAUI | Host Android, `INotificationScheduler` nativo, `IFileExchange` (FilePicker/Share) y receptor de arranque del sistema. |
 | `ThreeMustTasks.App.Web` | Blazor WASM | Host PWA, `manifest.webmanifest`, service worker, notificaciones web y descarga/subida de archivos. |
@@ -173,3 +173,4 @@ Función pura `(settings, plan, pool futuro, ahora) → List<PlannedNotification
 | Expectativas de recordatorios en la PWA | Indicarlo claramente en la UI y en el onboarding web |
 | Tamaño y arranque del WASM | Trimming, compresión Brotli y carga diferida de las vistas de calendario |
 | Cambios de esquema | Migraciones de EF Core, versión de esquema en IndexedDB y backup JSON versionado |
+| Safari/iOS: limpieza de datos a los 7 días sin uso si la PWA no está instalada | Pedir `navigator.storage.persist()` e invitar a instalar la PWA (ADR 0001) |
