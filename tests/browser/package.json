@@ -1,0 +1,8 @@
+{
+  "name": "3musttasks-browser-e2e",
+  "private": true,
+  "type": "module",
+  "description": "E2E de persistencia de la PWA con Chrome headless (issue 05)",
+  "scripts": { "test": "node persistence.e2e.mjs ../../src/ThreeMustTasks.App.Web/bin/Release/net10.0/publish/wwwroot" },
+  "devDependencies": { "playwright-core": "^1.64.1" }
+}
