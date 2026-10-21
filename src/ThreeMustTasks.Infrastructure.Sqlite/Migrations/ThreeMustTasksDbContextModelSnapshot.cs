@@ -214,6 +214,9 @@ namespace ThreeMustTasks.Infrastructure.Sqlite.Migrations
                     b.Property<int>("Interval")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsPaused")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateOnly?>("LastGeneratedDate")
                         .HasColumnType("TEXT");
 

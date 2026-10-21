@@ -4,6 +4,7 @@
 @inject TodayService Today
 @inject TaskEditService Editor
 @inject CategoryService Categories
+@inject RecurrenceService Recurrences
 @inject NavigationManager Navigation
 
 <PageTitle>@L["App_Name"] · @L["Form_EditTitle"]</PageTitle>
@@ -29,13 +30,14 @@ else if (_task is { ReadOnly: true })
 else if (_task is not null && _view is not null)
 {
     <TaskForm Groups="_view.Groups" Existing="_task" Categories="_categories" TodayDate="_view.Date"
-              FullLevelId="_fullLevelId" Error="@_error"
-              OnSaveEdit="SaveAsync" OnDelete="DeleteAsync" OnCancel="GoBack" />
+              FullLevelId="_fullLevelId" Error="@_error" Rule="_rule"
+              OnSaveEdit="SaveAsync" OnSaveRecurring="SaveRecurringAsync" OnDelete="DeleteAsync" OnCancel="GoBack" />
 }
 
 @code {
     private TodayView? _view;
     private EditableTask? _task;
+    private RecurrenceRule? _rule;
     private IReadOnlyList<Category> _categories = [];
     private Guid? _fullLevelId;
     private string? _error;
@@ -48,6 +50,7 @@ else if (_task is not null && _view is not null)
         _view = await Today.GetAsync();
         _categories = await Categories.ListAsync();
         _task = await Editor.GetAsync(TaskId);
+        if (_task?.Task.RecurrenceRuleId is { } ruleId) _rule = await Recurrences.GetAsync(ruleId);
         _loaded = true;
     }
 
@@ -55,7 +58,22 @@ else if (_task is not null && _view is not null)
     {
         _fullLevelId = null;
         _error = null;
-        var result = await Editor.UpdateAsync(request);
+        ApplyEdit(request, await Editor.UpdateAsync(request));
+    }
+
+    private async Task SaveRecurringAsync(RecurringEdit edit)
+    {
+        _fullLevelId = null;
+        _error = null;
+        var result = await Recurrences.UpdateTaskAsync(edit.Request, edit.Scope, edit.Spec);
+        if (result.Edit is null) _error = RecurrenceText.Error(L, result.Recurrence);
+        else if (!result.Edit.Succeeded) ApplyEdit(edit.Request, result.Edit);
+        else if (result.Recurrence != RecurrenceOutcome.Saved) _error = RecurrenceText.Error(L, result.Recurrence);
+        else GoBack();
+    }
+
+    private void ApplyEdit(EditTaskRequest request, EditTaskResult result)
+    {
         switch (result.Outcome)
         {
             case EditTaskOutcome.Saved: GoBack(); break;

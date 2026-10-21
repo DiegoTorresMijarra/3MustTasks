@@ -221,6 +221,11 @@ public sealed class InMemoryConfigRepository(InMemoryDatabase db) : IConfigRepos
         lock (db.Gate) db.Recurrences[rule.Id] = rule;
         return Task.CompletedTask;
     }
+
+    public Task<bool> DeleteRecurrenceAsync(Guid id, CancellationToken ct = default)
+    {
+        lock (db.Gate) return Task.FromResult(db.Recurrences.Remove(id));
+    }
 }
 
 public sealed class InMemorySettingsStore(InMemoryDatabase db) : ISettingsStore

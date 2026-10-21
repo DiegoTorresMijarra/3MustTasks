@@ -13,11 +13,15 @@ public sealed record TodayTask(Guid AssignmentId, TaskItem Task, AssignmentOutco
 public sealed record LevelGroup(Level Level, IReadOnlyList<TodayTask> Tasks, int Slots, int EmptySlots, bool IsFull, int Completed);
 
 /// <param name="Quota">Estado de los mínimos a añadir y a completar (alimenta el banner y el progreso).</param>
-public sealed record TodayView(DateOnly Date, IReadOnlyList<LevelGroup> Groups, QuotaStatus Quota);
+/// <param name="RecurringOverflow">Instancias de recurrentes de hoy que no cupieron en su nivel y esperan en el pool (aviso).</param>
+public sealed record TodayView(
+    DateOnly Date, IReadOnlyList<LevelGroup> Groups, QuotaStatus Quota, IReadOnlyList<TaskItem>? RecurringOverflow = null);
 
 public enum AddDestination { Today, Pool }
 
-public sealed record NewTaskRequest(string Title, Guid LevelId, AddDestination Destination = AddDestination.Today, bool IsPinned = false);
+/// <param name="Recurrence">Si se da, la página convierte la tarea creada en recurrente con RecurrenceService; AddAsync no lo usa.</param>
+public sealed record NewTaskRequest(
+    string Title, Guid LevelId, AddDestination Destination = AddDestination.Today, bool IsPinned = false, RecurrenceSpec? Recurrence = null);
 
 public enum AddTaskOutcome { AddedToToday, AddedToPool, LevelFull, InvalidTitle, UnknownLevel }
 
@@ -65,7 +69,11 @@ public sealed class TodayService(
             return new LevelGroup(level, items, slots, Math.Max(0, slots - items.Count), full, done);
         }).ToList();
 
-        return new TodayView(today, groups, Evaluate(levels, plan));
+        var planned = plan.Select(p => p.Task.Id).ToHashSet();
+        var overflow = (await tasks.ListAsync(TaskItemStatus.Active, ct))
+            .Where(t => t.RecurrenceRuleId is not null && t.ScheduledDate == today && !planned.Contains(t.Id))
+            .OrderBy(t => t.CreatedAt).ThenBy(t => t.Title, StringComparer.Ordinal).ToList();
+        return new TodayView(today, groups, Evaluate(levels, plan), overflow);
     }
 
     /// <summary>Tacha una tarea de hoy. Devuelve false si no existe en el plan de hoy.</summary>

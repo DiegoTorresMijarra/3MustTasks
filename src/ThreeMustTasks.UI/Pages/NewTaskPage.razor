@@ -2,6 +2,7 @@
 @using ThreeMustTasks.Core.Services
 @inject IStringLocalizer<Strings> L
 @inject TodayService Today
+@inject RecurrenceService Recurrences
 @inject NavigationManager Navigation
 
 <PageTitle>@L["App_Name"] · @L["Form_NewTitle"]</PageTitle>
@@ -9,13 +10,14 @@
 
 @if (_view is not null)
 {
-    <TaskForm Groups="_view.Groups" InitialLevelId="LevelId" FullLevelId="_fullLevelId"
+    <TaskForm Groups="_view.Groups" InitialLevelId="LevelId" FullLevelId="_fullLevelId" TodayDate="_view.Date" Error="@_error"
               OnSave="SaveAsync" OnSendToPool="SaveToPoolAsync" OnCancel="GoBack" />
 }
 
 @code {
     private TodayView? _view;
     private Guid? _fullLevelId;
+    private string? _error;
 
     [SupplyParameterFromQuery(Name = "nivel")] public Guid? LevelId { get; set; }
 
@@ -23,15 +25,32 @@
 
     private async Task SaveAsync(NewTaskRequest request)
     {
+        if (!ValidRecurrence(request)) return;
         var result = await Today.AddAsync(request);
         if (result.Outcome == AddTaskOutcome.LevelFull) _fullLevelId = request.LevelId;
-        else if (result.Succeeded) GoBack();
+        else if (result.Succeeded) await FinishAsync(request, result);
     }
 
     private async Task SaveToPoolAsync(NewTaskRequest request)
     {
+        if (!ValidRecurrence(request)) return;
         var result = await Today.AddAsync(request);
-        if (result.Succeeded) GoBack();
+        if (result.Succeeded) await FinishAsync(request, result);
+    }
+
+    private bool ValidRecurrence(NewTaskRequest request)
+    {
+        _error = null;
+        if (request.Recurrence?.Validate(_view!.Date) is not { } invalid) return true;
+        _error = RecurrenceText.Error(L, invalid);
+        return false;
+    }
+
+    /// <summary>La tarea recién creada pasa a ser la primera instancia de la regla elegida (si hay).</summary>
+    private async Task FinishAsync(NewTaskRequest request, AddTaskResult result)
+    {
+        if (request.Recurrence is { } spec) await Recurrences.CreateFromTaskAsync(result.Task!.Id, spec);
+        GoBack();
     }
 
     private void GoBack() => Navigation.NavigateTo("");

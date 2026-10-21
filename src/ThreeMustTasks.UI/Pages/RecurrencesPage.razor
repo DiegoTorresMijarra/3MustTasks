@@ -1,0 +1,172 @@
+@page "/ajustes/recurrentes"
+@using ThreeMustTasks.Core.Services
+@inject IStringLocalizer<Strings> L
+@inject RecurrenceService Service
+@inject TodayService Today
+@inject CategoryService Categories
+
+<PageTitle>@L["App_Name"] · @L["Rec_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Rec_Title"]</MudText>
+
+@if (_rules.Count == 0)
+{
+    <MudText Color="Color.Secondary" Class="mb-4" data-testid="recurrences-empty">@L["Rec_Empty"]</MudText>
+}
+else
+{
+    <ul class="tmt-task-list" data-testid="recurrence-list">
+        @foreach (var r in _rules)
+        {
+            var rule = r;
+            <li class="tmt-task @(rule.IsPaused ? "tmt-level-off" : "")" data-testid="recurrence-row">
+                <span class="tmt-dot-lg" style="background:@LevelColor(rule.LevelId)" aria-hidden="true"></span>
+                <span class="tmt-task-title">
+                    <span data-testid="recurrence-title">@rule.TemplateTitle</span>
+                    <span class="tmt-level-hint" data-testid="recurrence-summary">@RecurrenceText.Describe(L, rule)@(rule.IsPaused ? " · " + L["Rec_Paused"].Value : "")</span>
+                </span>
+                <MudIconButton Icon="@(rule.IsPaused ? Icons.Material.Filled.PlayArrow : Icons.Material.Filled.Pause)"
+                               aria-label="@(rule.IsPaused ? L["Rec_Resume", rule.TemplateTitle] : L["Rec_Pause", rule.TemplateTitle])"
+                               OnClick="() => TogglePauseAsync(rule)" data-testid="recurrence-pause" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="@L["Rec_Edit", rule.TemplateTitle]"
+                               OnClick="() => StartEdit(rule)" data-testid="recurrence-edit" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="@L["Rec_Delete", rule.TemplateTitle]"
+                               OnClick="() => _confirmDeleteId = rule.Id" data-testid="recurrence-delete" />
+            </li>
+            @if (_confirmDeleteId == rule.Id)
+            {
+                <li class="tmt-task-menu" role="none">
+                    <MudAlert Severity="Severity.Error" data-testid="recurrence-delete-confirm">
+                        @L["Rec_DeleteConfirm", rule.TemplateTitle]
+                        <div class="mt-2 tmt-confirm-actions">
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => DeleteAsync(rule)" data-testid="recurrence-delete-yes">@L["Form_DeleteYes"]</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="() => _confirmDeleteId = null" data-testid="recurrence-delete-no">@L["Form_Cancel"]</MudButton>
+                        </div>
+                    </MudAlert>
+                </li>
+            }
+        }
+    </ul>
+}
+
+@if (_editing is not null)
+{
+    <form class="tmt-form" @onsubmit="SaveAsync" @onsubmit:preventDefault data-testid="recurrence-form">
+        @if (_error is not null)
+        {
+            <MudAlert Severity="Severity.Error" Class="mb-3" data-testid="recurrence-error">@_error</MudAlert>
+        }
+        <div class="tmt-form-label">@L["Rec_Editing"]</div>
+        <MudTextField T="string" @bind-Value="_title" Immediate="true" Label="@L["Form_Title"]" Variant="Variant.Outlined"
+                      data-testid="recurrence-title-input" MaxLength="120" />
+
+        <label class="tmt-field">
+            <span>@L["Form_Level"]</span>
+            <select @bind="_levelId" data-testid="recurrence-level-select">
+                @foreach (var l in _levels)
+                {
+                    <option value="@l.Id">@l.Name</option>
+                }
+            </select>
+        </label>
+        <label class="tmt-field">
+            <span>@L["Form_Category"]</span>
+            <select @bind="_categoryId" data-testid="recurrence-category-select">
+                <option value="">@L["Form_NoCategory"]</option>
+                @foreach (var c in _categories)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+        </label>
+        <label class="tmt-field">
+            <span>@L["Form_Time"]</span>
+            <input type="time" @bind="_time" @bind:format="HH:mm" data-testid="recurrence-time-input" />
+        </label>
+
+        <div class="tmt-form-label">@L["Rec_Section"]</div>
+        @* La clave fuerza un editor nuevo al cambiar de regla. *@
+        <RecurrenceEditor @key="_editing.Id" Value="_spec" ValueChanged="spec => _spec = spec" AllowNone="false" Anchor="_editing.StartDate" />
+
+        <div class="tmt-form-actions">
+            <MudButton Variant="Variant.Text" OnClick="Reset" data-testid="recurrence-cancel">@L["Form_Cancel"]</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
+                       Disabled="@string.IsNullOrWhiteSpace(_title)" data-testid="recurrence-save">@L["Form_Save"]</MudButton>
+        </div>
+    </form>
+}
+
+@code {
+    private IReadOnlyList<RecurrenceRule> _rules = [];
+    private IReadOnlyList<Level> _levels = [];
+    private IReadOnlyList<Category> _categories = [];
+    private RecurrenceRule? _editing;
+    private Guid? _confirmDeleteId;
+    private string? _title;
+    private Guid _levelId;
+    private string? _categoryIdText;
+    private TimeOnly? _time;
+    private RecurrenceSpec? _spec;
+    private string? _error;
+
+    private string? _categoryId
+    {
+        get => _categoryIdText;
+        set => _categoryIdText = string.IsNullOrEmpty(value) ? null : value;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _levels = await Today.GetLevelsAsync();
+        _categories = await Categories.ListAsync();
+        await ReloadAsync();
+    }
+
+    private async Task ReloadAsync() => _rules = await Service.ListAsync();
+
+    private string LevelColor(Guid levelId) => _levels.FirstOrDefault(l => l.Id == levelId)?.Color ?? "transparent";
+
+    private async Task TogglePauseAsync(RecurrenceRule rule)
+    {
+        await Service.SetPausedAsync(rule.Id, !rule.IsPaused);
+        await ReloadAsync();
+    }
+
+    private void StartEdit(RecurrenceRule rule)
+    {
+        _editing = rule;
+        _title = rule.TemplateTitle;
+        _levelId = rule.LevelId;
+        _categoryIdText = rule.CategoryId?.ToString();
+        _time = rule.DueTime;
+        _spec = RecurrenceSpec.FromRule(rule);
+        _error = null;
+    }
+
+    private void Reset()
+    {
+        _editing = null;
+        _error = null;
+    }
+
+    private async Task SaveAsync()
+    {
+        if (_editing is null || _spec is null) return;
+        Guid? category = Guid.TryParse(_categoryIdText, out var cid) ? cid : null;
+        var result = await Service.UpdateRuleAsync(_editing.Id, new RuleEdit(_title ?? "", _levelId, category, _time, _spec));
+        if (!result.Succeeded)
+        {
+            _error = RecurrenceText.Error(L, result.Outcome);
+            return;
+        }
+        Reset();
+        await ReloadAsync();
+    }
+
+    private async Task DeleteAsync(RecurrenceRule rule)
+    {
+        await Service.DeleteAsync(rule.Id);
+        _confirmDeleteId = null;
+        if (_editing?.Id == rule.Id) Reset();
+        await ReloadAsync();
+    }
+}
