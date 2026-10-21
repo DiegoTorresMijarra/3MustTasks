@@ -211,4 +211,41 @@
   <data name="Fav_UsedMany" xml:space="preserve"><value>{0} usos</value></data>
   <data name="Fav_Full" xml:space="preserve"><value>No cabe "{0}": el nivel {1} está lleno hoy.</value></data>
   <data name="Fav_Gone" xml:space="preserve"><value>La favorita "{0}" ya no existe.</value></data>
+  <data name="Rec_Section" xml:space="preserve"><value>Repetición</value></data>
+  <data name="Rec_None" xml:space="preserve"><value>No se repite</value></data>
+  <data name="Rec_daily" xml:space="preserve"><value>Cada día</value></data>
+  <data name="Rec_weekdays" xml:space="preserve"><value>Laborables</value></data>
+  <data name="Rec_weekly" xml:space="preserve"><value>Días de la semana</value></data>
+  <data name="Rec_everyn" xml:space="preserve"><value>Cada N días</value></data>
+  <data name="Rec_monthly" xml:space="preserve"><value>Cada mes</value></data>
+  <data name="Rec_DaysLabel" xml:space="preserve"><value>Días de la semana</value></data>
+  <data name="Rec_EveryNLabel" xml:space="preserve"><value>Repetir cada (días)</value></data>
+  <data name="Rec_DayOfMonthLabel" xml:space="preserve"><value>Día del mes</value></data>
+  <data name="Rec_DayOfMonthHint" xml:space="preserve"><value>En los meses más cortos se usa su último día.</value></data>
+  <data name="Rec_InstanceHint" xml:space="preserve"><value>Esta tarea viene de una recurrente. Los cambios de repetición solo valen con «Esta y las siguientes».</value></data>
+  <data name="Rec_ScopeQuestion" xml:space="preserve"><value>Es una tarea recurrente. ¿A qué afecta el cambio?</value></data>
+  <data name="Rec_ScopeOnly" xml:space="preserve"><value>Solo esta</value></data>
+  <data name="Rec_ScopeFollowing" xml:space="preserve"><value>Esta y las siguientes</value></data>
+  <data name="Rec_DescDaily" xml:space="preserve"><value>Cada día</value></data>
+  <data name="Rec_DescWeekdays" xml:space="preserve"><value>Laborables (lunes a viernes)</value></data>
+  <data name="Rec_DescWeekly" xml:space="preserve"><value>Cada {0}</value></data>
+  <data name="Rec_DescEveryN" xml:space="preserve"><value>Cada {0} días</value></data>
+  <data name="Rec_DescMonthly" xml:space="preserve"><value>El día {0} de cada mes</value></data>
+  <data name="Rec_ErrInterval" xml:space="preserve"><value>Los días entre repeticiones deben estar entre 1 y {0}.</value></data>
+  <data name="Rec_ErrNoDays" xml:space="preserve"><value>Elige al menos un día de la semana.</value></data>
+  <data name="Rec_ErrDayOfMonth" xml:space="preserve"><value>El día del mes debe estar entre 1 y 31.</value></data>
+  <data name="Rec_ErrEndDate" xml:space="preserve"><value>La fecha de fin no puede ser anterior al inicio.</value></data>
+  <data name="Rec_ErrAlready" xml:space="preserve"><value>Esa tarea ya es recurrente.</value></data>
+  <data name="Rec_Title" xml:space="preserve"><value>Tareas recurrentes</value></data>
+  <data name="Rec_Empty" xml:space="preserve"><value>Aún no tienes recurrentes. Crea una al añadir o editar una tarea, en «Repetición».</value></data>
+  <data name="Rec_Paused" xml:space="preserve"><value>pausada</value></data>
+  <data name="Rec_Pause" xml:space="preserve"><value>Pausar {0}</value></data>
+  <data name="Rec_Resume" xml:space="preserve"><value>Reanudar {0}</value></data>
+  <data name="Rec_Edit" xml:space="preserve"><value>Editar {0}</value></data>
+  <data name="Rec_Delete" xml:space="preserve"><value>Borrar {0}</value></data>
+  <data name="Rec_DeleteConfirm" xml:space="preserve"><value>¿Borrar la recurrente «{0}»? Las tareas ya generadas se conservan.</value></data>
+  <data name="Rec_Editing" xml:space="preserve"><value>Editar recurrente</value></data>
+  <data name="Today_Recurring" xml:space="preserve"><value>Recurrente</value></data>
+  <data name="Today_RecurringOverflow" xml:space="preserve"><value>No caben en su nivel y se han dejado en el pool: {0}.</value></data>
+  <data name="Today_RecurringOverflowAction" xml:space="preserve"><value>Ver pool</value></data>
 </root>

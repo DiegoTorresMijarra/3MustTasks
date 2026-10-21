@@ -69,7 +69,8 @@ public sealed record RecurrenceRule(
     int? DayOfMonth,
     DateOnly StartDate,
     DateOnly? EndDate,
-    DateOnly? LastGeneratedDate);
+    DateOnly? LastGeneratedDate,
+    bool IsPaused = false);
 
 /// <summary>Ajustes de la app. Solo lo necesario hasta ahora; el resto se añade con cada issue.</summary>
 public sealed record AppSettings

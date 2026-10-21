@@ -42,6 +42,8 @@ public interface IConfigRepository
     Task UpsertFavoriteAsync(FavoriteTemplate favorite, CancellationToken ct = default);
     Task<IReadOnlyList<RecurrenceRule>> ListRecurrencesAsync(CancellationToken ct = default);
     Task UpsertRecurrenceAsync(RecurrenceRule rule, CancellationToken ct = default);
+    /// <summary>Devuelve false si no existía. No toca las tareas ya generadas: el llamador las desvincula.</summary>
+    Task<bool> DeleteRecurrenceAsync(Guid id, CancellationToken ct = default);
 }
 
 public interface ISettingsStore

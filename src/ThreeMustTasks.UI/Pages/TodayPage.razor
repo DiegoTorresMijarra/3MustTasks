@@ -21,6 +21,14 @@
         </div>
     }
 
+    @if (_view.RecurringOverflow is { Count: > 0 } overflow)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mb-3" data-testid="recurring-overflow">
+            @L["Today_RecurringOverflow", string.Join(", ", overflow.Select(t => t.Title))]
+            <a class="tmt-banner-action" href="pool" data-testid="recurring-overflow-action">@L["Today_RecurringOverflowAction"]</a>
+        </MudAlert>
+    }
+
     @if (_view.Groups.All(g => g.Tasks.Count == 0))
     {
         <MudText Color="Color.Secondary" Class="mb-4" data-testid="today-empty">@L["Today_Empty"]</MudText>
@@ -70,6 +78,10 @@
                                          Style="@($"color:{level.Color}")" />
                             </button>
                             <a class="tmt-task-title" href="tarea/@t.Task.Id" data-testid="task-title">@t.Task.Title</a>
+                            @if (t.Task.RecurrenceRuleId is not null)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Repeat" Size="Size.Small" Title="@L["Today_Recurring"]" data-testid="recurring-badge" />
+                            }
                             @if (t.PinnedDay is { } day)
                             {
                                 <span class="tmt-pinned" data-testid="pinned-badge">

@@ -337,6 +337,40 @@ public abstract class ConfigRepositoryContract : PersistenceContract
         Assert.Equal(rule.Id, stored.Id);
         Assert.Equal(rule.DaysOfWeek, stored.DaysOfWeek);
         Assert.Equal(rule.Frequency, stored.Frequency);
+        Assert.False(stored.IsPaused);
+    }
+
+    [Fact]
+    public async Task Recurrence_paused_flag_and_last_generated_date_roundtrip_and_replace_by_id()
+    {
+        var p = Create();
+        var rule = new RecurrenceRule(
+            Guid.NewGuid(), "Pagar", Guid.NewGuid(), null, new TimeOnly(9, 0),
+            RecurrenceFrequency.Monthly, 1, [], 31, new DateOnly(2026, 1, 31), new DateOnly(2027, 1, 31), null);
+        await p.Config.UpsertRecurrenceAsync(rule);
+        var updated = rule with { IsPaused = true, LastGeneratedDate = new DateOnly(2026, 10, 31) };
+        await p.Config.UpsertRecurrenceAsync(updated);
+
+        var stored = Assert.Single(await p.Config.ListRecurrencesAsync());
+        Assert.True(stored.IsPaused);
+        Assert.Equal(new DateOnly(2026, 10, 31), stored.LastGeneratedDate);
+        Assert.Equal(31, stored.DayOfMonth);
+        Assert.Equal(new TimeOnly(9, 0), stored.DueTime);
+        Assert.Equal(new DateOnly(2027, 1, 31), stored.EndDate);
+    }
+
+    [Fact]
+    public async Task Delete_recurrence_removes_it_and_reports_whether_it_existed()
+    {
+        var p = Create();
+        var rule = new RecurrenceRule(
+            Guid.NewGuid(), "Revisar", Guid.NewGuid(), null, null, RecurrenceFrequency.Daily, 1, [], null,
+            new DateOnly(2026, 10, 1), null, null);
+        await p.Config.UpsertRecurrenceAsync(rule);
+
+        Assert.True(await p.Config.DeleteRecurrenceAsync(rule.Id));
+        Assert.Empty(await p.Config.ListRecurrencesAsync());
+        Assert.False(await p.Config.DeleteRecurrenceAsync(rule.Id));
     }
 }
 

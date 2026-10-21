@@ -4,9 +4,11 @@ using ThreeMustTasks.Core.Ports;
 namespace ThreeMustTasks.Core.Services;
 
 /// <param name="ClosedDates">Días que se han cerrado en esta ejecución (vacío si no había nada pendiente).</param>
-public sealed record RolloverResult(IReadOnlyList<DateOnly> ClosedDates)
+/// <param name="Generated">Instancias de recurrentes generadas hoy: al plan y al pool (estas últimas, con aviso).</param>
+public sealed record RolloverResult(IReadOnlyList<DateOnly> ClosedDates, GenerationResult? Generated = null)
 {
-    public bool Changed => ClosedDates.Count > 0;
+    public GenerationResult Recurrences => Generated ?? GenerationResult.Empty;
+    public bool Changed => ClosedDates.Count > 0 || Recurrences.Any;
 }
 
 /// <summary>
@@ -16,7 +18,8 @@ public sealed record RolloverResult(IReadOnlyList<DateOnly> ClosedDates)
 /// se replanifican para hoy. Todo en una sola transacción; ejecutarlo dos veces no tiene efecto adicional.
 /// </summary>
 /// <remarks>
-/// Quedan para otros issues los pasos de generar recurrentes, autoañadir las programadas y reconstruir
+/// Después de cerrar (haya o no días pendientes) genera las instancias de las recurrentes de hoy con
+/// <see cref="RecurrenceGenerator"/>, en la misma transacción. Quedan para otros issues los pasos de autoañadir las programadas y reconstruir
 /// recordatorios (la lista de §4.1).
 /// </remarks>
 public sealed class DayRolloverService(
@@ -39,16 +42,40 @@ public sealed class DayRolloverService(
         {
             var today = calendar.Today(settings.Load());
             IReadOnlyList<DateOnly> closed = [];
+            var generated = GenerationResult.Empty;
 
-            await unit.ExecuteInTransactionAsync(async token => closed = await CloseAsync(today, token), ct);
+            await unit.ExecuteInTransactionAsync(async token =>
+            {
+                closed = await CloseAsync(today, token);
+                var levels = (await config.ListLevelsAsync(token)).Where(l => l.Enabled).ToList();
+                var now = time.GetUtcNow();
+                generated = await new RecurrenceGenerator(tasks, days, config).GenerateAsync(today, levels, now, token);
+                if (generated.ToPlan.Count > 0) await RecordPlanMinimumAsync(today, levels, now, token);
+            }, ct);
 
-            if (closed.Count > 0) events.RaisePlanChanged(today);
-            return new RolloverResult(closed);
+            var result = new RolloverResult(closed, generated);
+            if (result.Changed) events.RaisePlanChanged(today);
+            return result;
         }
         finally
         {
             _gate.Release();
         }
+    }
+
+    /// <summary>Las instancias generadas pueden completar el mínimo a añadir: se anota la primera vez que se cumple.</summary>
+    private async Task RecordPlanMinimumAsync(DateOnly today, IReadOnlyList<Level> levels, DateTimeOffset now, CancellationToken ct)
+    {
+        var plan = new List<PlanEntry>();
+        foreach (var a in await days.GetAssignmentsAsync(today, ct))
+        {
+            if (a.Outcome is not (AssignmentOutcome.Planned or AssignmentOutcome.Completed)) continue;
+            var task = await tasks.GetAsync(a.TaskId, ct);
+            if (task is not null) plan.Add(new PlanEntry(task.LevelId, a.Outcome == AssignmentOutcome.Completed));
+        }
+        if (!QuotaPolicy.Evaluate(levels, plan).IsPlanMinimumMet) return;
+        var log = await days.GetLogAsync(today, ct) ?? new DayLog(today, null, null, null, null);
+        if (log.PlanMinimumMetAt is null) await days.UpsertLogAsync(log with { PlanMinimumMetAt = now }, ct);
     }
 
     private async Task<IReadOnlyList<DateOnly>> CloseAsync(DateOnly today, CancellationToken ct)

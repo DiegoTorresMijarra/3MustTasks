@@ -1,0 +1,127 @@
+@using ThreeMustTasks.Core.Services
+@inject IStringLocalizer<Strings> L
+
+@* Selector de repetición: diaria, laborables, días de la semana, cada N días o mensual. Emite null si "No se repite". *@
+<div class="tmt-chip-row" role="radiogroup" aria-label="@L["Rec_Section"]" data-testid="recurrence-editor">
+    @if (AllowNone)
+    {
+        <button type="button" role="radio" aria-checked="@(_preset is null ? "true" : "false")"
+                class="tmt-chip @(_preset is null ? "selected" : "")" data-testid="recurrence-none"
+                @onclick="() => SelectAsync(null)">@L["Rec_None"]</button>
+    }
+    @foreach (var (preset, key) in Presets)
+    {
+        var p = preset;
+        var on = _preset == p;
+        <button type="button" role="radio" aria-checked="@(on ? "true" : "false")"
+                class="tmt-chip @(on ? "selected" : "")" data-testid="recurrence-@key"
+                @onclick="() => SelectAsync(p)">@L[$"Rec_{key}"]</button>
+    }
+</div>
+
+@if (_preset == RecurrencePreset.Weekly)
+{
+    <div class="tmt-chip-row mt-2" role="group" aria-label="@L["Rec_DaysLabel"]">
+        @foreach (var d in WeekOrder)
+        {
+            var day = d;
+            var on = _days.Contains(day);
+            <button type="button" role="checkbox" aria-checked="@(on ? "true" : "false")"
+                    class="tmt-chip @(on ? "selected" : "")" data-testid="recurrence-day-@day"
+                    @onclick="() => ToggleDayAsync(day)">@L[$"Day_{day}"]</button>
+        }
+    </div>
+}
+else if (_preset == RecurrencePreset.EveryNDays)
+{
+    <label class="tmt-field">
+        <span>@L["Rec_EveryNLabel"]</span>
+        <input type="number" min="1" max="@RecurrenceSpec.MaxInterval" value="@_interval" @onchange="OnIntervalAsync" data-testid="recurrence-interval" />
+    </label>
+}
+else if (_preset == RecurrencePreset.Monthly)
+{
+    <label class="tmt-field">
+        <span>@L["Rec_DayOfMonthLabel"]</span>
+        <input type="number" min="1" max="31" value="@_dayOfMonth" @onchange="OnDayOfMonthAsync" data-testid="recurrence-dom" />
+        <span class="tmt-level-hint">@L["Rec_DayOfMonthHint"]</span>
+    </label>
+}
+
+@code {
+    private static readonly (RecurrencePreset Preset, string Key)[] Presets =
+    [
+        (RecurrencePreset.Daily, "daily"), (RecurrencePreset.Weekdays, "weekdays"), (RecurrencePreset.Weekly, "weekly"),
+        (RecurrencePreset.EveryNDays, "everyn"), (RecurrencePreset.Monthly, "monthly"),
+    ];
+
+    private static readonly DayOfWeek[] WeekOrder =
+        [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday];
+
+    private RecurrencePreset? _preset;
+    private int _interval = 2;
+    private int _dayOfMonth = 1;
+    private readonly HashSet<DayOfWeek> _days = [];
+    private DateOnly? _endDate;
+    private bool _initialized;
+
+    /// <summary>Valor inicial; después el componente mantiene su propio estado y lo emite con <see cref="ValueChanged"/>.</summary>
+    [Parameter] public RecurrenceSpec? Value { get; set; }
+    [Parameter] public EventCallback<RecurrenceSpec?> ValueChanged { get; set; }
+
+    /// <summary>Ofrece "No se repite". En una regla existente no se ofrece (para parar una se pausa o se borra en Ajustes).</summary>
+    [Parameter] public bool AllowNone { get; set; } = true;
+
+    /// <summary>Día de referencia para los valores por defecto (día de la semana y día del mes).</summary>
+    [Parameter] public DateOnly Anchor { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (_initialized) return;
+        _initialized = true;
+        _dayOfMonth = Anchor == default ? 1 : Anchor.Day;
+        if (Value is null) return;
+        _preset = Value.Preset;
+        _endDate = Value.EndDate;
+        if (Value.Preset == RecurrencePreset.EveryNDays) _interval = Value.Interval;
+        if (Value.DayOfMonth is { } d) _dayOfMonth = d;
+        foreach (var d2 in Value.Days ?? []) _days.Add(d2);
+    }
+
+    private RecurrenceSpec? Build() => _preset switch
+    {
+        null => null,
+        RecurrencePreset.Weekly => new(RecurrencePreset.Weekly, Days: WeekOrder.Where(_days.Contains).ToArray(), EndDate: _endDate),
+        RecurrencePreset.EveryNDays => new(RecurrencePreset.EveryNDays, _interval, EndDate: _endDate),
+        RecurrencePreset.Monthly => new(RecurrencePreset.Monthly, DayOfMonth: _dayOfMonth, EndDate: _endDate),
+        var p => new(p.Value, EndDate: _endDate),
+    };
+
+    private Task EmitAsync() => ValueChanged.InvokeAsync(Build());
+
+    private Task SelectAsync(RecurrencePreset? preset)
+    {
+        _preset = preset;
+        if (preset == RecurrencePreset.Weekly && _days.Count == 0)
+            _days.Add(Anchor == default ? DayOfWeek.Monday : Anchor.DayOfWeek);
+        return EmitAsync();
+    }
+
+    private Task ToggleDayAsync(DayOfWeek day)
+    {
+        if (!_days.Remove(day)) _days.Add(day);
+        return EmitAsync();
+    }
+
+    private Task OnIntervalAsync(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var n)) _interval = n;
+        return EmitAsync();
+    }
+
+    private Task OnDayOfMonthAsync(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var n)) _dayOfMonth = n;
+        return EmitAsync();
+    }
+}

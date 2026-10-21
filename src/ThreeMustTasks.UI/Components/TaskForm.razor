@@ -87,6 +87,13 @@
         <textarea class="tmt-notes" rows="3" maxlength="1000" @bind="_notes" @bind:event="oninput" data-testid="notes-input"></textarea>
     }
 
+    <div class="tmt-form-label">@L["Rec_Section"]</div>
+    @if (IsInstance)
+    {
+        <div class="tmt-level-hint" data-testid="recurrence-instance-hint">@L["Rec_InstanceHint"]</div>
+    }
+    <RecurrenceEditor Value="_recurrence" ValueChanged="spec => _recurrence = spec" AllowNone="@(!IsInstance)" Anchor="TodayDate" />
+
     <label class="tmt-pin-option">
         <input type="checkbox" @bind="_pinned" data-testid="pin-input" />
         <span>@L["Form_Pin"]</span>
@@ -103,6 +110,18 @@
             @L["Form_FullMessage", SelectedName]
             <div class="mt-2">
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SendToPoolAsync" data-testid="send-to-pool">@L["Form_SendToPool"]</MudButton>
+            </div>
+        </MudAlert>
+    }
+
+    @if (_pendingEdit is not null)
+    {
+        <MudAlert Severity="Severity.Info" Class="mt-3" data-testid="scope-prompt">
+            @L["Rec_ScopeQuestion"]
+            <div class="mt-2 tmt-confirm-actions">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => ConfirmScopeAsync(RecurrenceScope.OnlyThis)" data-testid="scope-only">@L["Rec_ScopeOnly"]</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => ConfirmScopeAsync(RecurrenceScope.ThisAndFollowing)" data-testid="scope-following">@L["Rec_ScopeFollowing"]</MudButton>
+                <MudButton Variant="Variant.Text" OnClick="() => _pendingEdit = null" data-testid="scope-cancel">@L["Form_Cancel"]</MudButton>
             </div>
         </MudAlert>
     }
@@ -144,6 +163,8 @@
     private bool _favorite;
     private bool _confirmDelete;
     private bool _loadedExisting;
+    private RecurrenceSpec? _recurrence;
+    private EditTaskRequest? _pendingEdit;
 
     /// <summary>Niveles activos con su ocupación de hoy.</summary>
     [Parameter, EditorRequired] public IReadOnlyList<LevelGroup> Groups { get; set; } = [];
@@ -167,11 +188,20 @@
 
     [Parameter] public EventCallback<NewTaskRequest> OnSave { get; set; }
     [Parameter] public EventCallback<EditTaskRequest> OnSaveEdit { get; set; }
+
+    /// <summary>Regla de la que viene la tarea que se edita (si es una instancia de una recurrente).</summary>
+    [Parameter] public RecurrenceRule? Rule { get; set; }
+
+    /// <summary>Guardado de la edición con su repetición y alcance; si no hay manejador se usa <see cref="OnSaveEdit"/>.</summary>
+    [Parameter] public EventCallback<RecurringEdit> OnSaveRecurring { get; set; }
     [Parameter] public EventCallback<NewTaskRequest> OnSendToPool { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
 
     private bool IsEdit => Existing is not null;
+
+    /// <summary>La tarea editada es una instancia de una regla: al guardar se pregunta el alcance.</summary>
+    private bool IsInstance => Rule is not null && Existing?.Task.RecurrenceRuleId == Rule.Id;
 
     private Guid _levelId
     {
@@ -196,6 +226,7 @@
         _notes = t.Notes;
         _pinned = t.IsPinned;
         _favorite = t.IsFavoriteSource;
+        if (Rule is not null && t.RecurrenceRuleId == Rule.Id) _recurrence = RecurrenceSpec.FromRule(Rule);
     }
 
     private Task SubmitAsync()
@@ -207,6 +238,36 @@
     private Task SendToPoolAsync() =>
         IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(TaskWhen.Pool))
                : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool, _pinned, MarkFavorite: _favorite));
+        return IsEdit ? SaveEditAsync(_when) : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId, IsPinned: _pinned, Recurrence: _recurrence));
+    }
+
+    private Task SendToPoolAsync() =>
+        IsEdit ? SaveEditAsync(TaskWhen.Pool)
+               : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool, _pinned, _recurrence));
+
+    private Task SaveEditAsync(TaskWhen when)
+    {
+        var request = BuildEdit(when);
+        if (IsInstance)
+        {
+            // PRD §6.2: editar una recurrente pregunta si afecta solo a esta instancia o también a las siguientes.
+            _pendingEdit = request;
+            return Task.CompletedTask;
+        }
+        return OnSaveRecurring.HasDelegate
+            ? OnSaveRecurring.InvokeAsync(new RecurringEdit(request, RecurrenceScope.OnlyThis, _recurrence))
+            : OnSaveEdit.InvokeAsync(request);
+    }
+
+    private async Task ConfirmScopeAsync(RecurrenceScope scope)
+    {
+        var request = _pendingEdit;
+        _pendingEdit = null;
+        if (request is null) return;
+        var edit = new RecurringEdit(request, scope, scope == RecurrenceScope.ThisAndFollowing ? _recurrence : null);
+        if (OnSaveRecurring.HasDelegate) await OnSaveRecurring.InvokeAsync(edit);
+        else await OnSaveEdit.InvokeAsync(request);
+    }
 
     private EditTaskRequest BuildEdit(TaskWhen when) => new(
         Existing!.Task.Id, _title ?? "", _levelId, _categoryId, _time,

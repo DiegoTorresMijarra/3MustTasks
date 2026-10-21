@@ -28,6 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<FavoriteService>();
         services.AddScoped<LevelService>();
         services.AddScoped<HistoryService>();
+        services.AddScoped<RecurrenceService>();
         return services;
     }
 }

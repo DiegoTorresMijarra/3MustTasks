@@ -170,6 +170,12 @@ public sealed class SqliteConfigRepository(Factory factory) : IConfigRepository
         await using var ctx = await factory.CreateDbContextAsync(ct);
         await ctx.UpsertAsync(rule, q => q.AnyAsync(r => r.Id == rule.Id, ct), ct);
     }
+
+    public async Task<bool> DeleteRecurrenceAsync(Guid id, CancellationToken ct = default)
+    {
+        await using var ctx = await factory.CreateDbContextAsync(ct);
+        return await ctx.Recurrences.Where(r => r.Id == id).ExecuteDeleteAsync(ct) > 0;
+    }
 }
 
 /// <summary>Ajustes como documento único (fila con Id = 1). El puerto es síncrono, así que usa el contexto de forma síncrona.</summary>

@@ -101,6 +101,9 @@ public sealed class BrowserConfigRepository(BrowserDatabase db) : IConfigReposit
 
     public Task UpsertRecurrenceAsync(RecurrenceRule rule, CancellationToken ct = default)
         => db.PutAsync(Tables.Recurrences, Tables.Key(rule.Id), rule, null, ct);
+
+    public Task<bool> DeleteRecurrenceAsync(Guid id, CancellationToken ct = default)
+        => db.DeleteAsync(Tables.Recurrences, Tables.Key(id), ct);
 }
 
 /// <summary>Almacén síncrono de cadenas (localStorage en el navegador).</summary>

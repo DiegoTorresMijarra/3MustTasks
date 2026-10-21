@@ -123,3 +123,4 @@ html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Se
 .tmt-quota.full { background: var(--level-color, transparent); color: #fff; }
 .tmt-plan-tabs { margin-bottom: 12px; }
 .tmt-fav-add { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 44px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; padding: 0; }
+.tmt-task-title .tmt-level-hint { display: block; }
