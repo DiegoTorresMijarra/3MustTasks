@@ -1,6 +1,6 @@
 # 04 · Esqueleto Android: host MAUI con SQLite
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 03
 Cubre: 3MT-05, parte de 07
 
@@ -20,3 +20,5 @@ Host MAUI Blazor Hybrid que arranca en emulador Android mostrando el mismo shell
 - 03-esqueleto-web
 
 ## Comments
+
+- pm-1: asignado a worker-3 (rama issue/04-esqueleto-android).

@@ -1,6 +1,6 @@
 # 06 · Añadir una tarea a Hoy y verla agrupada por nivel
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 03
 Cubre: 3MT-08, 09, parte de 10, 11 y 12
 
@@ -22,3 +22,5 @@ Primer recorrido completo: el usuario abre Hoy, añade una tarea con título y n
 - 03-esqueleto-web
 
 ## Comments
+
+- pm-1: asignado a worker-4 (rama issue/06-anadir-tarea-hoy-por-nivel). Camino crítico.

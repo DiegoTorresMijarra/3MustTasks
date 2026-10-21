@@ -1,6 +1,6 @@
 # 01 · Spike: persistencia en la web (SQLite WASM vs IndexedDB)
 
-Status: ready-for-human
+Status: claimed
 Blocked by: ninguno
 Cubre: 3MT-06
 
@@ -20,3 +20,5 @@ Decidir con una prueba de concepto si la PWA usa EF Core + SQLite en WASM (OPFS)
 None - can start immediately
 
 ## Comments
+
+- pm-1: el usuario delega la decisión en el PM (criterio: mejor encaje en dispositivos y gamas distintas, y mayor flexibilidad). Asignado a worker-2 (rama issue/01-spike-persistencia-web). El PM ratifica el ADR.
