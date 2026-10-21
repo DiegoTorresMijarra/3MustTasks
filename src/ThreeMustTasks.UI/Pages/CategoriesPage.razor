@@ -1,0 +1,102 @@
+@page "/ajustes/categorias"
+@using ThreeMustTasks.Core.Services
+@inject IStringLocalizer<Strings> L
+@inject CategoryService Service
+
+<PageTitle>@L["App_Name"] · @L["Categories_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Categories_Title"]</MudText>
+
+@if (_categories.Count == 0)
+{
+    <MudText Color="Color.Secondary" Class="mb-4" data-testid="categories-empty">@L["Categories_Empty"]</MudText>
+}
+else
+{
+    <ul class="tmt-task-list" data-testid="category-list">
+        @foreach (var c in _categories)
+        {
+            var cat = c;
+            <li class="tmt-task" data-testid="category-row">
+                <span class="tmt-dot-lg" style="background:@cat.Color" aria-hidden="true"></span>
+                <span class="tmt-task-title" data-testid="category-name">@cat.Name</span>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="@L["Categories_Edit", cat.Name]"
+                               OnClick="() => StartEdit(cat)" data-testid="category-edit" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="@L["Categories_Delete", cat.Name]"
+                               OnClick="() => DeleteAsync(cat)" data-testid="category-delete" />
+            </li>
+        }
+    </ul>
+}
+
+<form class="tmt-form" @onsubmit="SaveAsync" @onsubmit:preventDefault data-testid="category-form">
+    @if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-3" data-testid="category-error">@_error</MudAlert>
+    }
+    <div class="tmt-form-label">@(_editingId is null ? L["Categories_New"] : L["Categories_Editing"])</div>
+    <MudTextField T="string" @bind-Value="_name" Immediate="true" Label="@L["Categories_Name"]" Variant="Variant.Outlined"
+                  data-testid="category-name-input" MaxLength="30" />
+    <label class="tmt-field">
+        <span>@L["Categories_Color"]</span>
+        <input type="color" @bind="_color" @bind:event="oninput" data-testid="category-color-input" />
+    </label>
+    <div class="tmt-form-actions">
+        @if (_editingId is not null)
+        {
+            <MudButton Variant="Variant.Text" OnClick="Reset" data-testid="category-cancel">@L["Form_Cancel"]</MudButton>
+        }
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
+                   Disabled="@string.IsNullOrWhiteSpace(_name)" data-testid="category-save">@L["Form_Save"]</MudButton>
+    </div>
+</form>
+
+@code {
+    private IReadOnlyList<Category> _categories = [];
+    private Guid? _editingId;
+    private string? _name;
+    private string _color = "#2559C7";
+    private string? _error;
+
+    protected override async Task OnInitializedAsync() => _categories = await Service.ListAsync();
+
+    private void StartEdit(Category c)
+    {
+        _editingId = c.Id;
+        _name = c.Name;
+        _color = c.Color;
+        _error = null;
+    }
+
+    private void Reset()
+    {
+        _editingId = null;
+        _name = null;
+        _error = null;
+    }
+
+    private async Task SaveAsync()
+    {
+        var result = await Service.SaveAsync(_editingId, _name ?? "", _color);
+        if (result.Succeeded)
+        {
+            Reset();
+            _categories = await Service.ListAsync();
+            return;
+        }
+        _error = result.Outcome switch
+        {
+            SaveCategoryOutcome.DuplicateName => L["Categories_ErrDuplicate"],
+            SaveCategoryOutcome.InvalidColor => L["Categories_ErrColor"],
+            SaveCategoryOutcome.NameTooLong => L["Categories_ErrLong", CategoryService.MaxNameLength],
+            SaveCategoryOutcome.NotFound => L["Err_Generic"],
+            _ => L["Categories_ErrName"],
+        };
+    }
+
+    private async Task DeleteAsync(Category c)
+    {
+        await Service.DeleteAsync(c.Id);
+        if (_editingId == c.Id) Reset();
+        _categories = await Service.ListAsync();
+    }
+}

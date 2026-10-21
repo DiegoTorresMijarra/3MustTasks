@@ -69,7 +69,7 @@
                                 <MudIcon Icon="@(done ? Icons.Material.Filled.CheckCircle : Icons.Material.Outlined.RadioButtonUnchecked)"
                                          Style="@($"color:{level.Color}")" />
                             </button>
-                            <span class="tmt-task-title" data-testid="task-title">@t.Task.Title</span>
+                            <a class="tmt-task-title" href="tarea/@t.Task.Id" data-testid="task-title">@t.Task.Title</a>
                         </li>
                     }
                 </ul>

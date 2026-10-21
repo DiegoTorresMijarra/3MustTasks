@@ -13,6 +13,9 @@
     <MudRadio T="ThemeMode" Value="ThemeMode.Dark" Color="Color.Primary" data-testid="theme-dark">@L["Theme_Dark"]</MudRadio>
 </MudRadioGroup>
 
+<MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Settings_Organization"]</MudText>
+<a class="tmt-settings-link" href="ajustes/categorias" data-testid="categories-link">@L["Categories_Title"]</a>
+
 @code {
     protected override void OnInitialized() => Theme.OnChange += OnChanged;
     private void OnChanged() => InvokeAsync(StateHasChanged);
