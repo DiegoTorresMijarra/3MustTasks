@@ -1,0 +1,7 @@
+{
+  "name": "persistencia-web-spike",
+  "private": true,
+  "type": "module",
+  "description": "Spike 01: medicion de arranque y tamano con Chrome headless",
+  "devDependencies": { "playwright-core": "^1.64.1" }
+}
