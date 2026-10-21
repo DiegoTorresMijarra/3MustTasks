@@ -184,4 +184,19 @@
   <data name="Icon_bolt" xml:space="preserve"><value>Rayo</value></data>
   <data name="Icon_heart" xml:space="preserve"><value>Corazón</value></data>
   <data name="Icon_bookmark" xml:space="preserve"><value>Marcador</value></data>
+  <data name="History_Prev" xml:space="preserve"><value>Día anterior</value></data>
+  <data name="History_Next" xml:space="preserve"><value>Día siguiente</value></data>
+  <data name="History_Compliance" xml:space="preserve"><value>Cumplimiento (30 días)</value></data>
+  <data name="History_CurrentStreak" xml:space="preserve"><value>Racha actual</value></data>
+  <data name="History_BestStreak" xml:space="preserve"><value>Mejor racha</value></data>
+  <data name="History_Days" xml:space="preserve"><value>{0} días</value></data>
+  <data name="History_DayOne" xml:space="preserve"><value>1 día</value></data>
+  <data name="History_NoPlan" xml:space="preserve"><value>Sin plan</value></data>
+  <data name="History_Fulfilled" xml:space="preserve"><value>Día cumplido</value></data>
+  <data name="History_NotFulfilled" xml:space="preserve"><value>Día no cumplido</value></data>
+  <data name="History_Summary" xml:space="preserve"><value>{0} de {1} completadas ({2} %)</value></data>
+  <data name="History_Completed" xml:space="preserve"><value>Completada</value></data>
+  <data name="History_NotCompleted" xml:space="preserve"><value>No completada</value></data>
+  <data name="History_Removed" xml:space="preserve"><value>Quitada del plan</value></data>
+  <data name="History_Pending" xml:space="preserve"><value>Pendiente</value></data>
 </root>

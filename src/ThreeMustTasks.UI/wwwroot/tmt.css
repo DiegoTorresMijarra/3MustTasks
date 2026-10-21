@@ -111,3 +111,10 @@ html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Se
 .tmt-check-row input { min-width: 24px; width: 24px; min-height: 24px; height: 24px; flex: none; }
 .tmt-level-off { opacity: 0.6; }
 .tmt-settings-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--mud-palette-primary); }
+.tmt-history-metrics { display: flex; gap: 8px; margin-bottom: 16px; }
+.tmt-metric { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--mud-palette-lines-default); text-align: center; }
+.tmt-metric strong { display: block; font-size: 1.25rem; }
+.tmt-day-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.tmt-day-nav a, .tmt-day-nav span.disabled { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
+.tmt-day-nav span.disabled { opacity: 0.4; }
+.tmt-outcome { font-size: 0.8rem; color: var(--mud-palette-text-secondary); }
