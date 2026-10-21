@@ -1,6 +1,6 @@
 # 12 · Archivar, desarchivar y eliminar tareas
 
-Status: claimed
+Status: ready-for-agent
 Blocked by: 11
 Cubre: 3MT-18
 
@@ -21,4 +21,3 @@ El usuario archiva tareas del pool sin darlas por completadas, las consulta en A
 
 ## Comments
 - pm-2 (nota del 10): Archivadas debe enlazar a `tarea/{id}`; hoy `TaskEditService.GetAsync` trata las Archived como solo lectura: relajar esa regla aquí.
-- pm-2: asignado a worker-12 (nuevo; rama issue/12-archivar-eliminar).
