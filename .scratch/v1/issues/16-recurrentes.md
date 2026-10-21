@@ -1,6 +1,6 @@
 # 16 · Tareas recurrentes
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 08, 10
 Cubre: 3MT-24, 25
 
@@ -21,3 +21,4 @@ El usuario define una regla (diaria, laborables, días de la semana, cada N día
 - 10-editar-tareas-categorias
 
 ## Comments
+- pm-2: asignado a worker-11 (nuevo; rama issue/16-recurrentes).

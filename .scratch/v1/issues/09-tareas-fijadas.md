@@ -1,6 +1,6 @@
 # 09 · Tareas fijadas que sobreviven al cierre de día
 
-Status: in-review
+Status: resolved
 Blocked by: 08
 Cubre: 3MT-47
 
@@ -33,3 +33,4 @@ El usuario fija una tarea; si no la completa, al cerrar el día pasa al plan del
   - **Propuesta (no hecha)**: la spec §3.1 podría mencionar el cálculo de "día N".
   - **Fuera de alcance**: no se han tocado SettingsPage ni el modelo de niveles. La vista de historial (issue 22) aún no existe: el criterio del historial queda cubierto a nivel de datos (asignación `NotCompleted` por cada día cerrado, con test).
   - Build `-warnaserror` ok; Core 98, Infrastructure 51, UI 63 tests en verde. No probado manualmente en navegador/emulador.
+- pm-2: revisado e integrado en main en bloque con 10/09/15/11/05 (conflictos de Strings.resx/DI/css resueltos conservando ambos lados; añadido DeleteLevelAsync a BrowserConfigRepository por el nuevo puerto de 15). build -warnaserror 0 avisos; tests Core 129, Infra 84, UI 85 en verde. Resolved.

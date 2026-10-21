@@ -1,6 +1,6 @@
 # 11 · Pool: ver pendientes y recuperarlas a hoy
 
-Status: in-review
+Status: resolved
 Blocked by: 08
 Cubre: 3MT-16, 17
 
@@ -30,3 +30,4 @@ El usuario abre el Pool, filtra y ordena las tareas no completadas, selecciona v
   - **UI** (`PoolPage`): lista con casillas, indicador "pospuesta N veces", barra Recuperar a hoy / Archivar / Cancelar al haber selección, aviso con los rechazos (las rechazadas siguen seleccionadas). Controles nativos (no MudCheckBox). Se publicó `TodayService.RecordMilestonesAsync` como `internal`.
   - **Fuera de alcance** (otros issues): pestañas "A futuro" y "Archivadas" del mock, desarchivar, borrar, secciones "Esta semana / Más antiguas", mostrar la recuperación desde Planificar (14). No toqué el formulario ni la persistencia web.
   - Tests: Core 76/76 (10 de Pool), UI 55/55 (8 bUnit de Pool), Infrastructure 51/51; todo con `-warnaserror`. No he ejecutado la UI en un navegador.
+- pm-2: revisado e integrado en main en bloque con 10/09/15/11/05 (conflictos de Strings.resx/DI/css resueltos conservando ambos lados; añadido DeleteLevelAsync a BrowserConfigRepository por el nuevo puerto de 15). build -warnaserror 0 avisos; tests Core 129, Infra 84, UI 85 en verde. Resolved.

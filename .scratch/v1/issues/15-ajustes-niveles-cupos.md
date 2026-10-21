@@ -1,6 +1,6 @@
 # 15 · Ajustes: niveles, cupos y opciones generales
 
-Status: in-review
+Status: resolved
 Blocked by: 07
 Cubre: 3MT-21, 26
 
@@ -30,3 +30,4 @@ El usuario personaliza niveles (nombre, color, icono, mínimos, máximo, orden, 
   - **Restaurar valores por defecto**: aplica solo a los niveles (no a los ajustes generales). Deja Must/Recommended/Maybe como en el PRD §5.1 (nombre, color, icono, cupos, orden, activos); los niveles propios se conservan (pueden tener tareas) pero quedan desactivados y al final. Sin diálogo de confirmación.
   - **Reordenar**: arrastrar y soltar HTML5 nativo sobre las filas (soltar sobre una fila coloca el nivel en esa posición) más flechas subir/bajar como alternativa accesible. Hoy ya ordena por `Level.Order`.
   - **Fuera de alcance / dudas**: `StrictMode`, `AutoAddScheduled` y `ExportVTodo` se persisten, pero su efecto lo implementan otros issues; `DayStartsAt` ya lo usa `LogicalDayCalculator`. No se tocan los ajustes de recordatorios (PRD §5.5). Cómo trata Hoy/Pool las tareas de un nivel desactivado no se ha cambiado.
+- pm-2: revisado e integrado en main en bloque con 10/09/15/11/05 (conflictos de Strings.resx/DI/css resueltos conservando ambos lados; añadido DeleteLevelAsync a BrowserConfigRepository por el nuevo puerto de 15). build -warnaserror 0 avisos; tests Core 129, Infra 84, UI 85 en verde. Resolved.

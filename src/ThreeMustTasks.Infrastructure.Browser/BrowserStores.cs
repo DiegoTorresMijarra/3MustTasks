@@ -78,6 +78,9 @@ public sealed class BrowserConfigRepository(BrowserDatabase db) : IConfigReposit
     public Task UpsertLevelAsync(Level level, CancellationToken ct = default)
         => db.PutAsync(Tables.Levels, Tables.Key(level.Id), level, null, ct);
 
+    public Task<bool> DeleteLevelAsync(Guid id, CancellationToken ct = default)
+        => db.DeleteAsync(Tables.Levels, Tables.Key(id), ct);
+
     public async Task<IReadOnlyList<Category>> ListCategoriesAsync(CancellationToken ct = default)
         => (await db.ListAsync<Category>(Tables.Categories, null, ct)).OrderBy(c => c.Name, StringComparer.Ordinal).ToList();
 

@@ -1,6 +1,6 @@
 # 22 · Historial: vista Día y métricas
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 08
 Cubre: 3MT-34, 35
 
@@ -21,3 +21,4 @@ El usuario consulta un día pasado en solo lectura, navega con ←/→ y ve % de
 
 ## Comments
 - pm-2 (nota del 10): borrar una tarea deja asignaciones huérfanas en días pasados; el historial debe ignorar las que apunten a una tarea inexistente.
+- pm-2: asignado a worker-10 (nuevo; rama issue/22-historial-dia-metricas).

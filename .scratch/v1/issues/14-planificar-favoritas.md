@@ -1,6 +1,6 @@
 # 14 · Planificar con selector rápido y favoritas
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 11
 Cubre: 3MT-15, 23
 
@@ -20,3 +20,4 @@ Pantalla Planificar con pestañas Nueva · Favoritas · Pool y cupos en tiempo r
 - 11-pool-ver-recuperar
 
 ## Comments
+- pm-2: asignado a worker-9 (nuevo; rama issue/14-planificar-favoritas).
