@@ -79,14 +79,14 @@ AppSettings (documento único)
 
 | Entidad | Campos |
 |---|---|
-| **Level** | `Id`, `Name`, `Color`, `Icon`, `Min`, `Max?` (null = ilimitado), `Order`, `Enabled` |
+| **Level** | `Id`, `Name`, `Color`, `Icon`, `MinToAdd`, `MinToComplete`, `Max?` (null = ilimitado), `Order`, `Enabled` |
 | **Category** | `Id`, `Name`, `Color` |
-| **TaskItem** | `Id (Guid)`, `Title`, `Notes?`, `LevelId`, `CategoryId?`, `DueTime? (TimeOnly)`, `ReminderOffset? (TimeSpan)`, `ScheduledDate? (DateOnly)`, `Status {Active, Completed, Archived}`, `TimesPostponed`, `RecurrenceRuleId?`, `IcsUid?`, `IsFavoriteSource`, `CreatedAt`, `UpdatedAt` |
+| **TaskItem** | `Id (Guid)`, `Title`, `Notes?`, `LevelId`, `CategoryId?`, `DueTime? (TimeOnly)`, `ReminderOffset? (TimeSpan)`, `ScheduledDate? (DateOnly)`, `Status {Active, Completed, Archived}`, `IsPinned`, `TimesPostponed`, `RecurrenceRuleId?`, `IcsUid?`, `IsFavoriteSource`, `CreatedAt`, `UpdatedAt` |
 | **DayAssignment** | `Id`, `TaskId`, `LogicalDate (DateOnly)`, `Outcome {Planned, Completed, NotCompleted, Removed}`, `CompletedAt?`, `Order` |
-| **DayLog** | `LogicalDate (PK)`, `MinimumMetAt?`, `ClosedAt?` |
+| **DayLog** | `LogicalDate (PK)`, `PlanMinimumMetAt?`, `CompletionMinimumMetAt?`, `Fulfilled (bool?)`, `ClosedAt?` |
 | **FavoriteTemplate** | `Id`, `Title`, `LevelId`, `CategoryId?`, `DueTime?`, `ReminderOffset?`, `UseCount` |
 | **RecurrenceRule** | `Id`, `TemplateTitle`, `LevelId`, `CategoryId?`, `DueTime?`, `Frequency {Daily, Weekly, EveryNDays, Monthly}`, `Interval`, `DaysOfWeek (flags)`, `DayOfMonth?`, `StartDate`, `EndDate?`, `LastGeneratedDate?` (se exporta como RRULE) |
-| **AppSettings** | `DayStartsAt (TimeOnly, 00:00)`, `PlanReminder {Enabled, Time 07:30, Days}`, `Nag {Enabled, IntervalMin 30, MaxPerDay 4}`, `EveningSummary {Enabled false, Time 21:00}`, `StrictMode false`, `AutoAddScheduled true`, `Theme`, `FirstDayOfWeek Monday`, `SchemaVersion` |
+| **AppSettings** | `DayStartsAt (TimeOnly, 00:00)`, `PlanReminder {Enabled, Time 07:30, Days}`, `Nag {Enabled, IntervalMin 30, MaxPerDay 4}`, `CompletionReminder {Enabled, Time 18:00}`, `EveningSummary {Enabled false, Time 21:00}`, `StrictMode false`, `AutoAddScheduled true`, `Theme`, `FirstDayOfWeek Monday`, `SchemaVersion` |
 
 ### 3.1 Consultas derivadas (no se guardan)
 - **Plan de hoy**: `DayAssignment` con `LogicalDate == hoy` y `Outcome ∈ {Planned, Completed}`.
@@ -106,7 +106,8 @@ Se ejecuta al iniciar la app, al volver a primer plano y antes de cada consulta 
 último = max(DayLog.ClosedAt != null).LogicalDate  (o fecha de instalación)
 para cada día d en (último, hoy):
     asignaciones Planned de d → Outcome = NotCompleted; TaskItem.TimesPostponed++
-    DayLog(d).ClosedAt = now
+    DayLog(d).Fulfilled = mínimos a completar alcanzados; DayLog(d).ClosedAt = now
+tareas fijadas no completadas → nueva DayAssignment Planned para hoy (no van al pool)
 generar instancias de recurrentes para hoy (RecurrenceGenerator)
 si AutoAddScheduled: añadir al plan las tareas con ScheduledDate == hoy (respetando QuotaPolicy)
 ReminderPlanner.Rebuild()
@@ -116,8 +117,8 @@ ReminderPlanner.Rebuild()
 
 ### 4.2 `QuotaPolicy`
 - `CanAdd(level, plannedCountForLevel)` → respeta `Max`.
-- `Evaluate(plan) → QuotaStatus { IsMinimumMet, Missing: [(Level, n)] }`.
-- Cuando se cumple el mínimo por primera vez → `DayLog.MinimumMetAt` y se cancelan las notificaciones de insistencia.
+- `Evaluate(plan) → QuotaStatus { IsPlanMinimumMet, MissingToAdd: [(Level, n)], IsCompletionMinimumMet, MissingToComplete: [(Level, n)] }`.
+- Cuando se cumple el mínimo a añadir por primera vez → `DayLog.PlanMinimumMetAt` y se cancelan las insistencias. Igual con el de completar → `CompletionMinimumMetAt` y se cancela el aviso de la tarde.
 
 ### 4.3 `PoolService`
 `Recover(taskIds, today)` (valida cupos y devuelve los rechazados con su motivo), `Archive(ids)`, `Unarchive(ids)`, `Delete(ids)`.

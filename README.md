@@ -1,6 +1,6 @@
 # 3MustTasks
 
-App de **foco diario**: cada día eliges unas pocas tareas importantes (por defecto **3 Must**), las tachas, y lo que no hagas pasa a un **pool** del que puedes recuperarlo o archivarlo.
+App de **foco diario**: cada día eliges unas pocas tareas importantes (por defecto **1 Must + 2 Recommended**), las tachas, y lo que no hagas pasa a un **pool** del que puedes recuperarlo o archivarlo.
 
 - **Stack:** .NET 10 · Blazor · MudBlazor · MAUI Blazor Hybrid (Android) · Blazor WASM PWA (web)
 - **Datos:** solo locales (SQLite / IndexedDB), sin cuentas
@@ -13,7 +13,7 @@ App de **foco diario**: cada día eliges unas pocas tareas importantes (por defe
 | [docs/01-producto.md](docs/01-producto.md) | PRD: visión, glosario, reglas de negocio, pantallas, alcance |
 | [docs/02-spec-tecnica.md](docs/02-spec-tecnica.md) | Arquitectura, proyectos, modelo de datos, servicios, plataforma, calidad |
 | [docs/03-preguntas-abiertas.md](docs/03-preguntas-abiertas.md) | Decisiones tomadas y preguntas con su valor asumido |
-| [docs/04-backlog.md](docs/04-backlog.md) | 46 issues en 8 hitos con criterios de aceptación |
+| [docs/04-backlog.md](docs/04-backlog.md) | 48 issues en 8 hitos con criterios de aceptación |
 
 ## Trazabilidad seed → specs
 
@@ -32,7 +32,7 @@ App de **foco diario**: cada día eliges unas pocas tareas importantes (por defe
 | Favoritas | §3, §6 | 23 |
 | Recurrentes | §5.5 | 24, 25 |
 | Pool a futuro con recordatorio | §5.3, §5.6 | 12, 17, 19, 28 |
-| Valores por defecto (3 Must, Must/Should/Maybe) | §5.1 | 08, 21 |
+| Valores por defecto (1 Must + 2 Recommended) | §5.1 | 08, 21 |
 | Vistas calendario: diario en inicio, semanal… | §6 | 11, 35–37 |
 | Import/export `.ics` (Google Calendar) | §7 | 38, 39, 40 |
 | Móvil con .NET + Blazor | §8, spec §1 | 01, 07 |

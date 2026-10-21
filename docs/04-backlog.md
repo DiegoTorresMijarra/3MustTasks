@@ -9,7 +9,7 @@
 | Hito | Objetivo | Issues | Entregable |
 |---|---|---|---|
 | **M0 Fundaciones** | Esqueleto que compila y corre en Android y web | 3MT-01 … 3MT-07 | App vacía con navegación en ambos hosts + CI |
-| **M1 Bucle diario** | Planificar, tachar, cerrar el día | 3MT-08 … 3MT-15 | Se puede usar a diario (sin notificaciones) |
+| **M1 Bucle diario** | Planificar, tachar, cerrar el día | 3MT-08 … 3MT-15, 47, 48 | Se puede usar a diario (sin notificaciones) |
 | **M2 Pool** | Lo no hecho no se pierde | 3MT-16 … 3MT-20 | Pool, recuperar, archivar, a futuro |
 | **M3 Personalización** | Todo configurable con valores por defecto | 3MT-21 … 3MT-27 | Niveles, categorías, favoritas, recurrentes, onboarding |
 | **M4 Notificaciones** | Recordatorios | 3MT-28 … 3MT-33 | Planificación, insistencia, recordatorio de tarea |
@@ -73,13 +73,13 @@
 ### 3MT-08 · Entidades de dominio y valores por defecto
 `area:core` `type:feature` `prio:P0` · **M** · deps: 04
 - [ ] `Level`, `Category`, `TaskItem`, `DayAssignment`, `DayLog` y `AppSettings`.
-- [ ] Seed inicial: Must (3/3, rojo), Should (0/2, ámbar), Maybe (0/2, azul) y los ajustes por defecto del PRD §5.6/5.7.
+- [ ] Seed inicial: Must (añadir 1, completar 1, rojo), Recommended (añadir 2, completar 0, ámbar), Maybe (0/0, azul) y los ajustes por defecto del PRD §5.6/5.7.
 - [ ] `LogicalDayCalculator` con tests (incluye `DayStartsAt` = 04:00 y cambio de horario).
 
 ### 3MT-09 · `QuotaPolicy`
 `area:core` `type:feature` `prio:P0` · **S** · deps: 08
 - [ ] `CanAdd` respeta el `Max` (null = ilimitado).
-- [ ] `Evaluate` devuelve `IsMinimumMet` y lo que falta por nivel.
+- [ ] `Evaluate` devuelve si se cumplen el mínimo a añadir y el mínimo a completar, y lo que falta de cada uno por nivel.
 - [ ] Ignora los niveles desactivados.
 - [ ] 100 % de cobertura.
 
@@ -109,7 +109,8 @@
 
 ### 3MT-13 · Banner de mínimo no cumplido
 `area:ui` `type:feature` `prio:P0` · **S** · deps: 11
-- [ ] Banner persistente "Te faltan N Must…" mientras `IsMinimumMet == false`.
+- [ ] Banner persistente "Te falta añadir…" mientras no se cumpla el mínimo a añadir.
+- [ ] Progreso "completadas X/mín." por nivel.
 - [ ] Al pulsarlo se abre Planificar.
 - [ ] Desaparece al cumplir el mínimo.
 
@@ -118,6 +119,19 @@
 - [ ] Algoritmo de [spec §4.1](02-spec-tecnica.md#41-dayrolloverservice-idempotente) en una transacción.
 - [ ] Tests: un día, varios días saltados, idempotencia, inicio de día ≠ 00:00 y día sin plan.
 - [ ] Se invoca al iniciar y al reanudar en ambos hosts.
+
+### 3MT-47 · Tareas fijadas
+`area:core` `area:ui` `type:feature` `prio:P1` · **M** · deps: 14, 12
+- [ ] Campo `IsPinned`; fijar/desfijar desde el formulario y desde Hoy (menú).
+- [ ] En el cierre de día, las fijadas no completadas pasan al plan del día nuevo (no al pool) y cuentan para los cupos.
+- [ ] Indicador "Fijada · día N" en Hoy.
+- [ ] Tests del cierre de día con fijadas.
+
+### 3MT-48 · Mínimo a completar y día cumplido
+`area:core` `area:ui` `type:feature` `prio:P0` · **S** · deps: 14
+- [ ] `DayLog.Fulfilled` calculado al cerrar el día.
+- [ ] La racha cuenta solo días cumplidos.
+- [ ] Aviso de la tarde si falta el mínimo a completar (lo programa el `ReminderPlanner`).
 
 ### 3MT-15 · Pantalla Planificar (selector rápido)
 `area:ui` `type:feature` `prio:P1` · **M** · deps: 11, 12

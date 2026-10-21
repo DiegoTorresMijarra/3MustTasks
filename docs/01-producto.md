@@ -4,7 +4,7 @@
 
 ## 1. Visión
 
-Una app móvil de **foco diario**: cada día te pide que elijas un número pequeño de tareas importantes (por defecto **3 "Must"**), te recuerda que las hagas y no deja que lo no hecho desaparezca: lo acumula en un *pool* del que puedes rescatarlo otro día o archivarlo conscientemente.
+Una app móvil de **foco diario**: cada día te pide que elijas un número pequeño de tareas clasificadas por nivel de exigencia (por defecto **3: 1 Must + 2 Recommended**), te recuerda que las hagas y no deja que lo no hecho desaparezca: lo acumula en un *pool* del que puedes rescatarlo otro día o archivarlo conscientemente.
 
 No es un gestor de tareas genérico. La gracia es la **restricción**: pocas tareas, clasificadas por importancia, con un mínimo obligatorio.
 
@@ -18,11 +18,12 @@ No es un gestor de tareas genérico. La gracia es la **restricción**: pocas tar
 | Término | Definición |
 |---|---|
 | **Tarea** | Algo a hacer: título, nivel, categoría, notas opcionales, hora/recordatorio opcional. |
-| **Nivel** (antes "tipo") | Importancia de la tarea. Por defecto: **Must**, **Should**, **Maybe**. Cada nivel tiene un cupo diario (mín./máx.). Personalizable (nombre, color, cupos, orden). |
-| **Categoría** | Etiqueta libre con color (Trabajo, Casa, Salud…). Independiente del nivel. **[D]** |
+| **Nivel** ("tipo") | Nivel de exigencia de la tarea. Por defecto: **Must**, **Recommended**, **Maybe**. Cada nivel tiene un **mínimo a añadir**, un **mínimo a completar** y un **máximo** opcional. Personalizable (nombre, color, cupos, orden). |
+| **Categoría** | Etiqueta libre con color (Trabajo, Casa, Salud…). Independiente del nivel. ✅ |
+| **Fijada** | Marca de una tarea para que se mantenga en el plan de un día para otro hasta completarla, sin pasar al pool. |
 | **Plan del día** | Las tareas asignadas a un día concreto. |
 | **Día lógico** | El "día" de la app. Por defecto empieza a las 00:00; configurable (p. ej. 04:00 para quien trasnocha). **[D]** |
-| **Cierre de día** | Al empezar un día nuevo, las tareas no completadas del anterior pasan al pool. |
+| **Cierre de día** | Al empezar un día nuevo, las tareas no completadas del anterior pasan al pool (las fijadas pasan al plan del día nuevo). |
 | **Pool** | Acumulado de tareas no completadas de días anteriores **más** las tareas planificadas a futuro / sin fecha. Se pueden recuperar o archivar. |
 | **Archivada** | Tarea no completada que el usuario descarta del pool. No cuenta como completada ni sigue en el pool, pero sigue en el historial. |
 | **Favorita** | Plantilla de tarea para añadirla rápido. |
@@ -46,26 +47,33 @@ No es un gestor de tareas genérico. La gracia es la **restricción**: pocas tar
 
 ## 5. Reglas de negocio
 
-### 5.1 Cupos por nivel
-- Cada nivel tiene **mínimo** y **máximo** diarios.
-- Valores por defecto **[D]**:
+### 5.1 Cupos por nivel ✅
+Cada nivel tiene tres valores:
+- **Mínimo a añadir**: cuántas tareas de ese nivel hay que planificar cada día.
+- **Mínimo a completar**: cuántas hay que tachar para que el día cuente como **cumplido**.
+- **Máximo** (opcional): tope de tareas de ese nivel por día. Vacío = sin tope.
 
-| Nivel | Color | Mín. | Máx. |
-|---|---|---|---|
-| Must | rojo | **3** | 3 |
-| Should | ámbar | 0 | 2 |
-| Maybe | azul | 0 | 2 |
+Valores por defecto (total por defecto: **3 tareas**):
 
-- Ejemplo personalizado del seed: *2 Must + 1 Should ("recommended")*.
+| Nivel | Color | Mín. añadir | Mín. completar | Máx. |
+|---|---|---|---|---|
+| Must | rojo | **1** | **1** | — |
+| Recommended | ámbar | **2** | 0 **[D]** | — |
+| Maybe | azul | 0 | 0 | — |
+
 - Se pueden renombrar, recolorear, reordenar, añadir y desactivar niveles. Siempre tiene que quedar al menos uno activo.
-- No se pueden añadir más tareas de las que permite el máximo de un nivel. El usuario puede desactivar el máximo (= ilimitado).
+- Validación: mín. completar ≤ mín. añadir ≤ máx.
 
-### 5.2 Mínimo obligatorio ("forzar")
-- El plan está **incompleto** mientras no se cumpla el mínimo de algún nivel.
-- Con el plan incompleto (✅ decidido):
-  1. Un banner persistente en Inicio indica lo que falta ("Te faltan 2 Must").
-  2. Recordatorios repetidos cada *X* min (por defecto 30) desde la hora de planificación hasta cumplirlo, con un tope diario (por defecto 4).
-  3. **Modo estricto** opcional (desactivado por defecto): la app no deja salir de la pantalla de planificación hasta cumplir el mínimo.
+### 5.2 Forzar los mínimos ✅
+**Mínimo a añadir** (planificación incompleta):
+1. Un banner persistente en Inicio indica lo que falta ("Te falta añadir 1 Must y 1 Recommended").
+2. Recordatorios repetidos cada *X* min (por defecto 30) desde la hora de planificación hasta cumplirlo, con un tope diario (por defecto 4).
+3. **Modo estricto** opcional (desactivado por defecto): la app no deja salir de la pantalla de planificación hasta cumplir el mínimo.
+
+**Mínimo a completar**:
+1. En Inicio, cada nivel muestra su progreso ("Must 0/1 completadas").
+2. Aviso por la tarde si aún falta (por defecto 18:00: "Te queda 1 Must por completar").
+3. Al cerrar el día, si se cumplieron todos los mínimos a completar, el día cuenta como **cumplido** (y suma a la racha). Si no, cuenta como **no cumplido**.
 
 ### 5.3 Ciclo de vida de una tarea
 
@@ -80,6 +88,7 @@ No es un gestor de tareas genérico. La gracia es la **restricción**: pocas tar
          (sin fecha / futura)                   └── eliminar (definitivo, con confirmación)
 ```
 
+- **Fijar**: una tarea fijada no va al pool al cerrar el día; pasa al plan del día siguiente (cuenta para los cupos) hasta que se complete o se desfije. En el historial, cada día que pasó sin completarse aparece como no completada. La tarea muestra "Fijada · día N".
 - **Tachar** es reversible el mismo día (destachar).
 - **Editar**: cualquier tarea de hoy, del pool, de días futuros o archivada se puede editar (título, nivel, categoría, hora, recordatorio, notas, fecha, recurrencia). Al cambiar el nivel se valida el cupo. Tocar el círculo tacha la tarea; tocar el texto abre la edición. Los días pasados del historial son de solo lectura.
 - **Editar una recurrente**: se pregunta si el cambio afecta solo a esta instancia o también a las siguientes.
@@ -90,7 +99,7 @@ No es un gestor de tareas genérico. La gracia es la **restricción**: pocas tar
 
 ### 5.4 Historial
 - Un registro por día con cada tarea planificada y su resultado (completada / no completada / quitada del plan).
-- Se muestran métricas sencillas: % de cumplimiento, racha de días con todos los Must completados.
+- Se muestran métricas sencillas: % de cumplimiento y racha de días **cumplidos** (todos los mínimos a completar alcanzados).
 - El historial **no se reescribe**: si recuperas una tarea y la completas otro día, el día original sigue mostrándola como no completada.
 
 ### 5.5 Recurrentes
@@ -103,6 +112,7 @@ No es un gestor de tareas genérico. La gracia es la **restricción**: pocas tar
 |---|---|---|
 | "¡Añade tus tareas!" | 07:30, todos los días | hora, días de la semana, on/off |
 | Insistencia por plan incompleto | cada 30 min, máx. 4 | intervalo, tope, on/off |
+| Aviso de mínimo a completar pendiente | 18:00 | hora, on/off |
 | Recordatorio de tarea con hora | a la hora de la tarea | antelación (0/5/15/30/60 min) |
 | Resumen nocturno "Te quedan N" | 21:00, off | hora, on/off |
 | Tarea a futuro llega a su día | al inicio del día | on/off |
@@ -117,8 +127,8 @@ No es un gestor de tareas genérico. La gracia es la **restricción**: pocas tar
 
 ## 6. Pantallas
 
-1. **Inicio / Hoy**: las tareas del día agrupadas por nivel con huecos visibles ("Must 2/3"), tachar con un toque o deslizando, banner de mínimo y botón para añadir.
-2. **Añadir/editar tarea**: título, nivel, categoría, hora y recordatorio, notas, recurrencia y fecha (hoy / futura / sin fecha → pool), además de marcar como favorita.
+1. **Inicio / Hoy**: las tareas del día agrupadas por nivel con huecos visibles y progreso de completado por nivel; tocar el círculo tacha, tocar el texto edita; banner de mínimo y botón para añadir.
+2. **Añadir/editar tarea**: título, nivel, categoría, hora y recordatorio, notas, recurrencia, fecha (hoy / futura / sin fecha → pool), fijar y favorita; en edición, eliminar.
 3. **Planificar**: selector rápido con pestañas *Nueva · Favoritas · Pool*.
 4. **Pool**: lista filtrable (nivel, categoría, antigüedad, veces pospuesta), selección múltiple para *recuperar a hoy* o *archivar*. Con sección "Programadas a futuro".
 5. **Archivadas**.
