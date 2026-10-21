@@ -15,6 +15,45 @@ public sealed class InMemoryDatabase
     internal readonly Dictionary<Guid, FavoriteTemplate> Favorites = new();
     internal readonly Dictionary<Guid, RecurrenceRule> Recurrences = new();
     internal AppSettings Settings = new();
+
+    internal sealed record State(
+        Dictionary<Guid, TaskItem> Tasks,
+        Dictionary<Guid, DayAssignment> Assignments,
+        Dictionary<DateOnly, DayLog> Logs,
+        Dictionary<Guid, Level> Levels,
+        Dictionary<Guid, Category> Categories,
+        Dictionary<Guid, FavoriteTemplate> Favorites,
+        Dictionary<Guid, RecurrenceRule> Recurrences,
+        AppSettings Settings);
+
+    internal State Snapshot()
+    {
+        lock (Gate)
+            return new State(new(Tasks), new(Assignments), new(Logs), new(Levels), new(Categories),
+                new(Favorites), new(Recurrences), Settings);
+    }
+
+    internal void Restore(State s)
+    {
+        lock (Gate)
+        {
+            Replace(Tasks, s.Tasks);
+            Replace(Assignments, s.Assignments);
+            Replace(Logs, s.Logs);
+            Replace(Levels, s.Levels);
+            Replace(Categories, s.Categories);
+            Replace(Favorites, s.Favorites);
+            Replace(Recurrences, s.Recurrences);
+            Settings = s.Settings;
+        }
+    }
+
+    private static void Replace<TKey, TValue>(Dictionary<TKey, TValue> target, Dictionary<TKey, TValue> source)
+        where TKey : notnull
+    {
+        target.Clear();
+        foreach (var (k, v) in source) target[k] = v;
+    }
 }
 
 public sealed class InMemoryTaskRepository(InMemoryDatabase db) : ITaskRepository
@@ -82,6 +121,32 @@ public sealed class InMemoryDayRepository(InMemoryDatabase db) : IDayRepository
     {
         lock (db.Gate) db.Logs[log.LogicalDate] = log;
         return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<DateOnly>> ListUnclosedDatesAsync(DateOnly before, CancellationToken ct = default)
+    {
+        lock (db.Gate)
+        {
+            var closed = db.Logs.Values.Where(l => l.ClosedAt is not null).Select(l => l.LogicalDate).ToHashSet();
+            IReadOnlyList<DateOnly> result = db.Assignments.Values
+                .Where(a => a.Outcome is AssignmentOutcome.Planned or AssignmentOutcome.Completed)
+                .Select(a => a.LogicalDate)
+                .Concat(db.Logs.Values.Where(l => l.ClosedAt is null).Select(l => l.LogicalDate))
+                .Where(d => d < before && !closed.Contains(d))
+                .Distinct().Order().ToList();
+            return Task.FromResult(result);
+        }
+    }
+
+    public Task<IReadOnlyList<DayLog>> ListClosedLogsAsync(DateOnly from, DateOnly to, CancellationToken ct = default)
+    {
+        lock (db.Gate)
+        {
+            IReadOnlyList<DayLog> result = db.Logs.Values
+                .Where(l => l.ClosedAt is not null && l.LogicalDate >= from && l.LogicalDate <= to)
+                .OrderBy(l => l.LogicalDate).ToList();
+            return Task.FromResult(result);
+        }
     }
 }
 
@@ -166,8 +231,35 @@ public sealed class InMemorySettingsStore(InMemoryDatabase db) : ISettingsStore
     }
 }
 
-/// <summary>En memoria los cambios se aplican al instante; no hay nada que confirmar.</summary>
-public sealed class InMemoryUnitOfWork : IUnitOfWork
+/// <summary>
+/// En memoria los cambios se aplican al instante. La transacción toma una copia del estado y, si el trabajo
+/// falla, la restaura (revierte todo lo escrito dentro).
+/// </summary>
+public sealed class InMemoryUnitOfWork(InMemoryDatabase db) : IUnitOfWork
 {
+    private readonly SemaphoreSlim _gate = new(1, 1);
+
     public Task SaveChangesAsync(CancellationToken ct = default) => Task.CompletedTask;
+
+    public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> work, CancellationToken ct = default)
+    {
+        await _gate.WaitAsync(ct);
+        try
+        {
+            var snapshot = db.Snapshot();
+            try
+            {
+                await work(ct);
+            }
+            catch
+            {
+                db.Restore(snapshot);
+                throw;
+            }
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
 }

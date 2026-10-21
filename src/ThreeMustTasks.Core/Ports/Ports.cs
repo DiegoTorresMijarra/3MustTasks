@@ -19,6 +19,14 @@ public interface IDayRepository
     Task<bool> DeleteAssignmentAsync(Guid id, CancellationToken ct = default);
     Task<DayLog?> GetLogAsync(DateOnly logicalDate, CancellationToken ct = default);
     Task UpsertLogAsync(DayLog log, CancellationToken ct = default);
+    /// <summary>
+    /// Días anteriores a <paramref name="before"/> que aún no se han cerrado: los que tienen alguna asignación
+    /// Planned/Completed o un <see cref="DayLog"/> sin <c>ClosedAt</c>, y no tienen un log ya cerrado. Orden ascendente.
+    /// Un día sin plan (sin asignaciones y sin log) no aparece.
+    /// </summary>
+    Task<IReadOnlyList<DateOnly>> ListUnclosedDatesAsync(DateOnly before, CancellationToken ct = default);
+    /// <summary>Logs con <c>ClosedAt</c> entre las fechas indicadas (ambas incluidas), orden ascendente.</summary>
+    Task<IReadOnlyList<DayLog>> ListClosedLogsAsync(DateOnly from, DateOnly to, CancellationToken ct = default);
 }
 
 public interface IConfigRepository
@@ -43,4 +51,11 @@ public interface ISettingsStore
 public interface IUnitOfWork
 {
     Task SaveChangesAsync(CancellationToken ct = default);
+
+    /// <summary>
+    /// Ejecuta <paramref name="work"/> de forma atómica: todas las escrituras de los repositorios hechas dentro
+    /// se confirman juntas o, si lanza una excepción, ninguna se aplica (y la excepción se propaga).
+    /// No admite anidamiento.
+    /// </summary>
+    Task ExecuteInTransactionAsync(Func<CancellationToken, Task> work, CancellationToken ct = default);
 }

@@ -46,6 +46,11 @@ public sealed class SqliteConfigRepositoryTests : ConfigRepositoryContract
     protected override PersistenceSet Create() => SqliteFactory.Create();
 }
 
+public sealed class SqliteUnitOfWorkTests : UnitOfWorkContract
+{
+    protected override PersistenceSet Create() => SqliteFactory.Create();
+}
+
 public sealed class SqliteSettingsStoreTests : SettingsStoreContract
 {
     protected override PersistenceSet Create() => SqliteFactory.Create();

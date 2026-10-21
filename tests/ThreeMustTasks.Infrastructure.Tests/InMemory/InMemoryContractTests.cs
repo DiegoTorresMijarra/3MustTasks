@@ -39,6 +39,11 @@ public sealed class InMemorySettingsStoreTests : SettingsStoreContract
     protected override PersistenceSet Create() => InMemoryFactory.Create();
 }
 
+public sealed class InMemoryUnitOfWorkTests : UnitOfWorkContract
+{
+    protected override PersistenceSet Create() => InMemoryFactory.Create();
+}
+
 public sealed class InMemoryRegistrationTests
 {
     [Fact]
