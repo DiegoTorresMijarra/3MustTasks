@@ -2,6 +2,13 @@
 
 Ver [README.md](README.md) y `docs/` para producto, spec técnica y backlog.
 
+## Cómo trabajar en este proyecto
+
+Antes de planificar o implementar nada, lee:
+
+- `docs/workflow.md`: roles (`pm-[n]` revisa y asigna, `worker-[n]` implementa), concurrencia, reutilización de agentes y límite de cuota. Se aplica siempre salvo que el usuario diga lo contrario.
+- `docs/waves.md`: olas de issues que se pueden paralelizar. El estado real de cada issue está en su línea `Status:` de `.scratch/v1/issues/`.
+
 ## Agent skills
 
 ### Issue tracker
