@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.JSInterop;
 using ThreeMustTasks.App.Web;
+using ThreeMustTasks.Core.Services;
 using ThreeMustTasks.Infrastructure.Shared.InMemory;
 using ThreeMustTasks.UI;
 
@@ -13,4 +15,12 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddInMemoryPersistence();
 builder.Services.AddThreeMustTasksUI();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+
+// Cierre de día: al iniciar y al volver a primer plano.
+var foreground = new ForegroundListener(host.Services.GetRequiredService<DayRolloverService>());
+await foreground.RunRolloverAsync();
+await host.Services.GetRequiredService<IJSRuntime>()
+    .InvokeVoidAsync("tmtLifecycle.register", DotNetObjectReference.Create(foreground));
+
+await host.RunAsync();

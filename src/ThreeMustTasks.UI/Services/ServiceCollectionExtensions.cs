@@ -15,8 +15,12 @@ public static class ServiceCollectionExtensions
         services.AddLocalization();
         services.TryAddSingleton(TimeProvider.System);
         services.AddScoped<ThemeService>();
-        services.AddScoped<LogicalDayCalculator>();
-        services.AddScoped<PlanEvents>();
+        // Singleton: los hosts (p. ej. MAUI al reanudar) ejecutan el cierre de día fuera del ámbito del WebView y
+        // el evento PlanChanged debe llegar a la UI.
+        services.AddSingleton<LogicalDayCalculator>();
+        services.AddSingleton<PlanEvents>();
+        services.AddSingleton<DayRolloverService>();
+        services.AddSingleton<StreakCalculator>();
         services.AddScoped<TodayService>();
         return services;
     }

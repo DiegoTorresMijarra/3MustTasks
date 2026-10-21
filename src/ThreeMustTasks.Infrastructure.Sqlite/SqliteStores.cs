@@ -4,7 +4,7 @@ using ThreeMustTasks.Core.Ports;
 
 namespace ThreeMustTasks.Infrastructure.Sqlite;
 
-using Factory = IDbContextFactory<ThreeMustTasksDbContext>;
+using Factory = SqliteContextFactory;
 
 internal static class Upserts
 {
@@ -81,6 +81,27 @@ public sealed class SqliteDayRepository(Factory factory) : IDayRepository
     {
         await using var ctx = await factory.CreateDbContextAsync(ct);
         await ctx.UpsertAsync(log, q => q.AnyAsync(l => l.LogicalDate == log.LogicalDate, ct), ct);
+    }
+
+    public async Task<IReadOnlyList<DateOnly>> ListUnclosedDatesAsync(DateOnly before, CancellationToken ct = default)
+    {
+        await using var ctx = await factory.CreateDbContextAsync(ct);
+        var withPlan = await ctx.DayAssignments.AsNoTracking()
+            .Where(a => a.LogicalDate < before && (a.Outcome == AssignmentOutcome.Planned || a.Outcome == AssignmentOutcome.Completed))
+            .Select(a => a.LogicalDate).Distinct().ToListAsync(ct);
+        var logs = await ctx.DayLogs.AsNoTracking()
+            .Where(l => l.LogicalDate < before).Select(l => new { l.LogicalDate, l.ClosedAt }).ToListAsync(ct);
+        var closed = logs.Where(l => l.ClosedAt != null).Select(l => l.LogicalDate).ToHashSet();
+        return withPlan.Concat(logs.Where(l => l.ClosedAt == null).Select(l => l.LogicalDate))
+            .Where(d => !closed.Contains(d)).Distinct().Order().ToList();
+    }
+
+    public async Task<IReadOnlyList<DayLog>> ListClosedLogsAsync(DateOnly from, DateOnly to, CancellationToken ct = default)
+    {
+        await using var ctx = await factory.CreateDbContextAsync(ct);
+        return await ctx.DayLogs.AsNoTracking()
+            .Where(l => l.ClosedAt != null && l.LogicalDate >= from && l.LogicalDate <= to)
+            .OrderBy(l => l.LogicalDate).ToListAsync(ct);
     }
 }
 
@@ -170,9 +191,14 @@ public sealed class SqliteSettingsStore(Factory factory) : ISettingsStore
 
 /// <summary>
 /// Cada operación de los repositorios confirma al instante (contexto corto por operación), igual que la
-/// implementación en memoria; por eso no queda nada pendiente que confirmar aquí.
+/// implementación en memoria; por eso no queda nada pendiente que confirmar en <see cref="SaveChangesAsync"/>.
+/// <see cref="ExecuteInTransactionAsync"/> abre una transacción de base de datos real y hace que los
+/// repositorios usen su conexión mientras dure el trabajo.
 /// </summary>
-public sealed class SqliteUnitOfWork : IUnitOfWork
+public sealed class SqliteUnitOfWork(Factory factory) : IUnitOfWork
 {
     public Task SaveChangesAsync(CancellationToken ct = default) => Task.CompletedTask;
+
+    public Task ExecuteInTransactionAsync(Func<CancellationToken, Task> work, CancellationToken ct = default) =>
+        factory.RunInTransactionAsync(work, ct);
 }

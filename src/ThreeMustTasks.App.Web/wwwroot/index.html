@@ -28,6 +28,16 @@
         <a href="." class="reload">Recargar</a>
         <span class="dismiss">🗙</span>
     </div>
+    <script>
+        // Avisa a la app cuando la pestaña/PWA vuelve a primer plano (cierre de día).
+        window.tmtLifecycle = {
+            register: function (ref) {
+                document.addEventListener('visibilitychange', function () {
+                    if (document.visibilityState === 'visible') ref.invokeMethodAsync('OnForeground');
+                });
+            }
+        };
+    </script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
     <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>

@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
         this IServiceCollection services, Action<DbContextOptionsBuilder> configure)
     {
         services.AddDbContextFactory<ThreeMustTasksDbContext>(configure);
+        services.AddSingleton<SqliteContextFactory>();
         services.AddSingleton<ITaskRepository, SqliteTaskRepository>();
         services.AddSingleton<IDayRepository, SqliteDayRepository>();
         services.AddSingleton<IConfigRepository, SqliteConfigRepository>();

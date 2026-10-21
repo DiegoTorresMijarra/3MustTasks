@@ -174,6 +174,92 @@ public abstract class DayRepositoryContract : PersistenceContract
         Assert.Equal(closed, await p.Days.GetLogAsync(Day));
         Assert.Null(await p.Days.GetLogAsync(Day.AddDays(1)));
     }
+
+    [Fact]
+    public async Task Unclosed_dates_are_days_before_the_limit_with_plan_or_open_log_and_no_closed_log()
+    {
+        var p = Create();
+        var d = (int n) => Day.AddDays(n);
+        await p.Days.UpsertAssignmentAsync(Assignment(d(0), 0));                                   // Planned: abierto
+        await p.Days.UpsertAssignmentAsync(Assignment(d(1), 0, AssignmentOutcome.Completed));      // Completed: abierto
+        await p.Days.UpsertAssignmentAsync(Assignment(d(2), 0, AssignmentOutcome.Removed));        // solo Removed: sin plan
+        await p.Days.UpsertLogAsync(new DayLog(d(3), T0, null, null, null));                       // log abierto sin asignaciones
+        await p.Days.UpsertAssignmentAsync(Assignment(d(4), 0));                                   // con log cerrado: no
+        await p.Days.UpsertLogAsync(new DayLog(d(4), null, null, true, T0));
+        await p.Days.UpsertAssignmentAsync(Assignment(d(9), 0));                                   // no anterior al límite
+
+        Assert.Equal([d(0), d(1), d(3)], await p.Days.ListUnclosedDatesAsync(d(5)));
+    }
+
+    [Fact]
+    public async Task Closed_logs_are_listed_in_range_by_date()
+    {
+        var p = Create();
+        await p.Days.UpsertLogAsync(new DayLog(Day.AddDays(2), null, null, false, T0));
+        await p.Days.UpsertLogAsync(new DayLog(Day, null, null, true, T0));
+        await p.Days.UpsertLogAsync(new DayLog(Day.AddDays(1), null, null, null, null)); // abierto: no
+        await p.Days.UpsertLogAsync(new DayLog(Day.AddDays(9), null, null, true, T0));   // fuera de rango
+
+        var result = await p.Days.ListClosedLogsAsync(Day, Day.AddDays(3));
+
+        Assert.Equal([Day, Day.AddDays(2)], result.Select(l => l.LogicalDate));
+    }
+}
+
+public abstract class UnitOfWorkContract : PersistenceContract
+{
+    [Fact]
+    public async Task Transaction_commits_all_writes_when_work_succeeds()
+    {
+        var p = Create();
+        var task = NewTask("A");
+        var log = new DayLog(new DateOnly(2026, 10, 20), null, null, true, T0);
+
+        await p.Unit.ExecuteInTransactionAsync(async ct =>
+        {
+            await p.Tasks.UpsertAsync(task, ct);
+            await p.Days.UpsertLogAsync(log, ct);
+            // Lo escrito dentro es visible dentro de la transacción.
+            Assert.Equal(task, await p.Tasks.GetAsync(task.Id, ct));
+        });
+
+        Assert.Equal(task, await p.Tasks.GetAsync(task.Id));
+        Assert.Equal(log, await p.Days.GetLogAsync(log.LogicalDate));
+    }
+
+    [Fact]
+    public async Task Transaction_rolls_back_every_write_and_rethrows_when_work_fails()
+    {
+        var p = Create();
+        var existing = NewTask("Existente");
+        await p.Tasks.UpsertAsync(existing);
+        var created = NewTask("Nueva");
+        var day = new DateOnly(2026, 10, 20);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => p.Unit.ExecuteInTransactionAsync(async ct =>
+        {
+            await p.Tasks.UpsertAsync(created, ct);
+            await p.Tasks.UpsertAsync(existing with { Title = "Cambiada" }, ct);
+            await p.Days.UpsertLogAsync(new DayLog(day, null, null, true, T0), ct);
+            throw new InvalidOperationException("fallo a mitad");
+        }));
+
+        Assert.Null(await p.Tasks.GetAsync(created.Id));
+        Assert.Equal("Existente", (await p.Tasks.GetAsync(existing.Id))!.Title);
+        Assert.Null(await p.Days.GetLogAsync(day));
+    }
+
+    [Fact]
+    public async Task Writes_after_a_failed_transaction_still_work()
+    {
+        var p = Create();
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            p.Unit.ExecuteInTransactionAsync(_ => throw new InvalidOperationException()));
+
+        var task = NewTask("Después");
+        await p.Tasks.UpsertAsync(task);
+        Assert.Equal(task, await p.Tasks.GetAsync(task.Id));
+    }
 }
 
 public abstract class ConfigRepositoryContract : PersistenceContract
