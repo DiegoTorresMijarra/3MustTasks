@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Calendario, mes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#15171C}a:hover{color:#000}
+button{font-family:inherit}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #F5F6F8; font-family: Manrope, system-ui, sans-serif; color: #15171C; box-sizing: border-box">
+
+  <header style="padding: 56px 20px 12px; display: flex; flex-direction: column; gap: 14px">
+    <h1 style="margin: 0; font-size: 34px; font-weight: 800; letter-spacing: -0.02em">Calendario</h1>
+    <div role="tablist" style="padding: 4px; border-radius: 14px; background: #E8EBEF; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px">
+      <button role="tab" aria-selected="false" style="min-height: 38px; border: 0; border-radius: 10px; background: transparent; font-size: 13px; font-weight: 700; color: #5B6170">Día</button>
+      <a href="Semana.dc.html" role="tab" aria-selected="false" style="min-height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #5B6170; text-decoration: none">Semana</a>
+      <button role="tab" aria-selected="true" style="min-height: 38px; border: 0; border-radius: 10px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(21,23,28,0.12); font-size: 13px; font-weight: 800; color: #15171C">Mes</button>
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <button aria-label="Mes anterior" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #E3E6EB; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15171C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <div style="font-size: 17px; font-weight: 800">Octubre 2026</div>
+      <button aria-label="Mes siguiente" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #E3E6EB; background: #FFFFFF; display: flex; align-items: center; justify-content: center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#15171C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div style="margin: 0 16px; padding: 12px 8px; border-radius: 18px; background: #FFFFFF; border: 1px solid #E3E6EB">
+    <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin-bottom: 6px">
+      <sc-for list="{{dows}}" as="w" hint-placeholder-count="7">
+        <div style="text-align: center; font-size: 11px; font-weight: 800; color: #5B6170">{{w}}</div>
+      </sc-for>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: 6px; column-gap: 2px">
+      <sc-for list="{{cells}}" as="c" hint-placeholder-count="35">
+        <div aria-label="{{c.label}}" style="height: 44px; position: relative; display: flex; align-items: center; justify-content: center">
+          <sc-if value="{{c.ring}}" hint-placeholder-val="{{ false }}">
+            <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" style="position: absolute">
+              <circle cx="20" cy="20" r="17" fill="{{c.fill}}" stroke="{{c.track}}" stroke-width="3"/>
+              <circle cx="20" cy="20" r="17" fill="none" stroke="{{c.stroke}}" stroke-width="3" stroke-linecap="round" stroke-dasharray="{{c.dash}}" transform="rotate(-90 20 20)"/>
+            </svg>
+          </sc-if>
+          <span style="position: relative; font-size: 14px; font-weight: {{c.weight}}; color: {{c.ink}}">{{c.n}}</span>
+          <sc-if value="{{c.sched}}" hint-placeholder-val="{{ false }}">
+            <span style="position: absolute; bottom: 1px; width: 5px; height: 5px; border-radius: 50%; background: #5B6170"></span>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 12px; font-size: 11px; font-weight: 700; color: #5B6170">
+      <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #15171C"></span>Cumplido</span>
+      <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 12px; height: 12px; border-radius: 50%; border: 2.5px solid #C9372C; box-sizing: border-box"></span>No cumplido</span>
+      <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 5px; height: 5px; border-radius: 50%; background: #5B6170"></span>Programadas</span>
+    </div>
+  </div>
+
+  <div style="margin: 14px 16px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+    <div style="padding: 12px; border-radius: 16px; background: #15171C; color: #FFFFFF; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 26px; font-weight: 800; line-height: 1.1">6</span>
+      <span style="font-size: 12px; font-weight: 600; color: #C9CDD5">racha actual</span>
+    </div>
+    <div style="padding: 12px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E3E6EB; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 26px; font-weight: 800; line-height: 1.1">14/17</span>
+      <span style="font-size: 12px; font-weight: 600; color: #5B6170">días cumplidos</span>
+    </div>
+    <div style="padding: 12px; border-radius: 16px; background: #FFFFFF; border: 1px solid #E3E6EB; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 26px; font-weight: 800; line-height: 1.1">12</span>
+      <span style="font-size: 12px; font-weight: 600; color: #5B6170">mejor racha</span>
+    </div>
+  </div>
+
+  <nav aria-label="Principal" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: #FFFFFF; border-top: 1px solid #E3E6EB; display: flex; justify-content: space-around; align-items: flex-start; padding-top: 10px; box-sizing: border-box">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 64px; min-height: 44px; text-decoration: none; color: #5B6170; font-size: 12px; font-weight: 600">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>Hoy
+    </a>
+    <a href="Pool.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 64px; min-height: 44px; text-decoration: none; color: #5B6170; font-size: 12px; font-weight: 600">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/></svg>Pool
+    </a>
+    <a href="Semana.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 64px; min-height: 44px; text-decoration: none; color: #15171C; font-size: 12px; font-weight: 800">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></svg>Calendario
+    </a>
+    <a href="Ajustes.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 64px; min-height: 44px; text-decoration: none; color: #5B6170; font-size: 12px; font-weight: 600">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Ajustes
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    // F = cumplido, N<pct> = no cumplido, - = sin plan
+    var past = { 1:'F',2:'F',3:'-',4:'-',5:'F',6:'F',7:'N50',8:'F',9:'F',10:'F',11:'N33',12:'F',13:'N67',14:'-',15:'F',16:'F',17:'F',18:'F',19:'F',20:'F' };
+    var scheduled = { 22: 1, 23: 1, 28: 1, 31: 1 };
+    var C = 2 * Math.PI * 17;
+    var cells = [];
+    for (var b = 0; b < 3; b++) cells.push({ n: '', ring: false, sched: false, ink: '#15171C', weight: 600, label: '' });
+    for (var d = 1; d <= 31; d++) {
+      var s = past[d], cell = { n: d, ring: false, sched: !!scheduled[d], ink: '#15171C', weight: 600, label: d + ' de octubre' };
+      if (s === 'F') {
+        Object.assign(cell, { ring: true, fill: '#15171C', track: '#15171C', stroke: '#15171C', dash: C + ' ' + C, ink: '#FFFFFF', weight: 800, label: d + ' de octubre: cumplido' });
+      } else if (s && s[0] === 'N') {
+        var pct = parseInt(s.slice(1), 10) / 100;
+        Object.assign(cell, { ring: true, fill: '#FFFFFF', track: '#F3D3D0', stroke: '#C9372C', dash: (C * pct).toFixed(1) + ' ' + C.toFixed(1), weight: 700, label: d + ' de octubre: no cumplido' });
+      } else if (s === '-') {
+        Object.assign(cell, { ink: '#8A909C', label: d + ' de octubre: sin plan' });
+      } else if (d === 21) {
+        Object.assign(cell, { ring: true, fill: '#FFFFFF', track: '#E3E6EB', stroke: '#15171C', dash: (C * 0.33).toFixed(1) + ' ' + C.toFixed(1), weight: 800, label: 'Hoy, en curso' });
+      }
+      cells.push(cell);
+    }
+    return { dows: ['L', 'M', 'X', 'J', 'V', 'S', 'D'], cells: cells };
+  }
+}
+</script>
+</body>
+</html>
