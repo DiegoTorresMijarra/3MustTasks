@@ -111,3 +111,8 @@ html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Se
 .tmt-check-row input { min-width: 24px; width: 24px; min-height: 24px; height: 24px; flex: none; }
 .tmt-level-off { opacity: 0.6; }
 .tmt-settings-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--mud-palette-primary); }
+.tmt-quota-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.tmt-quota { border: 1px solid var(--level-color, var(--mud-palette-lines-default)); border-radius: 999px; padding: 4px 12px; font-size: 0.875rem; }
+.tmt-quota.full { background: var(--level-color, transparent); color: #fff; }
+.tmt-plan-tabs { margin-bottom: 12px; }
+.tmt-fav-add { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 44px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; padding: 0; }

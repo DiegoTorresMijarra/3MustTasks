@@ -1,0 +1,79 @@
+@page "/planificar"
+@using ThreeMustTasks.Core.Services
+@implements IDisposable
+@inject IStringLocalizer<Strings> L
+@inject TodayService Today
+@inject PlanEvents Events
+
+<PageTitle>@L["App_Name"] · @L["Plan_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="mb-2 tmt-title">@L["Plan_Title"]</MudText>
+
+@if (_view is not null)
+{
+    <div class="tmt-quota-strip" role="status" aria-label="@L["Plan_Quotas"]" data-testid="plan-quotas">
+        @foreach (var g in _view.Groups)
+        {
+            <span class="tmt-quota @(g.IsFull ? "full" : "")" style="--level-color:@g.Level.Color" data-testid="quota-@g.Level.Name">
+                @g.Level.Name @g.Tasks.Count/@g.Slots
+            </span>
+        }
+    </div>
+}
+
+<div class="tmt-chips tmt-plan-tabs" role="tablist" aria-label="@L["Plan_Title"]">
+    <button type="button" role="tab" class="tmt-chip" aria-selected="@Sel("nueva")" aria-pressed="@Sel("nueva")" data-testid="tab-nueva"
+            @onclick='() => _tab = "nueva"'>@L["Plan_TabNew"]</button>
+    <button type="button" role="tab" class="tmt-chip" aria-selected="@Sel("favoritas")" aria-pressed="@Sel("favoritas")" data-testid="tab-favoritas"
+            @onclick='() => _tab = "favoritas"'>@L["Plan_TabFavorites"]</button>
+    <button type="button" role="tab" class="tmt-chip" aria-selected="@Sel("pool")" aria-pressed="@Sel("pool")" data-testid="tab-pool"
+            @onclick='() => _tab = "pool"'>@L["Plan_TabPool"]</button>
+</div>
+
+<div role="tabpanel" data-testid="plan-panel">
+    @switch (_tab)
+    {
+        case "favoritas":
+            <FavoritesPanel />
+            break;
+        case "pool":
+            <PoolPanel />
+            break;
+        default:
+            <NewTaskPanel InitialLevelId="LevelId" />
+            break;
+    }
+</div>
+
+@code {
+    private TodayView? _view;
+    private string _tab = "nueva";
+    private string? _appliedTab;
+
+    [SupplyParameterFromQuery(Name = "nivel")] public Guid? LevelId { get; set; }
+
+    /// <summary>Pestaña inicial: <c>nueva</c> (por defecto), <c>favoritas</c> o <c>pool</c>.</summary>
+    [SupplyParameterFromQuery(Name = "pestana")] public string? Tab { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Events.PlanChanged += OnPlanChanged;
+        _view = await Today.GetAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Tab == _appliedTab) return;
+        _appliedTab = Tab;
+        if (Tab is "nueva" or "favoritas" or "pool") _tab = Tab;
+    }
+
+    private void OnPlanChanged(DateOnly _) => InvokeAsync(async () =>
+    {
+        _view = await Today.GetAsync();
+        StateHasChanged();
+    });
+
+    private string Sel(string tab) => _tab == tab ? "true" : "false";
+
+    public void Dispose() => Events.PlanChanged -= OnPlanChanged;
+}

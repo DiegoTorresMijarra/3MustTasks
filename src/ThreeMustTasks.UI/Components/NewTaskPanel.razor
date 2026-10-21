@@ -1,0 +1,56 @@
+@using ThreeMustTasks.Core.Services
+@implements IDisposable
+@inject TodayService Today
+@inject FavoriteService Favorites
+@inject PlanEvents Events
+
+@* Alta de tarea nueva (formulario rápido). Lo usan la página /tarea/nueva y la pestaña Nueva de Planificar. *@
+@if (_view is not null)
+{
+    <TaskForm @key="_formKey" Groups="_view.Groups" InitialLevelId="InitialLevelId" FullLevelId="_fullLevelId"
+              OnSave="SaveAsync" OnSendToPool="SaveToPoolAsync" OnCancel="() => OnDone.InvokeAsync()" />
+}
+
+@code {
+    private TodayView? _view;
+    private Guid? _fullLevelId;
+    private Guid _formKey = Guid.NewGuid();
+
+    [Parameter] public Guid? InitialLevelId { get; set; }
+
+    /// <summary>Tarea guardada (o cancelado): el host decide si vuelve a Hoy o deja el formulario en blanco.</summary>
+    [Parameter] public EventCallback OnDone { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Events.PlanChanged += OnPlanChanged;
+        _view = await Today.GetAsync();
+    }
+
+    private void OnPlanChanged(DateOnly _) => InvokeAsync(async () =>
+    {
+        _view = await Today.GetAsync();
+        StateHasChanged();
+    });
+
+    private async Task SaveAsync(NewTaskRequest request)
+    {
+        var result = await Today.AddAsync(request);
+        if (result.Outcome == AddTaskOutcome.LevelFull) { _fullLevelId = request.LevelId; return; }
+        await FinishAsync(request, result);
+    }
+
+    private async Task SaveToPoolAsync(NewTaskRequest request) => await FinishAsync(request, await Today.AddAsync(request));
+
+    private async Task FinishAsync(NewTaskRequest request, AddTaskResult result)
+    {
+        if (!result.Succeeded) return;
+        if (request.MarkFavorite && result.Task is not null) await Favorites.MarkAsync(result.Task.Id);
+        _fullLevelId = null;
+        _formKey = Guid.NewGuid();
+        _view = await Today.GetAsync();
+        await OnDone.InvokeAsync();
+    }
+
+    public void Dispose() => Events.PlanChanged -= OnPlanChanged;
+}

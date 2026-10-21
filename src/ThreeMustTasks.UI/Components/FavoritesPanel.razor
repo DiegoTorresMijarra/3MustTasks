@@ -1,0 +1,76 @@
+@using ThreeMustTasks.Core.Services
+@implements IDisposable
+@inject IStringLocalizer<Strings> L
+@inject FavoriteService Favorites
+@inject PlanEvents Events
+
+@* Favoritas ordenadas por uso: un toque añade la tarea a Hoy si el cupo del nivel lo permite. *@
+@if (_items is not null)
+{
+    @if (_message is not null)
+    {
+        <div class="tmt-banner" role="status" data-testid="favorites-message">
+            <MudIcon Icon="@Icons.Material.Filled.WarningAmber" />
+            <span class="tmt-banner-text">@_message</span>
+        </div>
+    }
+
+    @if (_items.Count == 0)
+    {
+        <MudText Color="Color.Secondary" data-testid="favorites-empty">@L["Fav_Empty"]</MudText>
+    }
+    else
+    {
+        <ul class="tmt-task-list">
+            @foreach (var item in _items)
+            {
+                <li class="tmt-task tmt-pool-item" data-testid="favorite-item">
+                    <button type="button" class="tmt-fav-add" data-testid="favorite-add" @onclick="() => AddAsync(item)"
+                            aria-label="@L["Fav_Add", item.Favorite.Title]">
+                        <span class="tmt-pool-text">
+                            <span class="tmt-task-title" data-testid="favorite-title">@item.Favorite.Title</span>
+                            <span class="tmt-pool-meta">
+                                @if (item.Category is not null) { <span>@item.Category.Name · </span> }
+                                <span data-testid="favorite-uses">@UsesText(item.Favorite.UseCount)</span>
+                            </span>
+                        </span>
+                        <span class="tmt-level-tag" style="--level-color:@item.Level.Color" data-testid="favorite-level">@item.Level.Name</span>
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private IReadOnlyList<FavoriteItem>? _items;
+    private string? _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Events.PlanChanged += OnPlanChanged;
+        _items = await Favorites.ListAsync();
+    }
+
+    private void OnPlanChanged(DateOnly _) => InvokeAsync(async () =>
+    {
+        _items = await Favorites.ListAsync();
+        StateHasChanged();
+    });
+
+    private async Task AddAsync(FavoriteItem item)
+    {
+        var result = await Favorites.AddToTodayAsync(item.Favorite.Id);
+        _message = result.Outcome switch
+        {
+            AddFavoriteOutcome.LevelFull => L["Fav_Full", item.Favorite.Title, item.Level.Name].Value,
+            AddFavoriteOutcome.NotFound => L["Fav_Gone", item.Favorite.Title].Value,
+            _ => null,
+        };
+        _items = await Favorites.ListAsync();
+    }
+
+    private string UsesText(int n) => n == 1 ? L["Fav_UsedOne"] : L["Fav_UsedMany", n];
+
+    public void Dispose() => Events.PlanChanged -= OnPlanChanged;
+}

@@ -157,11 +157,10 @@
     private static string NewTaskUrl(Guid levelId) => $"tarea/nueva?nivel={levelId}";
 
     /// <summary>
-    /// Destino provisional del banner: la pantalla Planificar llega con el issue 14, así que por ahora abre
-    /// el formulario de nueva tarea en el primer nivel al que le falte algo. Cambiar solo aquí cuando exista.
+    /// Destino del banner: la pantalla Planificar, con el primer nivel al que le falte algo preseleccionado.
     /// </summary>
     internal static string PlanUrl(QuotaStatus quota) =>
-        quota.MissingToAdd.Count > 0 ? NewTaskUrl(quota.MissingToAdd[0].Level.Id) : "tarea/nueva";
+        quota.MissingToAdd.Count > 0 ? $"planificar?nivel={quota.MissingToAdd[0].Level.Id}" : "planificar";
 
     private string BannerText(QuotaStatus quota)
     {

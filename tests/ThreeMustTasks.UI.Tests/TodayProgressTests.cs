@@ -60,7 +60,7 @@ public sealed class TodayProgressTests : BunitContext
 
         var href = cut.Find("[data-testid=plan-banner-action]").GetAttribute("href");
 
-        Assert.Equal($"tarea/nueva?nivel={DefaultLevels.MustId}", href);
+        Assert.Equal($"planificar?nivel={DefaultLevels.MustId}", href);
         Assert.Equal("Te falta añadir 1 Must y 1 Recommended", cut.Find("[data-testid=plan-banner-text]").TextContent.Trim());
     }
 

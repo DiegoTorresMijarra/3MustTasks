@@ -18,7 +18,8 @@ public sealed record EditTaskRequest(
     string? Notes,
     TaskWhen When,
     DateOnly? Date = null,
-    bool? IsPinned = null);
+    bool? IsPinned = null,
+    bool MarkFavorite = false);
 
 public enum EditTaskOutcome
 {

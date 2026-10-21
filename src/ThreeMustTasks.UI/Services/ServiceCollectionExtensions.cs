@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<TaskEditService>();
         services.AddScoped<CategoryService>();
         services.AddScoped<PoolService>();
+        services.AddScoped<FavoriteService>();
         services.AddScoped<LevelService>();
         return services;
     }

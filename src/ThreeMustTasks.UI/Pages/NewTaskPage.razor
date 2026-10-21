@@ -1,38 +1,14 @@
 @page "/tarea/nueva"
-@using ThreeMustTasks.Core.Services
 @inject IStringLocalizer<Strings> L
-@inject TodayService Today
 @inject NavigationManager Navigation
 
 <PageTitle>@L["App_Name"] · @L["Form_NewTitle"]</PageTitle>
 <MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Form_NewTitle"]</MudText>
 
-@if (_view is not null)
-{
-    <TaskForm Groups="_view.Groups" InitialLevelId="LevelId" FullLevelId="_fullLevelId"
-              OnSave="SaveAsync" OnSendToPool="SaveToPoolAsync" OnCancel="GoBack" />
-}
+<NewTaskPanel InitialLevelId="LevelId" OnDone="GoBack" />
 
 @code {
-    private TodayView? _view;
-    private Guid? _fullLevelId;
-
     [SupplyParameterFromQuery(Name = "nivel")] public Guid? LevelId { get; set; }
-
-    protected override async Task OnInitializedAsync() => _view = await Today.GetAsync();
-
-    private async Task SaveAsync(NewTaskRequest request)
-    {
-        var result = await Today.AddAsync(request);
-        if (result.Outcome == AddTaskOutcome.LevelFull) _fullLevelId = request.LevelId;
-        else if (result.Succeeded) GoBack();
-    }
-
-    private async Task SaveToPoolAsync(NewTaskRequest request)
-    {
-        var result = await Today.AddAsync(request);
-        if (result.Succeeded) GoBack();
-    }
 
     private void GoBack() => Navigation.NavigateTo("");
 }

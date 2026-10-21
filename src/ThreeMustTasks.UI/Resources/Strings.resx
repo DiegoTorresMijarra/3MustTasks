@@ -184,4 +184,16 @@
   <data name="Icon_bolt" xml:space="preserve"><value>Rayo</value></data>
   <data name="Icon_heart" xml:space="preserve"><value>Corazón</value></data>
   <data name="Icon_bookmark" xml:space="preserve"><value>Marcador</value></data>
+  <data name="Plan_Title" xml:space="preserve"><value>Planificar</value></data>
+  <data name="Plan_Quotas" xml:space="preserve"><value>Cupos de hoy</value></data>
+  <data name="Plan_TabNew" xml:space="preserve"><value>Nueva</value></data>
+  <data name="Plan_TabFavorites" xml:space="preserve"><value>Favoritas</value></data>
+  <data name="Plan_TabPool" xml:space="preserve"><value>Pool</value></data>
+  <data name="Form_Favorite" xml:space="preserve"><value>Guardar como favorita para añadirla rápido</value></data>
+  <data name="Fav_Empty" xml:space="preserve"><value>Aún no tienes favoritas. Márcalas al crear o editar una tarea.</value></data>
+  <data name="Fav_Add" xml:space="preserve"><value>Añadir a Hoy: {0}</value></data>
+  <data name="Fav_UsedOne" xml:space="preserve"><value>1 uso</value></data>
+  <data name="Fav_UsedMany" xml:space="preserve"><value>{0} usos</value></data>
+  <data name="Fav_Full" xml:space="preserve"><value>No cabe "{0}": el nivel {1} está lleno hoy.</value></data>
+  <data name="Fav_Gone" xml:space="preserve"><value>La favorita "{0}" ya no existe.</value></data>
 </root>

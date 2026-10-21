@@ -4,6 +4,7 @@
 @inject TodayService Today
 @inject TaskEditService Editor
 @inject CategoryService Categories
+@inject FavoriteService Favorites
 @inject NavigationManager Navigation
 
 <PageTitle>@L["App_Name"] · @L["Form_EditTitle"]</PageTitle>
@@ -58,7 +59,10 @@ else if (_task is not null && _view is not null)
         var result = await Editor.UpdateAsync(request);
         switch (result.Outcome)
         {
-            case EditTaskOutcome.Saved: GoBack(); break;
+            case EditTaskOutcome.Saved:
+                if (request.MarkFavorite) await Favorites.MarkAsync(request.TaskId);
+                GoBack();
+                break;
             case EditTaskOutcome.LevelFull: _fullLevelId = request.LevelId; break;
             default: _error = ErrorText(result.Outcome); break;
         }
