@@ -1,6 +1,6 @@
 # 11 · Pool: ver pendientes y recuperarlas a hoy
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 08
 Cubre: 3MT-16, 17
 
@@ -21,3 +21,4 @@ El usuario abre el Pool, filtra y ordena las tareas no completadas, selecciona v
 - 08-cierre-de-dia
 
 ## Comments
+- pm-1: asignado a worker-6 (reutilizado, ~25 %; rama issue/11-pool-ver-recuperar). Camino crítico.

@@ -1,6 +1,6 @@
 # 05 · Persistencia real en la PWA
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 01, 03
 Cubre: 3MT-06
 
@@ -21,3 +21,4 @@ Implementar en la PWA la persistencia elegida en el spike, de modo que los datos
 - 03-esqueleto-web
 
 ## Comments
+- pm-1: asignado a worker-5 (reutilizado, ~15 %; rama issue/05-persistencia-web). Opción elegida: IndexedDB (ADR 0001).
