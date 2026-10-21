@@ -1,6 +1,6 @@
 # 03 · Esqueleto andante: solución, CI y PWA con navegación vacía
 
-Status: in-review
+Status: resolved
 Blocked by: ninguno
 Cubre: 3MT-01, 02, 03, parte de 04 y 07
 
@@ -30,3 +30,4 @@ None - can start immediately
   - "Arranca offline": verificado estáticamente (tests de manifest/service worker) y con `dotnet publish` (el `service-worker-assets.js` incluye index, manifest, iconos, MudBlazor y todo `_framework`). No se ha probado en un navegador real con la red cortada; conviene una comprobación manual o el E2E de Playwright (issue 28/30).
   - CI: `.github/workflows/ci.yml` (PRs y main): build con warnaserror, tests con cobertura (coverlet + ReportGenerator en el resumen del job y artefacto) y publicación de la PWA como artefacto. No se ha podido ejecutar en GitHub desde aquí.
   - Sin fuente Roboto externa (MudBlazor la pide a Google Fonts por defecto): se usa la tipografía del sistema para que funcione offline.
+- pm-1: revisado y aceptado. Build -warnaserror y 43 tests en verde; integrado en main (merge local). Pendiente fuera de alcance: prueba offline real en navegador y primera ejecución del CI en GitHub. Menor: quedan tests plantilla vacíos (UnitTest1) en UI.Tests/Infrastructure.Tests; limpiar en un issue posterior.
