@@ -79,5 +79,7 @@ public sealed record AppSettings
     public bool AutoAddScheduled { get; init; } = true;
     public ThemeMode Theme { get; init; } = ThemeMode.System;
     public DayOfWeek FirstDayOfWeek { get; init; } = DayOfWeek.Monday;
+    /// <summary>Si el export .ics añade además un VTODO por tarea (spec §10). Desactivado por defecto.</summary>
+    public bool ExportVTodo { get; init; }
     public int SchemaVersion { get; init; } = 1;
 }

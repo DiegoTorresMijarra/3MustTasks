@@ -289,6 +289,18 @@ public abstract class ConfigRepositoryContract : PersistenceContract
     }
 
     [Fact]
+    public async Task Delete_level_removes_it_and_reports_whether_it_existed()
+    {
+        var p = Create();
+        var level = new Level(Guid.NewGuid(), "Must", "#f00", "flag", 3, 3, null, 1, true);
+        await p.Config.UpsertLevelAsync(level);
+
+        Assert.True(await p.Config.DeleteLevelAsync(level.Id));
+        Assert.False(await p.Config.DeleteLevelAsync(level.Id));
+        Assert.Empty(await p.Config.ListLevelsAsync());
+    }
+
+    [Fact]
     public async Task Categories_roundtrip_and_delete()
     {
         var p = Create();
@@ -348,6 +360,7 @@ public abstract class SettingsStoreContract : PersistenceContract
             StrictMode = true,
             AutoAddScheduled = false,
             FirstDayOfWeek = DayOfWeek.Sunday,
+            ExportVTodo = true,
         };
 
         p.Settings.Save(settings);

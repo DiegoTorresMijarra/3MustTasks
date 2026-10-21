@@ -14,5 +14,6 @@ public class AppSettingsTests
         Assert.True(s.AutoAddScheduled);
         Assert.Equal(ThemeMode.System, s.Theme);
         Assert.Equal(DayOfWeek.Monday, s.FirstDayOfWeek);
+        Assert.False(s.ExportVTodo);
     }
 }

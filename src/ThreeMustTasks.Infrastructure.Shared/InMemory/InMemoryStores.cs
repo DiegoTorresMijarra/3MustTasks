@@ -167,6 +167,11 @@ public sealed class InMemoryConfigRepository(InMemoryDatabase db) : IConfigRepos
         return Task.CompletedTask;
     }
 
+    public Task<bool> DeleteLevelAsync(Guid id, CancellationToken ct = default)
+    {
+        lock (db.Gate) return Task.FromResult(db.Levels.Remove(id));
+    }
+
     public Task<IReadOnlyList<Category>> ListCategoriesAsync(CancellationToken ct = default)
     {
         lock (db.Gate)
