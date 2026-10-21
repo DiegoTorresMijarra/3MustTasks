@@ -3,3 +3,8 @@ dist/
 .env
 .DS_Store
 
+bin/
+obj/
+TestResults/
+coverage/
+.vs/

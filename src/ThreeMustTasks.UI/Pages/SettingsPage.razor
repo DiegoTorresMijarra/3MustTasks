@@ -1,0 +1,20 @@
+@page "/ajustes"
+@implements IDisposable
+@inject IStringLocalizer<Strings> L
+@inject ThemeService Theme
+
+<PageTitle>@L["App_Name"] · @L["Settings_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Settings_Title"]</MudText>
+
+<MudText Typo="Typo.h6" Class="mb-2">@L["Settings_Appearance"]</MudText>
+<MudRadioGroup T="ThemeMode" Value="Theme.Mode" ValueChanged="Theme.SetMode" aria-label="@L["Settings_Theme"]">
+    <MudRadio T="ThemeMode" Value="ThemeMode.System" Color="Color.Primary" data-testid="theme-system">@L["Theme_System"]</MudRadio>
+    <MudRadio T="ThemeMode" Value="ThemeMode.Light" Color="Color.Primary" data-testid="theme-light">@L["Theme_Light"]</MudRadio>
+    <MudRadio T="ThemeMode" Value="ThemeMode.Dark" Color="Color.Primary" data-testid="theme-dark">@L["Theme_Dark"]</MudRadio>
+</MudRadioGroup>
+
+@code {
+    protected override void OnInitialized() => Theme.OnChange += OnChanged;
+    private void OnChanged() => InvokeAsync(StateHasChanged);
+    public void Dispose() => Theme.OnChange -= OnChanged;
+}

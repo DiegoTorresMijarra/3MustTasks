@@ -1,0 +1,73 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject ThemeService Theme
+@inject IStringLocalizer<Strings> L
+
+<MudThemeProvider @ref="_themeProvider" IsDarkMode="_isDark" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="tmt-shell @(_isDark ? "theme-dark" : "theme-light")" data-testid="app-shell">
+    <main class="tmt-content">
+        @Body
+    </main>
+
+    <nav class="tmt-bottom-nav" aria-label="@L["Nav_Label"]">
+        <NavLink class="tmt-nav-item" href="" Match="NavLinkMatch.All">
+            <MudIcon Icon="@Icons.Material.Filled.Today" />
+            <span>@L["Nav_Today"]</span>
+        </NavLink>
+        <NavLink class="tmt-nav-item" href="pool">
+            <MudIcon Icon="@Icons.Material.Filled.Inbox" />
+            <span>@L["Nav_Pool"]</span>
+        </NavLink>
+        <NavLink class="tmt-nav-item" href="calendario">
+            <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" />
+            <span>@L["Nav_Calendar"]</span>
+        </NavLink>
+        <NavLink class="tmt-nav-item" href="ajustes">
+            <MudIcon Icon="@Icons.Material.Filled.Settings" />
+            <span>@L["Nav_Settings"]</span>
+        </NavLink>
+    </nav>
+</div>
+
+@code {
+    private MudThemeProvider? _themeProvider;
+    private bool _systemDark;
+    private bool _isDark;
+
+    protected override void OnInitialized()
+    {
+        Theme.OnChange += OnThemeChanged;
+        _isDark = Theme.IsDark(_systemDark);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _themeProvider is not null)
+        {
+            _systemDark = await _themeProvider.GetSystemDarkModeAsync();
+            await _themeProvider.WatchSystemDarkModeAsync(OnSystemDarkChanged);
+            Refresh();
+        }
+    }
+
+    private Task OnSystemDarkChanged(bool dark)
+    {
+        _systemDark = dark;
+        Refresh();
+        return Task.CompletedTask;
+    }
+
+    private void OnThemeChanged() => InvokeAsync(Refresh);
+
+    private void Refresh()
+    {
+        _isDark = Theme.IsDark(_systemDark);
+        StateHasChanged();
+    }
+
+    public void Dispose() => Theme.OnChange -= OnThemeChanged;
+}

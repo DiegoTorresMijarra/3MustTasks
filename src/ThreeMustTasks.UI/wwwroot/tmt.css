@@ -1,0 +1,46 @@
+html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+.tmt-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--mud-palette-background);
+    color: var(--mud-palette-text-primary);
+}
+
+.tmt-content {
+    flex: 1;
+    padding: 16px 16px 88px;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.tmt-bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-around;
+    background: var(--mud-palette-surface);
+    border-top: 1px solid var(--mud-palette-lines-default);
+    padding-bottom: env(safe-area-inset-bottom);
+    z-index: 10;
+}
+
+.tmt-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 0;
+    font-size: 0.75rem;
+    text-decoration: none;
+    color: var(--mud-palette-text-secondary);
+}
+
+.tmt-nav-item.active { color: var(--mud-palette-primary); font-weight: 600; }
