@@ -17,7 +17,16 @@ public sealed record TodayView(DateOnly Date, IReadOnlyList<LevelGroup> Groups, 
 
 public enum AddDestination { Today, Pool }
 
-public sealed record NewTaskRequest(string Title, Guid LevelId, AddDestination Destination = AddDestination.Today, bool IsPinned = false);
+/// <param name="MarkFavorite">Además de crear la tarea, guardarla como favorita (lo aplica quien llama, vía <see cref="FavoriteService"/>).</param>
+public sealed record NewTaskRequest(
+    string Title,
+    Guid LevelId,
+    AddDestination Destination = AddDestination.Today,
+    bool IsPinned = false,
+    Guid? CategoryId = null,
+    TimeOnly? DueTime = null,
+    TimeSpan? ReminderOffset = null,
+    bool MarkFavorite = false);
 
 public enum AddTaskOutcome { AddedToToday, AddedToPool, LevelFull, InvalidTitle, UnknownLevel }
 
@@ -187,6 +196,9 @@ public sealed class TodayService(
         {
             Title = title,
             LevelId = level.Id,
+            CategoryId = request.CategoryId,
+            DueTime = request.DueTime,
+            ReminderOffset = request.DueTime is null ? null : request.ReminderOffset,
             ScheduledDate = toToday ? today : null,
             IsPinned = request.IsPinned,
             CreatedAt = now,

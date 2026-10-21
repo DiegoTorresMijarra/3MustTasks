@@ -118,3 +118,8 @@ html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Se
 .tmt-day-nav a, .tmt-day-nav span.disabled { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; }
 .tmt-day-nav span.disabled { opacity: 0.4; }
 .tmt-outcome { font-size: 0.8rem; color: var(--mud-palette-text-secondary); }
+.tmt-quota-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.tmt-quota { border: 1px solid var(--level-color, var(--mud-palette-lines-default)); border-radius: 999px; padding: 4px 12px; font-size: 0.875rem; }
+.tmt-quota.full { background: var(--level-color, transparent); color: #fff; }
+.tmt-plan-tabs { margin-bottom: 12px; }
+.tmt-fav-add { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 44px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; padding: 0; }

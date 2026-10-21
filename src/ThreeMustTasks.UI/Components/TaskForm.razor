@@ -92,6 +92,11 @@
         <span>@L["Form_Pin"]</span>
     </label>
 
+    <label class="tmt-pin-option">
+        <input type="checkbox" @bind="_favorite" disabled="@(Existing?.Task.IsFavoriteSource == true)" data-testid="favorite-input" />
+        <span>@L["Form_Favorite"]</span>
+    </label>
+
     @if (FullLevelId is { } fullId && fullId == _levelId)
     {
         <MudAlert Severity="Severity.Warning" Class="mt-3" data-testid="full-alert">
@@ -136,6 +141,7 @@
     private int? _reminderMinutes;
     private string? _notes;
     private bool _pinned;
+    private bool _favorite;
     private bool _confirmDelete;
     private bool _loadedExisting;
 
@@ -189,20 +195,21 @@
         _reminderMinutes = t.ReminderOffset is { } r ? (int)r.TotalMinutes : null;
         _notes = t.Notes;
         _pinned = t.IsPinned;
+        _favorite = t.IsFavoriteSource;
     }
 
     private Task SubmitAsync()
     {
         if (string.IsNullOrWhiteSpace(_title)) return Task.CompletedTask;
-        return IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(_when)) : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId, IsPinned: _pinned));
+        return IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(_when)) : OnSave.InvokeAsync(new NewTaskRequest(_title, _levelId, IsPinned: _pinned, MarkFavorite: _favorite));
     }
 
     private Task SendToPoolAsync() =>
         IsEdit ? OnSaveEdit.InvokeAsync(BuildEdit(TaskWhen.Pool))
-               : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool, _pinned));
+               : OnSendToPool.InvokeAsync(new NewTaskRequest(_title ?? "", _levelId, AddDestination.Pool, _pinned, MarkFavorite: _favorite));
 
     private EditTaskRequest BuildEdit(TaskWhen when) => new(
         Existing!.Task.Id, _title ?? "", _levelId, _categoryId, _time,
         _time is not null && _reminderMinutes is { } m ? TimeSpan.FromMinutes(m) : null,
-        _notes, when, when == TaskWhen.OtherDay ? _date : null, _pinned);
+        _notes, when, when == TaskWhen.OtherDay ? _date : null, _pinned, _favorite && !Existing.Task.IsFavoriteSource);
 }
