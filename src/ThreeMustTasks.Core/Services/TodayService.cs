@@ -3,7 +3,8 @@ using ThreeMustTasks.Core.Ports;
 
 namespace ThreeMustTasks.Core.Services;
 
-public sealed record TodayTask(Guid AssignmentId, TaskItem Task, AssignmentOutcome Outcome);
+/// <param name="PinnedDay">Solo en tareas fijadas: "día N" (1 el primer día en el plan, +1 por cada día consecutivo previo que pasó sin completarse).</param>
+public sealed record TodayTask(Guid AssignmentId, TaskItem Task, AssignmentOutcome Outcome, int? PinnedDay = null);
 
 /// <param name="Slots">Cupo visible del nivel: su máximo, o su mínimo a añadir si no tiene máximo.</param>
 /// <param name="EmptySlots">Huecos que quedan por rellenar hasta <paramref name="Slots"/>.</param>
@@ -16,7 +17,7 @@ public sealed record TodayView(DateOnly Date, IReadOnlyList<LevelGroup> Groups, 
 
 public enum AddDestination { Today, Pool }
 
-public sealed record NewTaskRequest(string Title, Guid LevelId, AddDestination Destination = AddDestination.Today);
+public sealed record NewTaskRequest(string Title, Guid LevelId, AddDestination Destination = AddDestination.Today, bool IsPinned = false);
 
 public enum AddTaskOutcome { AddedToToday, AddedToPool, LevelFull, InvalidTitle, UnknownLevel }
 
@@ -95,6 +96,23 @@ public sealed class TodayService(
         }, ct);
 
     /// <summary>
+    /// Fija o desfija una tarea (PRD §6.2). Solo las activas: una completada ya no necesita fijarse.
+    /// Devuelve false si no existe o no está activa.
+    /// </summary>
+    public async Task<bool> SetPinnedAsync(Guid taskId, bool pinned, CancellationToken ct = default)
+    {
+        var task = await tasks.GetAsync(taskId, ct);
+        if (task is null || task.Status != TaskItemStatus.Active) return false;
+        if (task.IsPinned != pinned)
+        {
+            await tasks.UpsertAsync(task with { IsPinned = pinned, UpdatedAt = time.GetUtcNow() }, ct);
+            await unit.SaveChangesAsync(ct);
+        }
+        events.RaisePlanChanged(calendar.Today(settings.Load()));
+        return true;
+    }
+
+    /// <summary>
     /// Reordena el plan de hoy: las asignaciones indicadas pasan a ocupar, en ese orden, las posiciones que
     /// ocupaban; el resto de asignaciones de hoy conserva su sitio. Ids desconocidos o repetidos se ignoran.
     /// </summary>
@@ -170,6 +188,7 @@ public sealed class TodayService(
             Title = title,
             LevelId = level.Id,
             ScheduledDate = toToday ? today : null,
+            IsPinned = request.IsPinned,
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -196,8 +215,24 @@ public sealed class TodayService(
         {
             if (a.Outcome is not (AssignmentOutcome.Planned or AssignmentOutcome.Completed)) continue;
             var task = await tasks.GetAsync(a.TaskId, ct);
-            if (task is not null) result.Add(new TodayTask(a.Id, task, a.Outcome));
+            if (task is null) continue;
+            result.Add(new TodayTask(a.Id, task, a.Outcome, task.IsPinned ? await PinnedDayAsync(task.Id, today, ct) : null));
         }
         return result;
+    }
+
+    private const int MaxPinnedLookBackDays = 366;
+
+    /// <summary>Hoy cuenta 1; suma un día por cada día consecutivo anterior en que estuvo en el plan y no se completó.</summary>
+    private async Task<int> PinnedDayAsync(Guid taskId, DateOnly today, CancellationToken ct)
+    {
+        var n = 1;
+        for (var d = today.AddDays(-1); n <= MaxPinnedLookBackDays; d = d.AddDays(-1))
+        {
+            var missed = (await days.GetAssignmentsAsync(d, ct)).Any(a => a.TaskId == taskId && a.Outcome == AssignmentOutcome.NotCompleted);
+            if (!missed) break;
+            n++;
+        }
+        return n;
     }
 }

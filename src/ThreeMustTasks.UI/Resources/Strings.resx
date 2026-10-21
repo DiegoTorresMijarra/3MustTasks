@@ -65,6 +65,10 @@
   <data name="Today_Optional" xml:space="preserve"><value>Opcional</value></data>
   <data name="Today_Check" xml:space="preserve"><value>Tachar {0}</value></data>
   <data name="Today_Uncheck" xml:space="preserve"><value>Destachar {0}</value></data>
+  <data name="Today_PinnedDay" xml:space="preserve"><value>Fijada · día {0}</value></data>
+  <data name="Today_TaskMenu" xml:space="preserve"><value>Más acciones de {0}</value></data>
+  <data name="Today_Pin" xml:space="preserve"><value>Fijar</value></data>
+  <data name="Today_Unpin" xml:space="preserve"><value>Desfijar</value></data>
   <data name="Form_EditTitle" xml:space="preserve"><value>Editar tarea</value></data>
   <data name="Form_Category" xml:space="preserve"><value>Categoría</value></data>
   <data name="Form_NoCategory" xml:space="preserve"><value>Sin categoría</value></data>
@@ -81,6 +85,7 @@
   <data name="Form_ReminderAtTime" xml:space="preserve"><value>A la hora</value></data>
   <data name="Form_ReminderBefore" xml:space="preserve"><value>{0} min antes</value></data>
   <data name="Form_Notes" xml:space="preserve"><value>Notas</value></data>
+  <data name="Form_Pin" xml:space="preserve"><value>Fijar: si no la completo hoy, pasa al plan de mañana</value></data>
   <data name="Form_Delete" xml:space="preserve"><value>Eliminar</value></data>
   <data name="Form_DeleteConfirm" xml:space="preserve"><value>¿Eliminar esta tarea definitivamente? No se puede deshacer.</value></data>
   <data name="Form_DeleteYes" xml:space="preserve"><value>Sí, eliminar</value></data>
