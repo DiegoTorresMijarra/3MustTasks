@@ -1,6 +1,6 @@
 # 08 · Cierre de día idempotente: lo no hecho pasa al pool
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 07
 Cubre: 3MT-14, 48
 
@@ -21,3 +21,4 @@ Al abrir la app o volver a primer plano, los días pendientes se cierran: las ta
 - 07-tachar-progreso-banner
 
 ## Comments
+- pm-1: asignado a worker-6 (rama issue/08-cierre-de-dia). Camino crítico.

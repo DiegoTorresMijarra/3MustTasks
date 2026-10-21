@@ -1,6 +1,6 @@
 # 10 · Editar cualquier tarea y categorías con color
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 07
 Cubre: 3MT-12 (edición), 22
 
@@ -22,3 +22,4 @@ Tocar el texto de una tarea abre su edición completa desde Hoy (después tambi�
 - 07-tachar-progreso-banner
 
 ## Comments
+- pm-1: asignado a worker-4 (reutilizado, ~40 %; rama issue/10-editar-tareas-categorias). Comparte formulario con 06.

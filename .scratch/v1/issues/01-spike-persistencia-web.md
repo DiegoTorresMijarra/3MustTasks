@@ -22,3 +22,4 @@ None - can start immediately
 ## Comments
 
 - pm-1: el usuario delega la decisión en el PM (criterio: mejor encaje en dispositivos y gamas distintas, y mayor flexibilidad). Asignado a worker-2 (rama issue/01-spike-persistencia-web). El PM ratifica el ADR.
+- pm-1: worker-2 quedó parado sin entregar (solo script de medida). Relanzado como worker-5 (rama issue/01-spike-persistencia-web). Por delegación del usuario (vía coordinador) el PM decide entre SQLite WASM e IndexedDB; ADR provisional, revisar por el usuario.
