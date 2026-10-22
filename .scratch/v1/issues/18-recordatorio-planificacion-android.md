@@ -1,6 +1,6 @@
 # 18 · Recordatorio '¡Añade tus tareas!' en Android
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 02, 04, 14
 Cubre: 3MT-28, 29, 30, parte de 31
 
@@ -24,3 +24,4 @@ Cubre: 3MT-28, 29, 30, parte de 31
 - 14-planificar-favoritas
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-4. Rama issue/18-recordatorio-planificacion-android.

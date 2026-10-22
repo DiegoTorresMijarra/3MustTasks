@@ -1,6 +1,6 @@
 # 25 · Exportar a .ics
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 22
 Cubre: 3MT-38
 
@@ -20,3 +20,4 @@ El usuario elige un rango y exporta un `.ics` con un VEVENT por asignación (dí
 - 22-historial-dia-metricas
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-5. Rama issue/25-exportar-ics.
