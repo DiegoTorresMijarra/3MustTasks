@@ -1,6 +1,6 @@
 # 24 · Calendario: vista Mes
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 22
 Cubre: 3MT-37
 
@@ -20,3 +20,4 @@ Cuadrícula mensual con anillo de cumplimiento por día y racha visible; los dí
 - 22-historial-dia-metricas
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-7 (reutilizado, ~25% de contexto; mismo ámbito). Rama issue/24-vista-mes.
