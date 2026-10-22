@@ -1,6 +1,6 @@
 # 21 · Notificaciones en la PWA con la app abierta
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 05, 18
 Cubre: 3MT-32
 
@@ -20,3 +20,4 @@ Implementación web de `INotificationScheduler` con la Notification API y tempor
 - 18-recordatorio-planificacion-android
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-9 (reutilizado, ~30% de contexto; mismo ámbito). Rama issue/21-notificaciones-pwa.

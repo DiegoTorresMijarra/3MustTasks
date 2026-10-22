@@ -1,6 +1,6 @@
 # 20 · Recordatorio de una tarea a su hora
 
-Status: in-review
+Status: resolved
 Blocked by: 18
 Cubre: 3MT-28 (parte)
 
@@ -42,3 +42,4 @@ Las tareas con hora y recordatorio notifican a su hora o con la antelación eleg
 
 ### No verificado (sin emulador)
 - No se ha visto salir ninguna de las tres notificaciones en un dispositivo. Guion manual (tras el del 18, con permiso concedido): (1) tarea de hoy con hora a +3 min y "A la hora", cerrar la app deslizándola de recientes: debe sonar a su hora; repetir con "5 min antes" y hora a +8 min; (2) activar el resumen nocturno con hora a +2 min y dejar una tarea sin tachar: debe salir "Te queda 1 tarea"; tachándola antes de la hora no debe salir; (3) tarea para mañana con hora: al llegar mañana a la hora de planificación debe salir "Hoy toca una tarea" y, a su hora, el recordatorio; (4) desactivar "Avisar cuando llega una tarea programada": no sale; (5) al tocar cualquiera abre Hoy.
+- pm-3 (2026-10-22): resolved; integrado en main (build -warnaserror y tests 323/160/221 en verde x2). Nada verificado en dispositivo. DUDAS PARA EL USUARIO: (1) ReminderOffset==null = "sin recordatorio": las tareas con hora importadas de .ics no avisan; alternativa: null = usar el de Ajustes y opción explícita "ninguno". (2) El aviso de tarea a futuro suena a la hora de planificación (07:30), no a medianoche. (3) El resumen nocturno solo cuenta el plan de hoy, no el pool. Propuesta de spec §3/§4.5 (4 ajustes planos, IDs tipo+día+ranura) sin aplicar.
