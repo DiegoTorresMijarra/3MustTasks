@@ -71,6 +71,25 @@ public sealed class SqliteDayRepository(Factory factory) : IDayRepository
         return await ctx.DayAssignments.Where(a => a.Id == id).ExecuteDeleteAsync(ct) > 0;
     }
 
+    public async Task<IReadOnlyList<DayAssignment>> ListAssignmentsAsync(CancellationToken ct = default)
+    {
+        await using var ctx = await factory.CreateDbContextAsync(ct);
+        return await ctx.DayAssignments.AsNoTracking()
+            .OrderBy(a => a.LogicalDate).ThenBy(a => a.Order).ThenBy(a => a.Id).ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<DayLog>> ListLogsAsync(CancellationToken ct = default)
+    {
+        await using var ctx = await factory.CreateDbContextAsync(ct);
+        return await ctx.DayLogs.AsNoTracking().OrderBy(l => l.LogicalDate).ToListAsync(ct);
+    }
+
+    public async Task<bool> DeleteLogAsync(DateOnly logicalDate, CancellationToken ct = default)
+    {
+        await using var ctx = await factory.CreateDbContextAsync(ct);
+        return await ctx.DayLogs.Where(l => l.LogicalDate == logicalDate).ExecuteDeleteAsync(ct) > 0;
+    }
+
     public async Task<DayLog?> GetLogAsync(DateOnly logicalDate, CancellationToken ct = default)
     {
         await using var ctx = await factory.CreateDbContextAsync(ct);
@@ -156,6 +175,12 @@ public sealed class SqliteConfigRepository(Factory factory) : IConfigRepository
     {
         await using var ctx = await factory.CreateDbContextAsync(ct);
         await ctx.UpsertAsync(favorite, q => q.AnyAsync(f => f.Id == favorite.Id, ct), ct);
+    }
+
+    public async Task<bool> DeleteFavoriteAsync(Guid id, CancellationToken ct = default)
+    {
+        await using var ctx = await factory.CreateDbContextAsync(ct);
+        return await ctx.Favorites.Where(f => f.Id == id).ExecuteDeleteAsync(ct) > 0;
     }
 
     public async Task<IReadOnlyList<RecurrenceRule>> ListRecurrencesAsync(CancellationToken ct = default)

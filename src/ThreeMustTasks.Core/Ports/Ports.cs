@@ -17,6 +17,12 @@ public interface IDayRepository
     Task<IReadOnlyList<DayAssignment>> GetAssignmentsAsync(DateOnly logicalDate, CancellationToken ct = default);
     Task UpsertAssignmentAsync(DayAssignment assignment, CancellationToken ct = default);
     Task<bool> DeleteAssignmentAsync(Guid id, CancellationToken ct = default);
+    /// <summary>Todas las asignaciones de todos los días (backup), orden ascendente por fecha y orden.</summary>
+    Task<IReadOnlyList<DayAssignment>> ListAssignmentsAsync(CancellationToken ct = default);
+    /// <summary>Todos los logs de día, abiertos o cerrados (backup), orden ascendente por fecha.</summary>
+    Task<IReadOnlyList<DayLog>> ListLogsAsync(CancellationToken ct = default);
+    /// <summary>Devuelve false si no existía.</summary>
+    Task<bool> DeleteLogAsync(DateOnly logicalDate, CancellationToken ct = default);
     Task<DayLog?> GetLogAsync(DateOnly logicalDate, CancellationToken ct = default);
     Task UpsertLogAsync(DayLog log, CancellationToken ct = default);
     /// <summary>
@@ -40,6 +46,8 @@ public interface IConfigRepository
     Task<bool> DeleteCategoryAsync(Guid id, CancellationToken ct = default);
     Task<IReadOnlyList<FavoriteTemplate>> ListFavoritesAsync(CancellationToken ct = default);
     Task UpsertFavoriteAsync(FavoriteTemplate favorite, CancellationToken ct = default);
+    /// <summary>Devuelve false si no existía.</summary>
+    Task<bool> DeleteFavoriteAsync(Guid id, CancellationToken ct = default);
     Task<IReadOnlyList<RecurrenceRule>> ListRecurrencesAsync(CancellationToken ct = default);
     Task UpsertRecurrenceAsync(RecurrenceRule rule, CancellationToken ct = default);
     /// <summary>Devuelve false si no existía. No toca las tareas ya generadas: el llamador las desvincula.</summary>

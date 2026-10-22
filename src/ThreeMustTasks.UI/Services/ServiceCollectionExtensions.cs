@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<LevelService>();
         services.AddScoped<HistoryService>();
         services.AddScoped<RecurrenceService>();
+        services.AddScoped<BackupService>();
         return services;
     }
 }

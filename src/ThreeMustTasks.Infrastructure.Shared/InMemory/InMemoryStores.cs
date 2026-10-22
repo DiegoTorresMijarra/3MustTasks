@@ -112,6 +112,30 @@ public sealed class InMemoryDayRepository(InMemoryDatabase db) : IDayRepository
         lock (db.Gate) return Task.FromResult(db.Assignments.Remove(id));
     }
 
+    public Task<IReadOnlyList<DayAssignment>> ListAssignmentsAsync(CancellationToken ct = default)
+    {
+        lock (db.Gate)
+        {
+            IReadOnlyList<DayAssignment> r = db.Assignments.Values
+                .OrderBy(a => a.LogicalDate).ThenBy(a => a.Order).ThenBy(a => a.Id).ToList();
+            return Task.FromResult(r);
+        }
+    }
+
+    public Task<IReadOnlyList<DayLog>> ListLogsAsync(CancellationToken ct = default)
+    {
+        lock (db.Gate)
+        {
+            IReadOnlyList<DayLog> r = db.Logs.Values.OrderBy(l => l.LogicalDate).ToList();
+            return Task.FromResult(r);
+        }
+    }
+
+    public Task<bool> DeleteLogAsync(DateOnly logicalDate, CancellationToken ct = default)
+    {
+        lock (db.Gate) return Task.FromResult(db.Logs.Remove(logicalDate));
+    }
+
     public Task<DayLog?> GetLogAsync(DateOnly logicalDate, CancellationToken ct = default)
     {
         lock (db.Gate) return Task.FromResult(db.Logs.GetValueOrDefault(logicalDate));
@@ -205,6 +229,11 @@ public sealed class InMemoryConfigRepository(InMemoryDatabase db) : IConfigRepos
     {
         lock (db.Gate) db.Favorites[favorite.Id] = favorite;
         return Task.CompletedTask;
+    }
+
+    public Task<bool> DeleteFavoriteAsync(Guid id, CancellationToken ct = default)
+    {
+        lock (db.Gate) return Task.FromResult(db.Favorites.Remove(id));
     }
 
     public Task<IReadOnlyList<RecurrenceRule>> ListRecurrencesAsync(CancellationToken ct = default)
