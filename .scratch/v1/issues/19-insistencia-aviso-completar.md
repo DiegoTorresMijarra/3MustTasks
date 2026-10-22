@@ -1,6 +1,6 @@
 # 19 · Insistencia por plan incompleto y aviso de la tarde
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 18
 Cubre: 3MT-31, 33
 
@@ -20,3 +20,4 @@ Mientras falte el mínimo a añadir, recordatorios cada X min con tope diario; p
 - 18-recordatorio-planificacion-android
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-4 (reutilizado, ~30% de contexto; mismo ámbito). Rama issue/19-insistencia-aviso-completar.

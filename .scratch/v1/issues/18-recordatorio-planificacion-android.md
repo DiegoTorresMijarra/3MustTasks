@@ -1,6 +1,6 @@
 # 18 · Recordatorio '¡Añade tus tareas!' en Android
 
-Status: in-review
+Status: resolved
 Blocked by: 02, 04, 14
 Cubre: 3MT-28, 29, 30, parte de 31
 
@@ -45,3 +45,4 @@ Cubre: 3MT-28, 29, 30, parte de 31
 - Spec §2.2: `RequestPermissionAsync` es `Task<bool>` como en la spec; el puerto añade `GetStatusAsync` y `OpenSystemSettingsAsync`. Proponer reflejarlo en §2.2 y los ajustes `PlanReminderEnabled`/`PlanReminderDaysMask` en §3 (`PlanReminder {Enabled, Time, Days}`), además de los cambios de spec ya listados en el ADR 0002.
 - La PWA queda con el planificador no-op (issue 32). `INotificationPermission` se mantiene (la web lo implementa); en Android lo implementa el mismo objeto que el planificador.
 - Restaurar un backup por otra vía distinta de la pantalla de Ajustes no reprograma hasta el siguiente `PlanChanged` o cierre de día.
+- pm-3 (2026-10-22): resolved con reserva (integrado en main; build -warnaserror y tests en verde salvo el flaky conocido del 13, ya devuelto a worker-6). Criterio "Verificado en emulador con la app cerrada" SIN ejecutar; el guion está arriba. Si falla, pasar a AlarmManager nativo tras INotificationScheduler (ADR 0002). Pendiente del usuario: SCHEDULE_EXACT_ALARM sí/no. Propuestas de spec §2.2 y §3 sin aplicar.
