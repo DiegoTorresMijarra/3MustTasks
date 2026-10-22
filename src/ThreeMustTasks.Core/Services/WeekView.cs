@@ -27,3 +27,15 @@ public sealed record WeekView(DateOnly Start, IReadOnlyList<WeekDay> Days)
     public int TotalPlanned => Days.Where(d => d.Kind != WeekDayKind.Future).Sum(d => d.Planned);
     public int TotalCompleted => Days.Where(d => d.Kind != WeekDayKind.Future).Sum(d => d.Completed);
 }
+
+/// <summary>
+/// Vista Mes (3MT-37): cuadrícula de semanas completas (desde el primer día de la semana de Ajustes) que cubre el mes.
+/// Los días de <see cref="Weeks"/> fuera del mes se muestran vacíos en la UI (<see cref="Contains"/>).
+/// </summary>
+/// <param name="First">Primer día del mes.</param>
+/// <param name="FulfilledDays">Días cerrados del mes cumplidos.</param>
+/// <param name="DaysWithPlan">Días cerrados del mes con plan.</param>
+public sealed record MonthView(DateOnly First, IReadOnlyList<WeekView> Weeks, int FulfilledDays, int DaysWithPlan, int CurrentStreak, int BestStreak)
+{
+    public bool Contains(DateOnly d) => d.Year == First.Year && d.Month == First.Month;
+}

@@ -365,4 +365,13 @@
   <data name="Week_Summary" xml:space="preserve"><value>{0} de {1} hechas</value></data>
   <data name="Week_Scheduled" xml:space="preserve"><value>{0} prog.</value></data>
   <data name="Week_More" xml:space="preserve"><value>+{0} más</value></data>
+  <!-- Calendario: vista Mes (issue 24) -->
+  <data name="Calendar_TabMonth" xml:space="preserve"><value>Mes</value></data>
+  <data name="Month_Prev" xml:space="preserve"><value>Mes anterior</value></data>
+  <data name="Month_Next" xml:space="preserve"><value>Mes siguiente</value></data>
+  <data name="Month_LegendFulfilled" xml:space="preserve"><value>Cumplido</value></data>
+  <data name="Month_LegendMissed" xml:space="preserve"><value>No cumplido</value></data>
+  <data name="Month_LegendScheduled" xml:space="preserve"><value>Programadas</value></data>
+  <data name="Month_FulfilledDays" xml:space="preserve"><value>días cumplidos</value></data>
+  <data name="Month_TodayInProgress" xml:space="preserve"><value>Hoy, en curso</value></data>
 </root>

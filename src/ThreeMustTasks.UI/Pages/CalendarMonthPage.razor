@@ -1,0 +1,136 @@
+@page "/calendario/mes"
+@page "/calendario/mes/{DateText}"
+@using System.Globalization
+@using ThreeMustTasks.Core.Services
+@using ThreeMustTasks.UI.Components
+@using ThreeMustTasks.UI.Services
+@inject IStringLocalizer<Strings> L
+@inject HistoryService History
+
+<PageTitle>@L["App_Name"] · @L["Calendar_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="mb-2 tmt-title">@L["Calendar_Title"]</MudText>
+<CalendarTabs Active="month" />
+
+@if (_month is not null)
+{
+    <div class="tmt-day-nav">
+        <a href="calendario/mes/@Iso(_month.First.AddMonths(-1))" data-testid="month-prev" aria-label="@L["Month_Prev"]">
+            <MudIcon Icon="@Icons.Material.Filled.ChevronLeft" />
+        </a>
+        <MudText Typo="Typo.subtitle1" data-testid="month-title">@SpanishDate.FormatMonth(_month.First)</MudText>
+        <a href="calendario/mes/@Iso(_month.First.AddMonths(1))" data-testid="month-next" aria-label="@L["Month_Next"]">
+            <MudIcon Icon="@Icons.Material.Filled.ChevronRight" />
+        </a>
+    </div>
+
+    <div class="tmt-month" data-testid="month-grid">
+        @foreach (var dow in _month.Weeks[0].Days)
+        {
+            <span class="tmt-month-dow">@SpanishDate.DayInitial(dow.Date)</span>
+        }
+        @foreach (var week in _month.Weeks)
+        {
+            foreach (var d in week.Days)
+            {
+                if (!_month.Contains(d.Date))
+                {
+                    <span class="tmt-month-cell outside" aria-hidden="true"></span>
+                    continue;
+                }
+                var kind = d.Kind.ToString().ToLowerInvariant();
+                var state = State(d);
+                var cls = $"tmt-month-cell {kind} {state}";
+                if (d.Kind == WeekDayKind.Future)
+                {
+                    <div class="@cls" data-testid="month-day" data-date="@Iso(d.Date)" data-kind="@kind" data-state="@state" aria-label="@Label(d, state)">
+                        @Cell(d, state)
+                    </div>
+                }
+                else
+                {
+                    var href = d.Kind == WeekDayKind.Today ? "" : "calendario/" + Iso(d.Date);
+                    <a class="@cls" href="@href" data-testid="month-day" data-date="@Iso(d.Date)" data-kind="@kind" data-state="@state" aria-label="@Label(d, state)">
+                        @Cell(d, state)
+                    </a>
+                }
+            }
+        }
+    </div>
+
+    <div class="tmt-month-legend" aria-hidden="true">
+        <span>@L["Month_LegendFulfilled"]</span><span>@L["Month_LegendMissed"]</span><span>@L["Month_LegendScheduled"]</span>
+    </div>
+
+    <div class="tmt-history-metrics" data-testid="month-metrics">
+        <div class="tmt-metric">
+            <strong data-testid="month-streak">@_month.CurrentStreak</strong>
+            <span>@L["History_CurrentStreak"]</span>
+        </div>
+        <div class="tmt-metric">
+            <strong data-testid="month-fulfilled">@_month.FulfilledDays/@_month.DaysWithPlan</strong>
+            <span>@L["Month_FulfilledDays"]</span>
+        </div>
+        <div class="tmt-metric">
+            <strong data-testid="month-best">@_month.BestStreak</strong>
+            <span>@L["History_BestStreak"]</span>
+        </div>
+    </div>
+}
+
+@code {
+    private const double Circumference = 2 * Math.PI * 17;
+
+    [Parameter] public string? DateText { get; set; }
+
+    private MonthView? _month;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var anchor = DateOnly.TryParseExact(DateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : History.Today;
+        _month = await History.GetMonthAsync(anchor);
+    }
+
+    /// <summary>fulfilled, missed, noplan, current (hoy con plan), scheduled o empty.</summary>
+    private static string State(WeekDay d) => d.Kind switch
+    {
+        WeekDayKind.Future => d.Planned > 0 ? "scheduled" : "empty",
+        WeekDayKind.Today => d.Planned > 0 ? "current" : "empty",
+        _ => !d.HasPlan ? "noplan" : d.Fulfilled == true ? "fulfilled" : "missed",
+    };
+
+    private string Label(WeekDay d, string state)
+    {
+        var date = SpanishDate.FormatShortLong(d.Date);
+        return state switch
+        {
+            "fulfilled" => $"{date}: {L["History_Fulfilled"]}",
+            "missed" => $"{date}: {L["History_NotFulfilled"]}",
+            "noplan" => $"{date}: {L["History_NoPlan"]}",
+            "current" => $"{L["Month_TodayInProgress"]}",
+            "scheduled" => $"{date}: {L["Week_Scheduled", d.Planned]}",
+            _ => date,
+        };
+    }
+
+    private RenderFragment Cell(WeekDay d, string state) => __builder =>
+    {
+        // Anillo SVG (no solo color): completo si cumplido, arco proporcional a lo completado si no.
+        var fraction = state == "fulfilled" ? 1.0 : d.Planned > 0 ? (double)d.Completed / d.Planned : 0;
+        if (state is "fulfilled" or "missed" or "current")
+        {
+            var arc = (Circumference * fraction).ToString("0.0", CultureInfo.InvariantCulture);
+            var total = Circumference.ToString("0.0", CultureInfo.InvariantCulture);
+            <svg class="tmt-ring" viewBox="0 0 40 40" aria-hidden="true" data-testid="month-ring" data-fraction="@fraction.ToString("0.00", CultureInfo.InvariantCulture)">
+                <circle class="track" cx="20" cy="20" r="17" fill="none" stroke-width="3" />
+                <circle class="arc" cx="20" cy="20" r="17" fill="none" stroke-width="3" stroke-dasharray="@arc @total" transform="rotate(-90 20 20)" />
+            </svg>
+        }
+        <span class="tmt-month-num">@d.Date.Day</span>
+        if (state == "scheduled")
+        {
+            <span class="tmt-month-dot" data-testid="month-scheduled" aria-hidden="true"></span>
+        }
+    };
+
+    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+}
