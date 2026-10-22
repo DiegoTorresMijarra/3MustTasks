@@ -33,7 +33,7 @@ public sealed record EditTaskResult(EditTaskOutcome Outcome, TaskItem? Task)
 }
 
 /// <param name="InTodayPlan">La tarea tiene asignación planificada o completada en el día lógico actual.</param>
-/// <param name="ReadOnly">Historial pasado (completada en otro día) o archivada: se puede ver, no editar.</param>
+/// <param name="ReadOnly">Historial pasado (completada en otro día): se puede ver, no editar. Las archivadas sí se editan.</param>
 public sealed record EditableTask(TaskItem Task, bool InTodayPlan, TaskWhen When, bool ReadOnly);
 
 /// <summary>Edición completa de una tarea (spec PRD §6.2) revalidando el cupo, y eliminación definitiva.</summary>
@@ -57,7 +57,7 @@ public sealed class TaskEditService(
         if (task is null) return null;
         var day = calendar.Today(settings.Load());
         var inPlan = await FindTodayAssignmentAsync(task.Id, day, ct) is not null;
-        var readOnly = task.Status == TaskItemStatus.Archived || (task.Status == TaskItemStatus.Completed && !inPlan);
+        var readOnly = task.Status == TaskItemStatus.Completed && !inPlan;
         var when = inPlan ? TaskWhen.Today : task.ScheduledDate is { } d && d > day ? TaskWhen.OtherDay : TaskWhen.Pool;
         return new EditableTask(task, inPlan, when, readOnly);
     }
@@ -82,6 +82,9 @@ public sealed class TaskEditService(
             return Fail(EditTaskOutcome.ReminderWithoutTime);
 
         var day = calendar.Today(settings.Load());
+        // Una archivada se edita en su sitio: sigue archivada, sin plan y con su fecha; "cuándo" no aplica.
+        var archived = current.Task.Status == TaskItemStatus.Archived;
+        if (archived) r = r with { When = TaskWhen.Pool, Date = null };
         if (r.When == TaskWhen.OtherDay && (r.Date is null || r.Date <= day)) return Fail(EditTaskOutcome.InvalidDate);
         var completed = current.Task.Status == TaskItemStatus.Completed;
         if (completed && r.When != TaskWhen.Today) return Fail(EditTaskOutcome.CannotMoveCompleted);
@@ -90,7 +93,7 @@ public sealed class TaskEditService(
         var otherInLevel = (await today.LoadPlanAsync(day, ct)).Count(p => p.Task.LevelId == level.Id && p.Task.Id != r.TaskId);
         if (r.When == TaskWhen.Today && !QuotaPolicy.CanAdd(level, otherInLevel)) return Fail(EditTaskOutcome.LevelFull);
 
-        var scheduled = r.When switch { TaskWhen.Today => day, TaskWhen.OtherDay => r.Date, _ => (DateOnly?)null };
+        var scheduled = archived ? current.Task.ScheduledDate : r.When switch { TaskWhen.Today => day, TaskWhen.OtherDay => r.Date, _ => (DateOnly?)null };
         var updated = current.Task with
         {
             Title = title,

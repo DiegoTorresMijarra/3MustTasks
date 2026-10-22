@@ -1,0 +1,75 @@
+@page "/pool/archivadas"
+@using ThreeMustTasks.Core.Services
+@inject IStringLocalizer<Strings> L
+@inject PoolService Pool
+
+<PageTitle>@L["App_Name"] · @L["Archived_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="tmt-title">@L["Archived_Title"]</MudText>
+<a class="tmt-settings-link" href="pool" data-testid="back-to-pool">@L["Archived_BackToPool"]</a>
+
+@if (_items is not null)
+{
+    @if (_items.Count == 0)
+    {
+        <MudText Color="Color.Secondary" Class="mt-3" data-testid="archived-empty">@L["Archived_Empty"]</MudText>
+    }
+    else
+    {
+        <ul class="tmt-task-list mt-3">
+            @foreach (var item in _items)
+            {
+                var id = item.Task.Id;
+                <li class="tmt-task tmt-pool-item" data-testid="archived-item">
+                    <span class="tmt-pool-label">
+                        <span class="tmt-pool-text">
+                            <a class="tmt-task-title" href="tarea/@id" data-testid="archived-title">@item.Task.Title</a>
+                            @if (item.Category is not null)
+                            {
+                                <span class="tmt-pool-meta">@item.Category.Name</span>
+                            }
+                        </span>
+                        @if (item.Level is not null)
+                        {
+                            <span class="tmt-level-tag" style="--level-color:@item.Level.Color">@item.Level.Name</span>
+                        }
+                    </span>
+                    <span class="tmt-confirm-actions">
+                        <MudButton Variant="Variant.Text" OnClick="() => UnarchiveAsync(id)" data-testid="unarchive">@L["Archived_Unarchive"]</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => _confirming = id" data-testid="delete">@L["Form_Delete"]</MudButton>
+                    </span>
+                </li>
+                @if (_confirming == id)
+                {
+                    <MudAlert Severity="Severity.Error" Class="mb-2" data-testid="delete-confirm">
+                        @L["Form_DeleteConfirm"]
+                        <div class="mt-2 tmt-confirm-actions">
+                            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="() => DeleteAsync(id)" data-testid="delete-yes">@L["Form_DeleteYes"]</MudButton>
+                            <MudButton Variant="Variant.Text" OnClick="() => _confirming = null" data-testid="delete-no">@L["Form_Cancel"]</MudButton>
+                        </div>
+                    </MudAlert>
+                }
+            }
+        </ul>
+    }
+}
+
+@code {
+    private IReadOnlyList<ArchivedItem>? _items;
+    private Guid? _confirming;
+
+    protected override async Task OnInitializedAsync() => _items = await Pool.ListArchivedAsync();
+
+    private async Task UnarchiveAsync(Guid id)
+    {
+        await Pool.UnarchiveAsync([id]);
+        _confirming = null;
+        _items = await Pool.ListArchivedAsync();
+    }
+
+    private async Task DeleteAsync(Guid id)
+    {
+        await Pool.DeleteAsync([id]);
+        _confirming = null;
+        _items = await Pool.ListArchivedAsync();
+    }
+}

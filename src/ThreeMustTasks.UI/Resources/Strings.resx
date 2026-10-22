@@ -296,4 +296,9 @@
   <data name="Backup_Restored" xml:space="preserve"><value>Backup restaurado.</value></data>
   <data name="Backup_ReadError" xml:space="preserve"><value>No se pudo leer el archivo.</value></data>
   <data name="Backup_RestoreError" xml:space="preserve"><value>No se pudo restaurar el backup; los datos no se han modificado.</value></data>
+  <data name="Pool_ArchivedLink" xml:space="preserve"><value>Archivadas</value></data>
+  <data name="Archived_Title" xml:space="preserve"><value>Archivadas</value></data>
+  <data name="Archived_BackToPool" xml:space="preserve"><value>Volver al pool</value></data>
+  <data name="Archived_Empty" xml:space="preserve"><value>No hay tareas archivadas.</value></data>
+  <data name="Archived_Unarchive" xml:space="preserve"><value>Desarchivar</value></data>
 </root>

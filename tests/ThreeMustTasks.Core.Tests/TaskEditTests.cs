@@ -202,7 +202,7 @@ public class TaskEditTests
     }
 
     [Fact]
-    public async Task Past_history_and_archived_tasks_are_read_only()
+    public async Task Past_history_tasks_are_read_only_but_archived_ones_are_editable()
     {
         var repo = _sp.GetRequiredService<ITaskRepository>();
         var days = _sp.GetRequiredService<IDayRepository>();
@@ -214,7 +214,8 @@ public class TaskEditTests
 
         Assert.True((await _edit.GetAsync(past.Id))!.ReadOnly);
         Assert.Equal(EditTaskOutcome.ReadOnly, (await _edit.UpdateAsync(Req(past) with { Title = "x" })).Outcome);
-        Assert.Equal(EditTaskOutcome.ReadOnly, (await _edit.UpdateAsync(Req(archived))).Outcome);
+        Assert.False((await _edit.GetAsync(archived.Id))!.ReadOnly);
+        Assert.True((await _edit.UpdateAsync(Req(archived))).Succeeded);
         Assert.Equal("ayer", (await repo.GetAsync(past.Id))!.Title);
     }
 

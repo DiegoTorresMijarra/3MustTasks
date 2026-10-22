@@ -30,6 +30,10 @@ public class PoolServiceTests
             .AddSingleton<PlanEvents>()
             .AddSingleton<TodayService>()
             .AddSingleton<PoolService>()
+            .AddSingleton<StreakCalculator>()
+            .AddSingleton<HistoryService>()
+            .AddSingleton<DayRolloverService>()
+            .AddSingleton<TaskEditService>()
             .BuildServiceProvider();
         _tasks = _sp.GetRequiredService<ITaskRepository>();
         _days = _sp.GetRequiredService<IDayRepository>();
@@ -209,5 +213,127 @@ public class PoolServiceTests
         Assert.Equal(["b"], Titles(await _pool.GetAsync()));
         Assert.Empty(await _days.GetAssignmentsAsync(Today));
         Assert.Equal(b.Id, (await _pool.GetAsync()).Items.Single().Task.Id);
+    }
+
+    private async Task<TaskItem> Archived(string title, int daysOld = 0, DateOnly? scheduled = null)
+    {
+        var t = await InPool(title, DefaultLevels.MustId, daysOld, scheduled: scheduled);
+        // Archivar solo admite tareas del pool: una a futuro se archiva guardándola directamente.
+        if (scheduled > Today) await _tasks.UpsertAsync(t with { Status = TaskItemStatus.Archived, UpdatedAt = _time.GetUtcNow() });
+        else await _pool.ArchiveAsync([t.Id]);
+        return (await _tasks.GetAsync(t.Id))!;
+    }
+
+    [Fact]
+    public async Task Archived_list_shows_only_archived_tasks_most_recent_first()
+    {
+        var first = await Archived("primera");
+        _time.Advance(TimeSpan.FromMinutes(5));
+        var second = await Archived("segunda");
+        await InPool("activa", DefaultLevels.MustId);
+
+        var list = await _pool.ListArchivedAsync();
+
+        Assert.Equal([second.Id, first.Id], list.Select(i => i.Task.Id));
+        Assert.All(list, i => Assert.NotNull(i.Level));
+    }
+
+    [Fact]
+    public async Task Unarchive_returns_tasks_to_the_pool_or_to_future_keeping_their_date()
+    {
+        var a = await Archived("a");
+        var future = await Archived("futura", scheduled: Today.AddDays(3));
+        var active = await InPool("activa", DefaultLevels.MustId);
+
+        var restored = await _pool.UnarchiveAsync([a.Id, future.Id, active.Id, Guid.NewGuid(), a.Id]);
+
+        Assert.Equal([a.Id, future.Id], restored);
+        Assert.Empty(await _pool.ListArchivedAsync());
+        Assert.Equal(["a", "activa"], Titles(await _pool.GetAsync()).Order());
+        var back = (await _tasks.GetAsync(future.Id))!;
+        Assert.Equal(Today.AddDays(3), back.ScheduledDate);
+        Assert.Equal(TaskItemStatus.Active, back.Status);
+    }
+
+    [Fact]
+    public async Task Archived_tasks_are_never_completed_and_do_not_come_back_to_the_pool_on_their_own()
+    {
+        var a = await Archived("a", daysOld: 40);
+        _time.Advance(TimeSpan.FromDays(30));
+
+        await _sp.GetRequiredService<DayRolloverService>().RunAsync();
+
+        Assert.Equal(TaskItemStatus.Archived, (await _tasks.GetAsync(a.Id))!.Status);
+        Assert.Equal([a.Id], (await _pool.ListArchivedAsync()).Select(i => i.Task.Id));
+        Assert.Empty((await _pool.GetAsync()).Items);
+    }
+
+    [Fact]
+    public async Task Archiving_a_task_with_past_history_keeps_it_in_the_history_day()
+    {
+        var t = await InPool("ayer sin hacer", DefaultLevels.MustId);
+        var yesterday = Today.AddDays(-1);
+        await _days.UpsertAssignmentAsync(new DayAssignment(Guid.NewGuid(), t.Id, yesterday, AssignmentOutcome.NotCompleted, null, 0));
+        await _days.UpsertLogAsync(new DayLog(yesterday, null, null, false, _time.GetUtcNow()));
+
+        await _pool.ArchiveAsync([t.Id]);
+
+        var detail = await _sp.GetRequiredService<HistoryService>().GetDayAsync(yesterday);
+        var item = Assert.Single(detail.Items);
+        Assert.Equal(t.Id, item.Task.Id);
+        Assert.Equal(TaskItemStatus.Archived, item.Task.Status);
+        Assert.Equal(AssignmentOutcome.NotCompleted, item.Outcome);
+    }
+
+    [Fact]
+    public async Task Delete_removes_only_archived_tasks_and_all_their_assignments()
+    {
+        var a = await Archived("a");
+        var active = await InPool("activa", DefaultLevels.MustId);
+        var yesterday = Today.AddDays(-1);
+        await _days.UpsertAssignmentAsync(new DayAssignment(Guid.NewGuid(), a.Id, yesterday, AssignmentOutcome.NotCompleted, null, 0));
+        await _days.UpsertAssignmentAsync(new DayAssignment(Guid.NewGuid(), active.Id, yesterday, AssignmentOutcome.NotCompleted, null, 1));
+
+        var deleted = await _pool.DeleteAsync([a.Id, active.Id, Guid.NewGuid()]);
+
+        Assert.Equal([a.Id], deleted);
+        Assert.Null(await _tasks.GetAsync(a.Id));
+        Assert.NotNull(await _tasks.GetAsync(active.Id));
+        Assert.Equal([active.Id], (await _days.ListAssignmentsAsync()).Select(x => x.TaskId));
+        Assert.Empty(await _pool.ListArchivedAsync());
+    }
+
+    [Fact]
+    public async Task Delete_leaves_favorites_and_the_recurrence_rule_untouched()
+    {
+        var rule = Guid.NewGuid();
+        var t = new TaskItem { Title = "rec", LevelId = DefaultLevels.MustId, RecurrenceRuleId = rule, IsFavoriteSource = true, Status = TaskItemStatus.Archived };
+        await _tasks.UpsertAsync(t);
+        var fav = new FavoriteTemplate(Guid.NewGuid(), "rec", DefaultLevels.MustId, null, null, null, 2);
+        await _config.UpsertFavoriteAsync(fav);
+        var recurrence = new RecurrenceRule(rule, "rec", DefaultLevels.MustId, null, null, RecurrenceFrequency.Daily, 1, [], null, Today, null, Today);
+        await _config.UpsertRecurrenceAsync(recurrence);
+
+        await _pool.DeleteAsync([t.Id]);
+
+        Assert.Equal([fav], await _config.ListFavoritesAsync());
+        Assert.Equal(recurrence.Id, Assert.Single(await _config.ListRecurrencesAsync()).Id);
+    }
+
+    [Fact]
+    public async Task Archived_tasks_can_be_edited_and_stay_archived_with_their_date()
+    {
+        var future = await Archived("vieja", scheduled: Today.AddDays(5));
+        var edit = _sp.GetRequiredService<TaskEditService>();
+
+        Assert.False((await edit.GetAsync(future.Id))!.ReadOnly);
+        var result = await edit.UpdateAsync(new EditTaskRequest(future.Id, "nueva", future.LevelId, null, null, null, "n", TaskWhen.Today));
+
+        Assert.True(result.Succeeded);
+        var stored = (await _tasks.GetAsync(future.Id))!;
+        Assert.Equal("nueva", stored.Title);
+        Assert.Equal(TaskItemStatus.Archived, stored.Status);
+        Assert.Equal(Today.AddDays(5), stored.ScheduledDate);
+        Assert.Empty(await _days.GetAssignmentsAsync(Today));
     }
 }

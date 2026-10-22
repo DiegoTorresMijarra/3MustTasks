@@ -167,4 +167,84 @@ public sealed class PoolPageTests : BunitContext
         Assert.Empty(cut.FindAll("[data-testid=pool-actions]"));
         Assert.Contains("0 seleccionadas", cut.Find("[data-testid=pool-summary]").TextContent);
     }
+
+    private async Task<TaskItem> SeedArchived(string title)
+    {
+        var t = await Seed(title, DefaultLevels.MustId);
+        await Services.GetRequiredService<PoolService>().ArchiveAsync([t.Id]);
+        return t;
+    }
+
+    private IRenderedComponent<Routes> RenderArchived()
+    {
+        Services.GetRequiredService<NavigationManager>().NavigateTo("/pool/archivadas");
+        return Render<Routes>();
+    }
+
+    [Fact]
+    public async Task Pool_links_to_archived_and_archiving_makes_the_task_appear_there()
+    {
+        await Seed("a", DefaultLevels.MustId);
+        var cut = RenderPool();
+        cut.Find("[data-testid=pool-select]").Change(true);
+        cut.Find("[data-testid=archive]").Click();
+        Assert.Equal("pool/archivadas", cut.Find("[data-testid=archived-link]").GetAttribute("href"));
+
+        Services.GetRequiredService<NavigationManager>().NavigateTo("/pool/archivadas");
+
+        cut.WaitForAssertion(() => Assert.Equal(["a"], cut.FindAll("[data-testid=archived-title]").Select(e => e.TextContent.Trim())));
+    }
+
+    [Fact]
+    public async Task Archived_screen_shows_empty_state()
+    {
+        await Services.GetRequiredService<TodayService>().GetLevelsAsync();
+
+        var cut = RenderArchived();
+
+        Assert.Contains("No hay tareas archivadas", cut.Find("[data-testid=archived-empty]").TextContent);
+    }
+
+    [Fact]
+    public async Task Archived_item_links_to_its_edit_page()
+    {
+        var t = await SeedArchived("vieja");
+
+        var cut = RenderArchived();
+
+        Assert.Equal($"tarea/{t.Id}", cut.Find("[data-testid=archived-title]").GetAttribute("href"));
+        Services.GetRequiredService<NavigationManager>().NavigateTo($"/tarea/{t.Id}");
+        cut.WaitForAssertion(() => Assert.NotNull(cut.Find("[data-testid=task-form]")));
+    }
+
+    [Fact]
+    public async Task Unarchive_returns_the_task_to_the_pool()
+    {
+        var t = await SeedArchived("vieja");
+        var cut = RenderArchived();
+
+        cut.Find("[data-testid=unarchive]").Click();
+
+        Assert.Empty(cut.FindAll("[data-testid=archived-item]"));
+        Assert.Equal(TaskItemStatus.Active, (await Services.GetRequiredService<ITaskRepository>().GetAsync(t.Id))!.Status);
+    }
+
+    [Fact]
+    public async Task Delete_asks_for_confirmation_and_only_then_removes_the_task()
+    {
+        var t = await SeedArchived("vieja");
+        var cut = RenderArchived();
+
+        cut.Find("[data-testid=delete]").Click();
+        Assert.NotNull(cut.Find("[data-testid=delete-confirm]"));
+        cut.Find("[data-testid=delete-no]").Click();
+        Assert.NotNull(await Services.GetRequiredService<ITaskRepository>().GetAsync(t.Id));
+        Assert.Empty(cut.FindAll("[data-testid=delete-confirm]"));
+
+        cut.Find("[data-testid=delete]").Click();
+        cut.Find("[data-testid=delete-yes]").Click();
+
+        Assert.Empty(cut.FindAll("[data-testid=archived-item]"));
+        Assert.Null(await Services.GetRequiredService<ITaskRepository>().GetAsync(t.Id));
+    }
 }
