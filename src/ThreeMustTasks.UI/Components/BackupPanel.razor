@@ -1,0 +1,123 @@
+@using ThreeMustTasks.Core.Services
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@inject IStringLocalizer<Strings> L
+@inject BackupService Backup
+@inject IJSRuntime JS
+@inject TimeProvider Time
+
+@* Backup JSON: exportar todo y restaurar (reemplazar o fusionar) con confirmación previa. *@
+<MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Backup_Title"]</MudText>
+<p class="tmt-level-hint">@L["Backup_Hint"]</p>
+
+<div class="tmt-chip-row">
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ExportAsync" data-testid="backup-export">@L["Backup_Export"]</MudButton>
+    <label class="tmt-field">
+        <span>@L["Backup_Import"]</span>
+        <InputFile OnChange="OnFileAsync" accept=".json,application/json" data-testid="backup-file" />
+    </label>
+</div>
+
+@if (_error is not null)
+{
+    <p role="alert" class="tmt-error" data-testid="backup-error">@_error</p>
+}
+@if (_done is not null)
+{
+    <p role="status" data-testid="backup-done">@_done</p>
+}
+
+@if (_pending is not null && _summary is not null)
+{
+    <div class="tmt-form" role="group" aria-label="@L["Backup_ConfirmTitle"]" data-testid="backup-confirm">
+        <strong>@L["Backup_ConfirmTitle"]</strong>
+        <p data-testid="backup-summary">@string.Format(L["Backup_Summary"], _summary.Tasks, _summary.Assignments, _summary.DayLogs,
+            _summary.Levels, _summary.Categories, _summary.Favorites, _summary.Recurrences, _summary.ExportedAt.ToString("yyyy-MM-dd HH:mm"))</p>
+        <div role="radiogroup" aria-label="@L["Backup_Mode"]">
+            <label class="tmt-field tmt-check-row">
+                <input type="radio" name="backup-mode" checked="@(_mode == RestoreMode.Merge)" @onchange="() => _mode = RestoreMode.Merge" data-testid="backup-mode-merge" />
+                <span>@L["Backup_ModeMerge"]</span>
+            </label>
+            <label class="tmt-field tmt-check-row">
+                <input type="radio" name="backup-mode" checked="@(_mode == RestoreMode.Replace)" @onchange="() => _mode = RestoreMode.Replace" data-testid="backup-mode-replace" />
+                <span>@L["Backup_ModeReplace"]</span>
+            </label>
+        </div>
+        @if (_mode == RestoreMode.Replace)
+        {
+            <p role="alert" class="tmt-error" data-testid="backup-replace-warning">@L["Backup_ReplaceWarning"]</p>
+        }
+        <div class="tmt-chip-row">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ConfirmAsync" data-testid="backup-confirm-restore">@L["Backup_Restore"]</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="Cancel" data-testid="backup-cancel">@L["Backup_Cancel"]</MudButton>
+        </div>
+    </div>
+}
+
+@code {
+    /// <summary>Se invoca tras restaurar para que la página que lo aloja recargue lo que muestra.</summary>
+    [Parameter] public EventCallback OnRestored { get; set; }
+
+    private const long MaxBytes = 50L * 1024 * 1024;
+
+    private BackupDocument? _pending;
+    private BackupSummary? _summary;
+    private RestoreMode _mode = RestoreMode.Merge;
+    private string? _error;
+    private string? _done;
+
+    private async Task ExportAsync()
+    {
+        _error = _done = null;
+        var json = await Backup.ExportAsync();
+        var name = $"3musttasks-backup-{Time.GetLocalNow():yyyy-MM-dd}.json";
+        var module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ThreeMustTasks.UI/backup.js");
+        await module.InvokeVoidAsync("downloadText", name, json);
+        _done = L["Backup_Exported"];
+    }
+
+    private async Task OnFileAsync(InputFileChangeEventArgs e)
+    {
+        _error = _done = null;
+        _pending = null;
+        _summary = null;
+        try
+        {
+            using var reader = new StreamReader(e.File.OpenReadStream(MaxBytes));
+            _pending = BackupService.Parse(await reader.ReadToEndAsync());
+            _summary = BackupService.Summarize(_pending);
+        }
+        catch (BackupFormatException ex)
+        {
+            _error = ex.Message;
+        }
+        catch (IOException)
+        {
+            _error = L["Backup_ReadError"];
+        }
+    }
+
+    private async Task ConfirmAsync()
+    {
+        if (_pending is null) return;
+        try
+        {
+            await Backup.RestoreAsync(_pending, _mode);
+        }
+        catch (Exception)
+        {
+            _error = L["Backup_RestoreError"];
+            return;
+        }
+        _pending = null;
+        _summary = null;
+        _done = L["Backup_Restored"];
+        await OnRestored.InvokeAsync();
+    }
+
+    private void Cancel()
+    {
+        _pending = null;
+        _summary = null;
+    }
+}

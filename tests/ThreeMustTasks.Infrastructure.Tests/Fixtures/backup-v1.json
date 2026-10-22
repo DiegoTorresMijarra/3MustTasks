@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "exportedAt": "2026-10-21T20:30:00+00:00",
+  "settings": {
+    "dayStartsAt": "04:30:00",
+    "strictMode": true,
+    "autoAddScheduled": false,
+    "theme": "dark",
+    "firstDayOfWeek": "sunday",
+    "exportVTodo": true,
+    "schemaVersion": 1
+  },
+  "levels": [
+    { "id": "00000000-0000-0000-0000-0000000000a1", "name": "Must", "color": "#e53935", "icon": "flag", "minToAdd": 1, "minToComplete": 1, "max": 3, "order": 1, "enabled": true },
+    { "id": "00000000-0000-0000-0000-0000000000a2", "name": "Nice", "color": "#43a047", "icon": "star", "minToAdd": 0, "minToComplete": 0, "max": null, "order": 2, "enabled": false }
+  ],
+  "categories": [
+    { "id": "00000000-0000-0000-0000-0000000000b1", "name": "Trabajo", "color": "#1e88e5" }
+  ],
+  "favorites": [
+    { "id": "00000000-0000-0000-0000-0000000000c1", "title": "Leer 20 minutos", "levelId": "00000000-0000-0000-0000-0000000000a1", "categoryId": null, "dueTime": "21:00:00", "reminderOffset": "00:15:00", "useCount": 4 }
+  ],
+  "recurrences": [
+    { "id": "00000000-0000-0000-0000-0000000000d1", "templateTitle": "Revisar correo", "levelId": "00000000-0000-0000-0000-0000000000a1", "categoryId": "00000000-0000-0000-0000-0000000000b1", "dueTime": "09:00:00", "frequency": "weekly", "interval": 1, "daysOfWeek": ["monday", "wednesday"], "dayOfMonth": null, "startDate": "2026-10-01", "endDate": null, "lastGeneratedDate": "2026-10-20", "isPaused": true }
+  ],
+  "tasks": [
+    { "id": "00000000-0000-0000-0000-0000000000e1", "title": "Escribir informe", "notes": "borrador", "levelId": "00000000-0000-0000-0000-0000000000a1", "categoryId": "00000000-0000-0000-0000-0000000000b1", "dueTime": "17:30:00", "reminderOffset": null, "scheduledDate": "2026-10-22", "status": "completed", "isPinned": true, "timesPostponed": 2, "recurrenceRuleId": "00000000-0000-0000-0000-0000000000d1", "icsUid": "abc@3musttasks", "isFavoriteSource": false, "createdAt": "2026-10-20T08:00:00+00:00", "updatedAt": "2026-10-21T18:00:00+00:00" },
+    { "id": "00000000-0000-0000-0000-0000000000e2", "title": "Llamar al banco", "notes": null, "levelId": "00000000-0000-0000-0000-0000000000a2", "categoryId": null, "dueTime": null, "reminderOffset": null, "scheduledDate": null, "status": "active", "isPinned": false, "timesPostponed": 0, "recurrenceRuleId": null, "icsUid": null, "isFavoriteSource": true, "createdAt": "2026-10-21T09:00:00+00:00", "updatedAt": "2026-10-21T09:00:00+00:00" }
+  ],
+  "assignments": [
+    { "id": "00000000-0000-0000-0000-0000000000f1", "taskId": "00000000-0000-0000-0000-0000000000e1", "logicalDate": "2026-10-21", "outcome": "completed", "completedAt": "2026-10-21T18:00:00+00:00", "order": 0 },
+    { "id": "00000000-0000-0000-0000-0000000000f2", "taskId": "00000000-0000-0000-0000-0000000000e2", "logicalDate": "2026-10-21", "outcome": "notCompleted", "completedAt": null, "order": 1 }
+  ],
+  "dayLogs": [
+    { "logicalDate": "2026-10-21", "planMinimumMetAt": "2026-10-21T07:45:00+00:00", "completionMinimumMetAt": "2026-10-21T18:00:00+00:00", "fulfilled": true, "closedAt": "2026-10-22T04:30:00+00:00" }
+  ]
+}

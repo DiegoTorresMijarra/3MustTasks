@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<OnboardingService>();
         // Por defecto no-op; el host (PWA, o Android cuando exista la implementación del spike 02) la sustituye.
         services.TryAddSingleton<INotificationPermission, NoOpNotificationPermission>();
+        services.AddScoped<BackupService>();
         return services;
     }
 }

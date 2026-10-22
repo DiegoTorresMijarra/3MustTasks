@@ -280,4 +280,20 @@
   <data name="Onb_PermDenied" xml:space="preserve"><value>Has bloqueado las notificaciones. Puedes activarlas más tarde desde los ajustes del navegador o del sistema.</value></data>
   <data name="Onb_PermUnsupported" xml:space="preserve"><value>Este dispositivo no permite activar notificaciones todavía.</value></data>
   <data name="Onb_PwaWarning" xml:space="preserve"><value>En la versión web las notificaciones solo funcionan con la pestaña o la app abierta. Para recordatorios fiables con la app cerrada, usa la app de Android.</value></data>
+  <data name="Backup_Title" xml:space="preserve"><value>Copia de seguridad</value></data>
+  <data name="Backup_Hint" xml:space="preserve"><value>Exporta todo (ajustes, tareas, plan e historial) a un archivo JSON para moverlo entre el móvil y la web o restaurarlo después.</value></data>
+  <data name="Backup_Export" xml:space="preserve"><value>Exportar backup</value></data>
+  <data name="Backup_Import" xml:space="preserve"><value>Restaurar desde archivo</value></data>
+  <data name="Backup_Exported" xml:space="preserve"><value>Backup exportado.</value></data>
+  <data name="Backup_ConfirmTitle" xml:space="preserve"><value>¿Restaurar este backup?</value></data>
+  <data name="Backup_Summary" xml:space="preserve"><value>Contiene {0} tareas, {1} asignaciones, {2} días de historial, {3} niveles, {4} categorías, {5} favoritas y {6} recurrentes (exportado el {7}).</value></data>
+  <data name="Backup_Mode" xml:space="preserve"><value>Modo de restauración</value></data>
+  <data name="Backup_ModeMerge" xml:space="preserve"><value>Fusionar: añade o actualiza por Id y conserva el resto (mantiene tus ajustes)</value></data>
+  <data name="Backup_ModeReplace" xml:space="preserve"><value>Reemplazar: borra todo lo actual y deja solo el backup (incluidos los ajustes)</value></data>
+  <data name="Backup_ReplaceWarning" xml:space="preserve"><value>Se borrarán todos los datos actuales.</value></data>
+  <data name="Backup_Restore" xml:space="preserve"><value>Restaurar</value></data>
+  <data name="Backup_Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Backup_Restored" xml:space="preserve"><value>Backup restaurado.</value></data>
+  <data name="Backup_ReadError" xml:space="preserve"><value>No se pudo leer el archivo.</value></data>
+  <data name="Backup_RestoreError" xml:space="preserve"><value>No se pudo restaurar el backup; los datos no se han modificado.</value></data>
 </root>

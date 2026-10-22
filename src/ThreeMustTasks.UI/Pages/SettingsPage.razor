@@ -51,7 +51,15 @@
 <a class="tmt-settings-link" href="ajustes/recurrentes" data-testid="recurrences-link">@L["Rec_Title"]</a><br />
 <a class="tmt-settings-link" href="onboarding" data-testid="onboarding-link">@L["Settings_Onboarding"]</a>
 
+<BackupPanel OnRestored="ReloadSettings" />
+
 @code {
+    private void ReloadSettings()
+    {
+        _s = Store.Load();
+        _dayStart = _s.DayStartsAt.ToString("HH:mm");
+    }
+
     private static readonly DayOfWeek[] _weekDays =
         [DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday];
 

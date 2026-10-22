@@ -148,6 +148,34 @@ public abstract class DayRepositoryContract : PersistenceContract
     }
 
     [Fact]
+    public async Task List_all_assignments_and_logs_spans_every_day_in_order()
+    {
+        var p = Create();
+        var late = Assignment(Day.AddDays(1), 0);
+        var b = Assignment(Day, 1);
+        var a = Assignment(Day, 0);
+        foreach (var x in new[] { late, b, a }) await p.Days.UpsertAssignmentAsync(x);
+        var open = new DayLog(Day.AddDays(1), null, null, null, null);
+        var closed = new DayLog(Day, T0, T0, true, T0);
+        await p.Days.UpsertLogAsync(open);
+        await p.Days.UpsertLogAsync(closed);
+
+        Assert.Equal([a, b, late], await p.Days.ListAssignmentsAsync());
+        Assert.Equal([closed, open], await p.Days.ListLogsAsync());
+    }
+
+    [Fact]
+    public async Task Delete_log_reports_whether_it_existed()
+    {
+        var p = Create();
+        await p.Days.UpsertLogAsync(new DayLog(Day, null, null, null, null));
+
+        Assert.True(await p.Days.DeleteLogAsync(Day));
+        Assert.False(await p.Days.DeleteLogAsync(Day));
+        Assert.Null(await p.Days.GetLogAsync(Day));
+    }
+
+    [Fact]
     public async Task Delete_assignment_reports_whether_it_existed()
     {
         var p = Create();
@@ -286,6 +314,18 @@ public abstract class ConfigRepositoryContract : PersistenceContract
         await p.Config.UpsertLevelAsync(renamed);
 
         Assert.Equal([renamed], await p.Config.ListLevelsAsync());
+    }
+
+    [Fact]
+    public async Task Delete_favorite_removes_it_and_reports_whether_it_existed()
+    {
+        var p = Create();
+        var fav = new FavoriteTemplate(Guid.NewGuid(), "Leer", Guid.NewGuid(), null, null, null, 2);
+        await p.Config.UpsertFavoriteAsync(fav);
+
+        Assert.True(await p.Config.DeleteFavoriteAsync(fav.Id));
+        Assert.False(await p.Config.DeleteFavoriteAsync(fav.Id));
+        Assert.Empty(await p.Config.ListFavoritesAsync());
     }
 
     [Fact]

@@ -20,6 +20,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Fixtures\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\ThreeMustTasks.Core\ThreeMustTasks.Core.csproj" />
     <ProjectReference Include="..\..\src\ThreeMustTasks.Infrastructure.Browser\ThreeMustTasks.Infrastructure.Browser.csproj" />
     <ProjectReference Include="..\..\src\ThreeMustTasks.Infrastructure.Shared\ThreeMustTasks.Infrastructure.Shared.csproj" />

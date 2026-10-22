@@ -45,6 +45,16 @@ public sealed class BrowserDayRepository(BrowserDatabase db) : IDayRepository
     public Task<bool> DeleteAssignmentAsync(Guid id, CancellationToken ct = default)
         => db.DeleteAsync(Tables.Assignments, Tables.Key(id), ct);
 
+    public async Task<IReadOnlyList<DayAssignment>> ListAssignmentsAsync(CancellationToken ct = default)
+        => (await db.ListAsync<DayAssignment>(Tables.Assignments, null, ct))
+            .OrderBy(a => a.LogicalDate).ThenBy(a => a.Order).ThenBy(a => a.Id).ToList();
+
+    public async Task<IReadOnlyList<DayLog>> ListLogsAsync(CancellationToken ct = default)
+        => (await db.ListAsync<DayLog>(Tables.Logs, null, ct)).OrderBy(l => l.LogicalDate).ToList();
+
+    public Task<bool> DeleteLogAsync(DateOnly logicalDate, CancellationToken ct = default)
+        => db.DeleteAsync(Tables.Logs, Tables.Key(logicalDate), ct);
+
     public Task<DayLog?> GetLogAsync(DateOnly logicalDate, CancellationToken ct = default)
         => db.GetAsync<DayLog>(Tables.Logs, Tables.Key(logicalDate), ct);
 
@@ -95,6 +105,9 @@ public sealed class BrowserConfigRepository(BrowserDatabase db) : IConfigReposit
 
     public Task UpsertFavoriteAsync(FavoriteTemplate favorite, CancellationToken ct = default)
         => db.PutAsync(Tables.Favorites, Tables.Key(favorite.Id), favorite, null, ct);
+
+    public Task<bool> DeleteFavoriteAsync(Guid id, CancellationToken ct = default)
+        => db.DeleteAsync(Tables.Favorites, Tables.Key(id), ct);
 
     public async Task<IReadOnlyList<RecurrenceRule>> ListRecurrencesAsync(CancellationToken ct = default)
         => (await db.ListAsync<RecurrenceRule>(Tables.Recurrences, null, ct)).OrderBy(x => x.StartDate).ThenBy(x => x.Id).ToList();
