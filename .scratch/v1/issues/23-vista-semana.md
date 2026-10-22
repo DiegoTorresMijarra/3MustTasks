@@ -1,6 +1,6 @@
 # 23 · Calendario: vista Semana
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 22
 Cubre: 3MT-36
 
@@ -19,3 +19,4 @@ Siete columnas (filas en móvil estrecho) con las tareas de cada día y su estad
 - 22-historial-dia-metricas
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-7. Rama issue/23-vista-semana.
