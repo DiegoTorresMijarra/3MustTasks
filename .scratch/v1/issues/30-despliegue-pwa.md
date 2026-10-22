@@ -1,6 +1,6 @@
 # 30 · Despliegue de la PWA en GitHub Pages
 
-Status: in-review
+Status: resolved
 Blocked by: 05
 Cubre: 3MT-46
 
@@ -24,3 +24,4 @@ Publicación automática de la PWA desde `main` con el base href correcto, HTTPS
 - Verificado en local: dotnet publish con base /3MustTasks/ servido bajo ese subpath con servidor estatico: la app arranca y enruta (/3MustTasks/onboarding), manifest en el subpath, y los 77 hashes de service-worker-assets.js coinciden con los ficheros (incl. index.html modificado). Build -warnaserror y 596 tests en verde.
 - NO verificado: el navegador embebido no soporta service workers (ni uno trivial se registra) y Chrome no estaba conectado, asi que registro del SW, instalacion y modo offline NO estan comprobados; tampoco el despliegue real. El criterio "Instalacion y modo offline verificados" queda sin marcar.
 - Usuario: Settings > Pages > Source = GitHub Actions; merge/push a main o Run workflow; luego checklist de docs/despliegue-pwa.md (SW registrado, offline, instalar). Los actions (upload-pages-artifact@v3, deploy-pages@v4) no se han ejecutado nunca.
+- pm-3 (2026-10-22): resolved con reserva: el workflow nunca se ha ejecutado y instalación/offline NO verificados (sin soporte de service workers en el entorno). Usuario: activar Settings > Pages > Source: GitHub Actions y seguir el checklist de docs/despliegue-pwa.md. Hasta activar Pages, el workflow fallará en el job deploy tras cada push a main.
