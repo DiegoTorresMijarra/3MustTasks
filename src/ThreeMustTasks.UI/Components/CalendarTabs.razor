@@ -4,10 +4,11 @@
 <nav class="tmt-chips" aria-label="@L["Calendar_Title"]" data-testid="calendar-tabs">
     <a class="tmt-chip" href="calendario" aria-current="@Current("day")" data-testid="tab-day">@L["Calendar_TabDay"]</a>
     <a class="tmt-chip" href="calendario/semana" aria-current="@Current("week")" data-testid="tab-week">@L["Calendar_TabWeek"]</a>
+    <a class="tmt-chip" href="calendario/mes" aria-current="@Current("month")" data-testid="tab-month">@L["Calendar_TabMonth"]</a>
 </nav>
 
 @code {
-    /// <summary>"day" o "week" (el issue 24 añade "month").</summary>
+    /// <summary>"day", "week" o "month".</summary>
     [Parameter, EditorRequired] public string Active { get; set; } = "day";
 
     private string Current(string tab) => tab == Active ? "page" : "false";

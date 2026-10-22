@@ -111,6 +111,19 @@ public sealed class HistoryService(
         return new WeekView(start, result);
     }
 
+    /// <summary>Vista Mes (3MT-37) del mes que contiene <paramref name="anyDateInMonth"/>, con rachas.</summary>
+    public async Task<MonthView> GetMonthAsync(DateOnly anyDateInMonth, CancellationToken ct = default)
+    {
+        var first = new DateOnly(anyDateInMonth.Year, anyDateInMonth.Month, 1);
+        var last = first.AddMonths(1).AddDays(-1);
+        var weeks = new List<WeekView>();
+        for (var start = WeekStart(first); start <= last; start = start.AddDays(7))
+            weeks.Add(await GetWeekAsync(start, ct));
+        var closedInMonth = (await days.ListClosedLogsAsync(first, last, ct)).ToList();
+        var metrics = await GetMetricsAsync(first, last, ct);
+        return new MonthView(first, weeks, closedInMonth.Count(l => l.Fulfilled == true), closedInMonth.Count, metrics.CurrentStreak, metrics.BestStreak);
+    }
+
     /// <summary>Cumplimiento del rango (% de días con plan cumplidos), racha actual y mejor racha.</summary>
     public async Task<HistoryMetrics> GetMetricsAsync(DateOnly from, DateOnly to, CancellationToken ct = default)
     {

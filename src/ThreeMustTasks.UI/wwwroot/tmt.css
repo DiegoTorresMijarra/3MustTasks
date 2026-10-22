@@ -181,3 +181,20 @@ a.tmt-chip { display: inline-flex; align-items: center; text-decoration: none; }
   .tmt-week-head { flex-direction: row; gap: 8px; flex: none; min-width: 120px; }
   .tmt-week-tasks { flex: 1; min-width: 0; }
 }
+
+/* Calendario: vista Mes (mock design/mocks/Mes.dc.html) */
+.tmt-month { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin-bottom: 12px; text-align: center; }
+.tmt-month-dow { font-size: 0.75rem; color: var(--mud-palette-text-secondary); }
+.tmt-month-cell { position: relative; display: flex; align-items: center; justify-content: center; aspect-ratio: 1; min-height: 44px; color: inherit; text-decoration: none; }
+.tmt-month-cell .tmt-ring { position: absolute; inset: 2px; width: calc(100% - 4px); height: calc(100% - 4px); }
+.tmt-month-cell .track { stroke: var(--mud-palette-lines-default); }
+.tmt-month-cell .arc { stroke: var(--mud-palette-text-primary); }
+.tmt-month-cell.missed .arc { stroke: #C9372C; }
+.tmt-month-cell.missed .track { stroke: #F3D3D0; }
+.tmt-month-num { position: relative; font-weight: 600; font-size: 0.85rem; }
+.tmt-month-cell.fulfilled .tmt-month-num { font-weight: 800; }
+.tmt-month-cell.noplan .tmt-month-num { color: var(--mud-palette-text-secondary); font-weight: 400; }
+.tmt-month-dot { position: absolute; bottom: 4px; width: 5px; height: 5px; border-radius: 50%; background: var(--mud-palette-text-primary); }
+.tmt-month-cell.future { border-radius: 50%; border: 1.5px dashed var(--mud-palette-lines-default); }
+.tmt-month-cell.future.empty { border-color: transparent; }
+.tmt-month-legend { display: flex; justify-content: center; gap: 16px; font-size: 0.75rem; color: var(--mud-palette-text-secondary); margin-bottom: 12px; }

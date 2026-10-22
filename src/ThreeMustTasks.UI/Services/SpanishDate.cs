@@ -16,5 +16,16 @@ public static class SpanishDate
     /// <summary>"LUN", "MIÉ"…</summary>
     public static string DayAbbreviation(DateOnly date) => DayAbbreviations[(int)date.DayOfWeek];
 
+    private static readonly string[] DayInitials = ["D", "L", "M", "X", "J", "V", "S"];
+
+    /// <summary>"Octubre 2026".</summary>
+    public static string FormatMonth(DateOnly date) => $"{char.ToUpperInvariant(Months[date.Month - 1][0])}{Months[date.Month - 1][1..]} {date.Year}";
+
+    /// <summary>"L", "M", "X"…</summary>
+    public static string DayInitial(DateOnly date) => DayInitials[(int)date.DayOfWeek];
+
+    /// <summary>"7 de octubre".</summary>
+    public static string FormatShortLong(DateOnly date) => $"{date.Day} de {Months[date.Month - 1]}";
+
     public static string Format(DateOnly date) => $"{Days[(int)date.DayOfWeek]}, {date.Day} de {Months[date.Month - 1]}";
 }
