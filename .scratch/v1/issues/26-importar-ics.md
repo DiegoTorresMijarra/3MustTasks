@@ -1,6 +1,6 @@
 # 26 · Importar desde .ics
 
-Status: in-review
+Status: resolved
 Blocked by: 25, 11
 Cubre: 3MT-39
 
@@ -30,3 +30,4 @@ El usuario elige un `.ics`, previsualiza los eventos, asigna nivel por defecto e
   - Se ignoran: VTODO, eventos CANCELLED, modificaciones de instancia (RECURRENCE-ID), EXDATE/RDATE; un evento de varios días entra en su primer día.
   - Decisiones/limitaciones a revisar por el PM: (1) la importación no es una única transacción (reutiliza `TodayService.AddAsync`, que guarda por tarea); un fallo a medias deja lo ya importado, que al reimportar se deduplica. (2) El nivel por defecto es uno solo para todo el fichero (más el sugerido por CATEGORIES), no hay selector por evento. (3) `BackupPanelTests` se ajustó para localizar su `InputFile` por `data-testid` (ahora hay dos en Ajustes).
   - NO VERIFICADO: el fixture `google-calendar.ics` está escrito a mano imitando el formato de Google Calendar (PRODID, VTIMEZONE Europe/Madrid, TZID, UTC, RRULE, RECURRENCE-ID, CANCELLED, líneas plegadas); no es una descarga real. No se ha probado con Apple/Outlook ni con un `.ics` real de Google, ni en Android (selección de fichero en el WebView de MAUI).
+- pm-3 (2026-10-22): resolved con reserva: integrado en main (build -warnaserror y tests en verde: 252/160/184). El fixture google-calendar.ics es de imitación; sin probar con .ics reales de Google/Apple/Outlook ni en el selector de ficheros del WebView de MAUI. Importación no transaccional (aceptado; el dedupe permite reintentar).

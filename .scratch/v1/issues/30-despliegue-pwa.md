@@ -1,6 +1,6 @@
 # 30 · Despliegue de la PWA en GitHub Pages
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 05
 Cubre: 3MT-46
 
@@ -19,3 +19,4 @@ Publicación automática de la PWA desde `main` con el base href correcto, HTTPS
 - 05-persistencia-web
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-8. Rama issue/30-despliegue-pwa.
