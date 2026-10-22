@@ -1,0 +1,104 @@
+name: Release Android
+
+# Al crear un tag de versión (vMAJOR.MINOR.PATCH[-sufijo]) compila el APK Release,
+# lo firma con el keystore de los secretos del repo y lo publica en GitHub Releases.
+# Ver docs/release-android.md.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write # crear la Release y subir el APK
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apk-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Derive version from tag
+        id: version
+        run: bash scripts/version-from-tag.sh "$GITHUB_REF_NAME" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Check signing secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          for v in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!v}" ]; then
+              echo "::error::Falta el secreto $v (ver docs/release-android.md)"
+              exit 1
+            fi
+          done
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Decode keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release.keystore"
+          echo "KEYSTORE_PATH=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+
+      # Las contraseñas se pasan como "env:NOMBRE": MSBuild las lee de la variable de entorno
+      # y no aparecen en la línea de comandos ni en los logs.
+      - name: Publish signed APK
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: >
+          dotnet publish src/ThreeMustTasks.App.Maui -f net10.0-android -c Release
+          -p:AndroidPackageFormat=apk
+          -p:ApplicationDisplayVersion=${{ steps.version.outputs.display }}
+          -p:ApplicationVersion=${{ steps.version.outputs.code }}
+          -p:AndroidKeyStore=true
+          -p:AndroidSigningKeyStore="$KEYSTORE_PATH"
+          -p:AndroidSigningStorePass=env:ANDROID_KEYSTORE_PASSWORD
+          -p:AndroidSigningKeyAlias="$ANDROID_KEY_ALIAS"
+          -p:AndroidSigningKeyPass=env:ANDROID_KEY_PASSWORD
+          -p:InstallAndroidDependencies=true
+          -p:AcceptAndroidSDKLicenses=true
+          -o publish/android
+
+      - name: Rename and verify APK
+        run: |
+          shopt -s nullglob
+          apks=(publish/android/*-Signed.apk)
+          [ ${#apks[@]} -eq 1 ] || { echo "::error::Se esperaba un único *-Signed.apk, hay ${#apks[@]}"; ls -R publish/android; exit 1; }
+          out="publish/android/3MustTasks-${GITHUB_REF_NAME}.apk"
+          mv "${apks[0]}" "$out"
+          apksigner="$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)"
+          "$apksigner" verify --print-certs "$out"
+          echo "APK_PATH=$out" >> "$GITHUB_ENV"
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+        run: |
+          flags=()
+          [ "$PRERELEASE" = "true" ] && flags+=(--prerelease)
+          gh release create "$GITHUB_REF_NAME" "$APK_PATH" \
+            --title "3MustTasks $GITHUB_REF_NAME" --generate-notes "${flags[@]}"
