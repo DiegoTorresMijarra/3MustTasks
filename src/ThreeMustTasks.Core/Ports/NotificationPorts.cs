@@ -8,6 +8,12 @@ public enum NotificationKind
     Nag = 2,
     /// <summary>Aviso de la tarde: falta el mínimo a completar (PRD §5.2).</summary>
     CompletionReminder = 3,
+    /// <summary>Recordatorio de una tarea con hora, a su hora o con antelación (PRD §5.6).</summary>
+    TaskReminder = 4,
+    /// <summary>Resumen nocturno "Te quedan N" (PRD §5.6).</summary>
+    EveningSummary = 5,
+    /// <summary>Una tarea programada a futuro llega a su día (PRD §5.6).</summary>
+    FutureTaskArrival = 6,
 }
 
 /// <summary>

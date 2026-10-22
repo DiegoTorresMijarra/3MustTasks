@@ -258,6 +258,10 @@
   <data name="Settings_NagMax" xml:space="preserve"><value>Máximo de avisos al día</value></data>
   <data name="Settings_CompletionReminder" xml:space="preserve"><value>Aviso de la tarde si falta completar</value></data>
   <data name="Settings_CompletionTime" xml:space="preserve"><value>Hora del aviso de la tarde</value></data>
+  <data name="Settings_DefaultReminder" xml:space="preserve"><value>Recordatorio por defecto de las tareas con hora</value></data>
+  <data name="Settings_EveningSummary" xml:space="preserve"><value>Resumen nocturno "Te quedan N"</value></data>
+  <data name="Settings_EveningSummaryTime" xml:space="preserve"><value>Hora del resumen nocturno</value></data>
+  <data name="Settings_FutureAlert" xml:space="preserve"><value>Avisar cuando llega una tarea programada</value></data>
   <data name="Plan_StrictNotice" xml:space="preserve"><value>Modo estricto: no puedes salir de Planificar hasta añadir el mínimo de tareas de hoy.</value></data>
   <data name="Plan_StrictBlocked" xml:space="preserve"><value>Aún te faltan tareas por añadir: complétalas para poder salir.</value></data>
   <data name="Notif_PermGranted" xml:space="preserve"><value>Las notificaciones están activadas.</value></data>

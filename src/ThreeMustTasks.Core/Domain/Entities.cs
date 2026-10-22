@@ -106,6 +106,14 @@ public sealed record AppSettings
     public bool CompletionReminderEnabled { get; init; } = true;
     public TimeOnly CompletionReminderTime { get; init; } = new(18, 0);
 
+    /// <summary>Antelación por defecto (minutos: 0/5/15/30/60) con la que se preselecciona el recordatorio de una tarea con hora (PRD §5.6).</summary>
+    public int DefaultReminderOffsetMin { get; init; }
+    /// <summary>Resumen nocturno "Te quedan N" (PRD §5.6): desactivado por defecto.</summary>
+    public bool EveningSummaryEnabled { get; init; }
+    public TimeOnly EveningSummaryTime { get; init; } = new(21, 0);
+    /// <summary>Aviso cuando una tarea programada a futuro llega a su día (PRD §5.6): activo por defecto.</summary>
+    public bool FutureTaskAlertEnabled { get; init; } = true;
+
     /// <summary>true si el recordatorio de planificación está activo el día de la semana indicado.</summary>
     public bool PlanReminderOnDay(DayOfWeek day) => (PlanReminderDaysMask & (1 << (int)day)) != 0;
 

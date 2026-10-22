@@ -126,7 +126,10 @@ public sealed class TaskEditService(
         planTouched |= assignment is not null && current.Task.LevelId != level.Id;
         if (planTouched) await today.RecordMilestonesAsync(day, ct);
         await unit.SaveChangesAsync(ct);
-        if (planTouched) events.RaisePlanChanged(day);
+        // Hora, antelación, fecha o título de una tarea (también de una futura) cambian qué recordatorios hay que programar.
+        var remindersTouched = current.Task.DueTime != updated.DueTime || current.Task.ReminderOffset != updated.ReminderOffset
+            || current.Task.ScheduledDate != updated.ScheduledDate || current.Task.Title != updated.Title;
+        if (planTouched || remindersTouched) events.RaisePlanChanged(day);
         return new(EditTaskOutcome.Saved, updated);
     }
 
@@ -138,11 +141,12 @@ public sealed class TaskEditService(
     {
         var day = calendar.Today(settings.Load());
         var assignment = await FindTodayAssignmentAsync(taskId, day, ct);
+        var scheduled = (await tasks.GetAsync(taskId, ct))?.ScheduledDate is not null;
         if (!await tasks.DeleteAsync(taskId, ct)) return false;
         if (assignment is not null) await days.DeleteAssignmentAsync(assignment.Id, ct);
         if (assignment is not null) await today.RecordMilestonesAsync(day, ct);
         await unit.SaveChangesAsync(ct);
-        if (assignment is not null) events.RaisePlanChanged(day);
+        if (assignment is not null || scheduled) events.RaisePlanChanged(day);
         return true;
     }
 

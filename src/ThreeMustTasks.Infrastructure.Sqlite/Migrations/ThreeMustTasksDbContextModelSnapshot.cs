@@ -34,10 +34,22 @@ namespace ThreeMustTasks.Infrastructure.Sqlite.Migrations
                     b.Property<TimeOnly>("DayStartsAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("DefaultReminderOffsetMin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("EveningSummaryEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<TimeOnly>("EveningSummaryTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("ExportVTodo")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("FirstDayOfWeek")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("FutureTaskAlertEnabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("NagEnabled")
