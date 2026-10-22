@@ -1,10 +1,10 @@
 @inject IStringLocalizer<Strings> L
 
 @* Selector Día · Semana (· Mes) del Calendario. Cada vista es una ruta. El issue 24 solo añade aquí su pestaña "Mes". *@
-<nav class="tmt-chips" aria-label="@L["Calendar_Title"]" data-testid="calendar-tabs">
-    <a class="tmt-chip" href="calendario" aria-current="@Current("day")" data-testid="tab-day">@L["Calendar_TabDay"]</a>
-    <a class="tmt-chip" href="calendario/semana" aria-current="@Current("week")" data-testid="tab-week">@L["Calendar_TabWeek"]</a>
-    <a class="tmt-chip" href="calendario/mes" aria-current="@Current("month")" data-testid="tab-month">@L["Calendar_TabMonth"]</a>
+<nav class="tmt-segment" aria-label="@L["Calendar_Title"]" data-testid="calendar-tabs">
+    <a class="tmt-seg" href="calendario" aria-current="@Current("day")" data-testid="tab-day">@L["Calendar_TabDay"]</a>
+    <a class="tmt-seg" href="calendario/semana" aria-current="@Current("week")" data-testid="tab-week">@L["Calendar_TabWeek"]</a>
+    <a class="tmt-seg" href="calendario/mes" aria-current="@Current("month")" data-testid="tab-month">@L["Calendar_TabMonth"]</a>
 </nav>
 
 @code {

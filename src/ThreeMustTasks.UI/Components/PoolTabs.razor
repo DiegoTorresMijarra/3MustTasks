@@ -1,10 +1,10 @@
 @inject IStringLocalizer<Strings> L
 
 @* Pestañas del mock de Pool: Pendientes · A futuro · Archivadas. Cada una es una ruta. *@
-<nav class="tmt-chips" aria-label="@L["Pool_Title"]">
-    <a class="tmt-chip" href="pool" aria-current="@Current("pending")" data-testid="tab-pending">@L["Pool_TabPending"]</a>
-    <a class="tmt-chip" href="pool/futuro" aria-current="@Current("future")" data-testid="tab-future">@L["Pool_TabFuture"]</a>
-    <a class="tmt-chip" href="pool/archivadas" aria-current="@Current("archived")" data-testid="archived-link">@L["Pool_ArchivedLink"]</a>
+<nav class="tmt-segment" aria-label="@L["Pool_Title"]">
+    <a class="tmt-seg" href="pool" aria-current="@Current("pending")" data-testid="tab-pending">@L["Pool_TabPending"]</a>
+    <a class="tmt-seg" href="pool/futuro" aria-current="@Current("future")" data-testid="tab-future">@L["Pool_TabFuture"]</a>
+    <a class="tmt-seg" href="pool/archivadas" aria-current="@Current("archived")" data-testid="archived-link">@L["Pool_ArchivedLink"]</a>
 </nav>
 
 @code {

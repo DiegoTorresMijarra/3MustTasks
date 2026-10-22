@@ -11,7 +11,7 @@
 
 @if (_view is not null)
 {
-    <MudText Color="Color.Secondary" Class="mb-2" data-testid="pool-summary">
+    <MudText Color="Color.Secondary" Class="tmt-subtitle" data-testid="pool-summary">
         @L["Pool_Summary", _view.TotalPending, _selected.Count]
     </MudText>
 
@@ -104,6 +104,7 @@
 
     @if (_selected.Count > 0)
     {
+        <div class="tmt-action-spacer" aria-hidden="true"></div>
         <div class="tmt-action-bar" data-testid="pool-actions">
             <button type="button" class="tmt-action primary" data-testid="recover" @onclick="RecoverAsync">@L["Pool_Recover"]</button>
             <button type="button" class="tmt-action" data-testid="archive" @onclick="ArchiveAsync">@L["Pool_Archive"]</button>

@@ -3,7 +3,7 @@
 @inject ThemeService Theme
 @inject IStringLocalizer<Strings> L
 
-<MudThemeProvider @ref="_themeProvider" IsDarkMode="_isDark" />
+<MudThemeProvider @ref="_themeProvider" Theme="_theme" IsDarkMode="_isDark" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
@@ -16,20 +16,21 @@
     @if (!OnOnboarding)
     {
     <nav class="tmt-bottom-nav" aria-label="@L["Nav_Label"]">
+        @* Iconos de línea del mock (design/mocks/Main.dc.html), decorativos: el texto de la pestaña es la etiqueta. *@
         <NavLink class="tmt-nav-item" href="" Match="NavLinkMatch.All">
-            <MudIcon Icon="@Icons.Material.Filled.Today" />
+            <svg class="tmt-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
             <span>@L["Nav_Today"]</span>
         </NavLink>
         <NavLink class="tmt-nav-item" href="pool">
-            <MudIcon Icon="@Icons.Material.Filled.Inbox" />
+            <svg class="tmt-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 13l3-8h12l3 8v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/></svg>
             <span>@L["Nav_Pool"]</span>
         </NavLink>
         <NavLink class="tmt-nav-item" href="calendario">
-            <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" />
+            <svg class="tmt-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="3"/><path d="M8 2.5v4M16 2.5v4M3 10h18"/></svg>
             <span>@L["Nav_Calendar"]</span>
         </NavLink>
         <NavLink class="tmt-nav-item" href="ajustes">
-            <MudIcon Icon="@Icons.Material.Filled.Settings" />
+            <svg class="tmt-nav-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
             <span>@L["Nav_Settings"]</span>
         </NavLink>
     </nav>
@@ -42,6 +43,7 @@
     // El onboarding va a pantalla completa, sin la barra de pestañas.
     private bool OnOnboarding => Nav.ToBaseRelativePath(Nav.Uri).StartsWith("onboarding", StringComparison.Ordinal);
 
+    private static readonly MudTheme _theme = TmtTheme.Create();
     private MudThemeProvider? _themeProvider;
     private bool _systemDark;
     private bool _isDark;

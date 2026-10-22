@@ -32,12 +32,22 @@ public sealed class PwaTests
     {
         var icons = Manifest().GetProperty("icons").EnumerateArray().ToList();
 
-        foreach (var size in new[] { "192x192", "512x512" })
-        {
-            var icon = icons.Single(i => i.GetProperty("sizes").GetString() == size);
-            Assert.Equal("image/png", icon.GetProperty("type").GetString());
-            Assert.True(File.Exists(Path.Combine(WebRoot, icon.GetProperty("src").GetString()!)));
-        }
+        // Cada tamaño tiene su icono "any" y su icono "maskable" (issue 28).
+        foreach (var purpose in new[] { "any", "maskable" })
+            foreach (var size in new[] { "192x192", "512x512" })
+            {
+                var icon = icons.Single(i => i.GetProperty("sizes").GetString() == size && i.GetProperty("purpose").GetString() == purpose);
+                Assert.Equal("image/png", icon.GetProperty("type").GetString());
+                Assert.True(File.Exists(Path.Combine(WebRoot, icon.GetProperty("src").GetString()!)));
+            }
+    }
+
+    [Fact]
+    public void Manifest_colors_match_the_visual_identity_for_the_splash()
+    {
+        var m = Manifest();
+        Assert.Equal("#15171C", m.GetProperty("theme_color").GetString());
+        Assert.Equal("#F5F6F8", m.GetProperty("background_color").GetString());
     }
 
     [Fact]
