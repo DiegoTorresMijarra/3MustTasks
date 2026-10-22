@@ -85,7 +85,7 @@
         </div>
 
         <div class="tmt-form-label">@L["Form_Notes"]</div>
-        <textarea class="tmt-notes" rows="3" maxlength="1000" @bind="_notes" @bind:event="oninput" data-testid="notes-input"></textarea>
+        <textarea class="tmt-notes" aria-label="@L["Form_Notes"]" rows="3" maxlength="1000" @bind="_notes" @bind:event="oninput" data-testid="notes-input"></textarea>
     }
 
     <div class="tmt-form-label">@L["Rec_Section"]</div>

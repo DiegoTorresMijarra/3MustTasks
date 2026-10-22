@@ -166,9 +166,9 @@ button, input, select, textarea { font-family: inherit; }
 .tmt-banner { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; padding: 16px; border-radius: var(--tmt-r-panel); border: 1.5px solid var(--tmt-danger); background: var(--tmt-danger-tint); color: var(--tmt-danger-ink); }
 .tmt-banner .mud-icon-root { flex: none; color: var(--tmt-danger-text); }
 .tmt-banner-text { flex: 1 1 0; min-width: 0; font-size: 16px; font-weight: 800; color: var(--tmt-danger-ink); }
-.tmt-banner .tmt-banner-action { flex: 1 1 100%; justify-content: center; min-height: 44px; border-radius: 12px; background: var(--tmt-danger); color: #fff; font-size: 15px; font-weight: 800; }
+.tmt-banner .tmt-banner-action { flex: 1 1 100%; justify-content: center; min-height: var(--tmt-touch); border-radius: 12px; background: var(--tmt-danger); color: #fff; font-size: 15px; font-weight: 800; }
 .tmt-shell.theme-dark .tmt-banner .tmt-banner-action { color: #15171C; }
-.tmt-banner-action { min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; font-weight: 700; color: var(--tmt-text); text-decoration: none; }
+.tmt-banner-action { min-height: var(--tmt-touch); display: inline-flex; align-items: center; padding: 0 12px; font-weight: 700; color: var(--tmt-text); text-decoration: none; }
 .mud-alert .tmt-banner-action { display: inline-flex; margin-top: 4px; text-decoration: underline; }
 
 /* Grupos por nivel */
@@ -211,8 +211,8 @@ button, input, select, textarea { font-family: inherit; }
    Selector segmentado (Planificar, Pool, Calendario, "¿Cuándo?") y chips-filtro
    -------------------------------------------------------------------------- */
 .tmt-segment { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; padding: 4px; margin-bottom: 14px; border-radius: var(--tmt-r-seg); background: var(--tmt-segment); }
-.tmt-seg { position: relative; display: flex; align-items: center; justify-content: center; min-height: 38px; padding: 0 6px; border: 0; border-radius: var(--tmt-r-seg-item); background: transparent; color: var(--tmt-text-2); font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; text-align: center; }
-.tmt-seg::after { content: ""; position: absolute; left: 0; right: 0; top: -4px; bottom: -4px; } /* área táctil 46-48 dp */
+.tmt-seg { position: relative; display: flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 6px; border: 0; border-radius: var(--tmt-r-seg-item); background: transparent; color: var(--tmt-text-2); font-size: 13px; font-weight: 700; text-decoration: none; cursor: pointer; text-align: center; }
+.tmt-seg::after { content: ""; position: absolute; left: 0; right: 0; top: -4px; bottom: -4px; } /* área táctil 48 dp */
 .tmt-seg[aria-current="page"], .tmt-seg[aria-selected="true"], .tmt-seg[aria-pressed="true"], .tmt-seg[aria-checked="true"] { background: var(--tmt-surface); box-shadow: var(--tmt-shadow-seg); color: var(--tmt-text); font-weight: 800; }
 .tmt-segment-lg { background: var(--tmt-fill); }
 .tmt-segment-lg .tmt-seg { min-height: 40px; font-size: 14px; }
@@ -421,3 +421,17 @@ a.tmt-chip { display: inline-flex; }
 @media (min-width: 721px) {
     .tmt-content { padding-top: 40px; }
 }
+
+/* --------------------------------------------------------------------------
+   Accesibilidad: áreas táctiles ≥ 48 dp (issue 28)
+   -------------------------------------------------------------------------- */
+.mud-button-root:not(.mud-icon-button) { min-height: var(--tmt-touch); }
+.mud-icon-button { min-width: var(--tmt-touch); min-height: var(--tmt-touch); }
+.tmt-title-field .mud-input > input { min-height: 40px; padding-top: 8px; padding-bottom: 8px; }
+.tmt-title-field .mud-input-control-input-container { min-height: var(--tmt-touch); }
+/* El enlace del título cubre toda la fila (el resto de controles quedan por encima) */
+.tmt-task { position: relative; }
+.tmt-task-body .tmt-task-title::after { content: ""; position: absolute; inset: 0; }
+.tmt-check, .tmt-task-menu-btn { position: relative; z-index: 1; }
+.tmt-month-cell::after { content: ""; position: absolute; inset: -2px -1px; }
+.tmt-card > .tmt-field input:not([type="checkbox"]), .tmt-card > .tmt-field select { min-height: 44px; }

@@ -4,7 +4,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#3f51b5" />
+    <meta name="theme-color" content="#15171C" />
+    <meta name="color-scheme" content="light dark" />
     <title>3MustTasks</title>
     <base href="/" />
     <link rel="preload" id="webassembly" />
@@ -23,13 +24,13 @@
 
 <body>
     <div id="app">
-        <div class="loading-text">3MustTasks…</div>
+        <div class="loading-text" role="status" aria-live="polite"><img src="icon-192.png" width="96" height="96" alt="" /><span>3MustTasks</span></div>
     </div>
 
     <div id="blazor-error-ui">
         Ha ocurrido un error inesperado.
         <a href="." class="reload">Recargar</a>
-        <span class="dismiss">🗙</span>
+        <span class="dismiss" role="button" tabindex="0" aria-label="Cerrar aviso">🗙</span>
     </div>
     <script>
         // Avisa a la app cuando la pestaña/PWA vuelve a primer plano (cierre de día).

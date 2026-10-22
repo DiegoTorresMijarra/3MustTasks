@@ -8,6 +8,15 @@
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
   </PropertyGroup>
 
+  <!-- Tamaño y arranque (issue 28, spec §8): trimming y Brotli explícitos en el publish. Son los valores por defecto del SDK
+       para Blazor WASM; se dejan escritos para que un cambio accidental salte en revisión. TrimMode partial (por defecto)
+       porque el trimming "full" rompe la reflexión de Microsoft.Extensions.Localization y System.Text.Json. -->
+  <PropertyGroup>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <BlazorEnableCompression>true</BlazorEnableCompression>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.13" PrivateAssets="all" />
