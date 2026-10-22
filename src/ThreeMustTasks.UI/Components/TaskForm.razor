@@ -1,5 +1,6 @@
 @using ThreeMustTasks.Core.Services
 @inject IStringLocalizer<Strings> L
+@inject ThreeMustTasks.Core.Ports.ISettingsStore SettingsStore
 
 @* Formulario de tarea. Nueva: título y nivel. Edición (Existing != null): además categoría, cuándo, hora, recordatorio y notas. *@
 <form class="tmt-form" @onsubmit="SubmitAsync" @onsubmit:preventDefault data-testid="task-form">
@@ -69,7 +70,7 @@
         <div class="tmt-field-row">
             <label class="tmt-field">
                 <span>@L["Form_Time"]</span>
-                <input type="time" @bind="_time" @bind:format="HH:mm" data-testid="time-input" />
+                <input type="time" @bind="_time" @bind:format="HH:mm" @bind:after="OnTimeChanged" data-testid="time-input" />
             </label>
             <label class="tmt-field">
                 <span>@L["Form_Reminder"]</span>
@@ -222,12 +223,23 @@
         _when = Existing.When;
         _date = t.ScheduledDate is { } d && d > TodayDate ? d : null;
         _time = t.DueTime;
+        _hadTime = _time is not null;
         _reminderMinutes = t.ReminderOffset is { } r ? (int)r.TotalMinutes : null;
         _notes = t.Notes;
         _pinned = t.IsPinned;
         _favorite = t.IsFavoriteSource;
         if (Rule is not null && t.RecurrenceRuleId == Rule.Id) _recurrence = RecurrenceSpec.FromRule(Rule);
     }
+
+    // Al poner hora a una tarea sin recordatorio, se preselecciona la antelación por defecto de Ajustes (issue 20).
+    private void OnTimeChanged()
+    {
+        // Solo al pasar de "sin hora" a "con hora": si el usuario eligió "Sin recordatorio" no se le pisa al retocar la hora.
+        if (_time is not null && !_hadTime && _reminderMinutes is null) _reminderMinutes = SettingsStore.Load().DefaultReminderOffsetMin;
+        _hadTime = _time is not null;
+    }
+
+    private bool _hadTime;
 
     private Task SubmitAsync()
     {

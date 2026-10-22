@@ -204,7 +204,7 @@ public sealed partial class IcsImportService(
             }
         }
 
-        if (planTouched) events.RaisePlanChanged(day);
+        if (planTouched || scheduled > 0) events.RaisePlanChanged(day);
         return new IcsImportResult(toPlan, toPool, scheduled, recurring, updated, skipped);
     }
 
