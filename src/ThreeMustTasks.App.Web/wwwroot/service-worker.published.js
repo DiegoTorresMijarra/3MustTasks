@@ -6,6 +6,19 @@ self.addEventListener('install', event => event.waitUntil(onInstall(event)));
 self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
 self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
 
+// Toque en una notificación (issue 21): enfoca la app abierta o la abre; con ruta, navega a ella.
+self.addEventListener('notificationclick', event => {
+    event.notification.close();
+    const route = (event.notification.data && event.notification.data.route) || '';
+    event.waitUntil((async () => {
+        const url = new URL(route, self.registration.scope).href;
+        const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        const open = all[0];
+        if (open) { await open.focus(); if (route && open.navigate) await open.navigate(url); }
+        else await self.clients.openWindow(url);
+    })());
+});
+
 const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/, /\.webmanifest$/ ];

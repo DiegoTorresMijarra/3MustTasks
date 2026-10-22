@@ -41,9 +41,25 @@
     <script>
         // Permiso de notificaciones (onboarding). Devuelve granted | denied | default | unsupported.
         window.tmtNotifications = {
+            permission: function () {
+                return 'Notification' in window ? Notification.permission : 'unsupported';
+            },
             requestPermission: async function () {
                 if (!('Notification' in window)) return 'unsupported';
                 return await Notification.requestPermission();
+            },
+            // Muestra una notificación (con la app abierta). Mismo tag = reemplaza. Al tocarla enfoca la app y, si trae ruta, navega.
+            show: async function (id, title, body, route) {
+                if (!('Notification' in window) || Notification.permission !== 'granted') return;
+                var options = { body: body, tag: 'tmt-' + id, icon: 'icon-192.png', data: { route: route || '' } };
+                var reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+                if (reg && reg.showNotification) { await reg.showNotification(title, options); return; }
+                var n = new Notification(title, options);
+                n.onclick = function () {
+                    window.focus();
+                    if (route) window.location.assign(new URL(route, document.baseURI).href);
+                    n.close();
+                };
             }
         };
     </script>

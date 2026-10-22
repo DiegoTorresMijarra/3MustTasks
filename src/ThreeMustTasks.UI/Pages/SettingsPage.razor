@@ -6,6 +6,7 @@
 @inject ThemeService Theme
 @inject ISettingsStore Store
 @inject INotificationScheduler Scheduler
+@inject INotificationPermission Permission
 @inject ThreeMustTasks.Core.Services.ReminderSyncService Reminders
 
 <PageTitle>@L["App_Name"] · @L["Settings_Title"]</PageTitle>
@@ -118,6 +119,11 @@
         <input type="checkbox" checked="@_s.FutureTaskAlertEnabled" @onchange="e => Update(s => s with { FutureTaskAlertEnabled = (bool)e.Value! })" data-testid="setting-future-alert" />
     </label>
 
+    @if (Permission.OnlyWorksWhileOpen)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mt-2" data-testid="settings-pwa-warning">@L["Onb_PwaWarning"]</MudAlert>
+    }
+
     @if (_status is { Supported: true })
     {
         <div class="tmt-onb-note" data-testid="notif-status">
@@ -130,7 +136,10 @@
                 <span data-testid="notif-permission-missing">@L["Notif_PermMissing"]</span>
                 <div>
                     <button type="button" class="tmt-onb-secondary" @onclick="RequestPermissionAsync" data-testid="notif-request-permission">@L["Notif_RequestPermission"]</button>
-                    <button type="button" class="tmt-onb-secondary" @onclick="() => OpenAsync(SystemSettingsTarget.Notifications)" data-testid="notif-open-settings">@L["Notif_OpenSettings"]</button>
+                    @if (!Permission.OnlyWorksWhileOpen)
+                    {
+                        <button type="button" class="tmt-onb-secondary" @onclick="() => OpenAsync(SystemSettingsTarget.Notifications)" data-testid="notif-open-settings">@L["Notif_OpenSettings"]</button>
+                    }
                 </div>
             }
         </div>
@@ -143,7 +152,10 @@
                 </div>
             </div>
         }
-        <a class="tmt-settings-link" href="ajustes/bateria" data-testid="battery-link">@L["Notif_BatteryLink"]</a>
+        @if (!Permission.OnlyWorksWhileOpen)
+        {
+            <a class="tmt-settings-link" href="ajustes/bateria" data-testid="battery-link">@L["Notif_BatteryLink"]</a>
+        }
     }
     else if (_status is not null)
     {
