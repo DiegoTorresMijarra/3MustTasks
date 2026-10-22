@@ -21,3 +21,4 @@ Icono, splash y colores definitivos; contraste AA, etiquetas para lectores de pa
 - 11-pool-ver-recuperar
 
 ## Comments
+- pm-3 (2026-10-22): incorporar aquí la carga diferida (lazy assembly loading) de las vistas de calendario (Día/Semana/Mes), trasladada desde el criterio no cumplido del 24.

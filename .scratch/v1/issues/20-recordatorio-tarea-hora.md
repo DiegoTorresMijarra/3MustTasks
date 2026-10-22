@@ -1,6 +1,6 @@
 # 20 · Recordatorio de una tarea a su hora
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 18
 Cubre: 3MT-28 (parte)
 
@@ -20,3 +20,4 @@ Las tareas con hora y recordatorio notifican a su hora o con la antelación eleg
 - 18-recordatorio-planificacion-android
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-9. Rama issue/20-recordatorio-tarea-hora.
