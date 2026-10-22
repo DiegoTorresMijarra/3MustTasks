@@ -1,6 +1,6 @@
 # 21 · Notificaciones en la PWA con la app abierta
 
-Status: in-review
+Status: resolved
 Blocked by: 05, 18
 Cubre: 3MT-32
 
@@ -36,3 +36,4 @@ Implementación web de `INotificationScheduler` con la Notification API y tempor
 ### No verificado (criterio 2 sin marcar)
 - Ninguna ejecución en un navegador real: ni la Notification API, ni `showNotification` vía service worker, ni `notificationclick`, ni los temporizadores tras suspender la pestaña. Guion manual (Chrome de escritorio y Chrome Android, PWA publicada por HTTPS o `localhost`): (1) Ajustes > Activar notificaciones: el navegador pide permiso y el estado pasa a "activadas"; (2) crear una tarea de hoy con hora a +2 min y "A la hora", dejar la pestaña abierta en segundo plano: debe salir una notificación a su hora; (3) tocarla: enfoca la app (con ruta `planificar`, navega); (4) activar el resumen nocturno a +2 min con una tarea sin tachar: sale "Te queda 1 tarea"; (5) cerrar la pestaña: no sale nada (limitación esperada); (6) permiso denegado: no sale nada y Ajustes muestra el aviso.
 - Limitaciones conocidas: los navegadores suspenden temporizadores de pestañas en segundo plano (pueden retrasarse); al volver a primer plano se reprograma (cierre de día), pero un aviso vencido durante la suspensión se pierde. iOS Safari solo permite notificaciones en PWA instalada.
+- pm-3 (2026-10-22): resolved con reserva: integrado en main (323/160/234 en verde). Criterio "las notificaciones del día salen con la PWA abierta" implementado y probado con dobles, NO ejecutado en navegador real (guion en Comments). Límites conocidos: temporizadores suspendidos en pestañas en segundo plano; iOS solo con PWA instalada.
