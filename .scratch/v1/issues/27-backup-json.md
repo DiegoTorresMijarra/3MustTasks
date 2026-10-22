@@ -1,6 +1,6 @@
 # 27 · Backup JSON versionado
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 08
 Cubre: 3MT-40, 41
 
@@ -20,3 +20,4 @@ Exportar toda la información a JSON con `schemaVersion` y restaurarla reemplaza
 - 08-cierre-de-dia
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-3. Rama issue/27-backup-json.

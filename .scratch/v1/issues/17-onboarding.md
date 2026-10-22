@@ -1,6 +1,6 @@
 # 17 · Onboarding del primer arranque
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 15
 Cubre: 3MT-27
 
@@ -19,3 +19,4 @@ Tres pasos en el primer arranque: concepto, cupos (aceptar 3 Must o ajustar) y h
 - 15-ajustes-niveles-cupos
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-2. Rama issue/17-onboarding.
