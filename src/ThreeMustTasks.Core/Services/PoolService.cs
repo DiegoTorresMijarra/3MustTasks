@@ -161,7 +161,7 @@ public sealed class PoolService(
         var categories = (await config.ListCategoriesAsync(ct)).ToDictionary(c => c.Id);
         return (await tasks.ListAsync(TaskItemStatus.Active, ct))
             .Where(t => t.ScheduledDate > day && levels.ContainsKey(t.LevelId))
-            .OrderBy(t => t.CreatedAt).ThenBy(t => t.Id)
+            .OrderBy(t => t.CreatedAt).ThenBy(t => t.Title, StringComparer.Ordinal).ThenBy(t => t.Id)
             .GroupBy(t => t.ScheduledDate!.Value).OrderBy(g => g.Key)
             .Select(g => new FutureGroup(g.Key, g.Select(t => new FutureItem(t, levels[t.LevelId],
                 t.CategoryId is { } c ? categories.GetValueOrDefault(c) : null)).ToList()))
