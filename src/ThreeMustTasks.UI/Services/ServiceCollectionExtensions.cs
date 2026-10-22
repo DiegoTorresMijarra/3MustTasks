@@ -34,6 +34,9 @@ public static class ServiceCollectionExtensions
         // Por defecto no-op; el host (PWA, o Android cuando exista la implementación del spike 02) la sustituye.
         services.TryAddSingleton<INotificationPermission, NoOpNotificationPermission>();
         services.AddScoped<BackupService>();
+        // El escritor .ics (Ical.Net) vive en Infrastructure.Shared; se registra aquí para que web y MAUI lo tengan sin tocar los hosts.
+        services.TryAddSingleton<IIcsWriter, ThreeMustTasks.Infrastructure.Shared.Ics.IcalNetWriter>();
+        services.AddScoped<IcsExportService>();
         return services;
     }
 }

@@ -1,0 +1,62 @@
+@using ThreeMustTasks.Core.Services
+@using Microsoft.JSInterop
+@inject IStringLocalizer<Strings> L
+@inject IcsExportService Ics
+@inject IJSRuntime JS
+@inject TimeProvider Time
+
+@* Export .ics: el usuario elige un rango de fechas y descarga el calendario (VEVENT por asignación; VTODO si está activo en ajustes). *@
+<MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Ics_Title"]</MudText>
+<p class="tmt-level-hint">@L["Ics_Hint"]</p>
+
+<div class="tmt-field-row">
+    <label class="tmt-field">
+        <span>@L["Ics_From"]</span>
+        <input type="date" @bind="_from" data-testid="ics-from" />
+    </label>
+    <label class="tmt-field">
+        <span>@L["Ics_To"]</span>
+        <input type="date" @bind="_to" data-testid="ics-to" />
+    </label>
+</div>
+<div class="tmt-chip-row">
+    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="ExportAsync" data-testid="ics-export">@L["Ics_Export"]</MudButton>
+</div>
+
+@if (_error is not null)
+{
+    <p role="alert" class="tmt-error" data-testid="ics-error">@_error</p>
+}
+@if (_done is not null)
+{
+    <p role="status" data-testid="ics-done">@_done</p>
+}
+
+@code {
+    private DateOnly _from;
+    private DateOnly _to;
+    private string? _error;
+    private string? _done;
+
+    protected override void OnInitialized()
+    {
+        // Por defecto, el mes en curso.
+        var today = DateOnly.FromDateTime(Time.GetLocalNow().DateTime);
+        _from = new DateOnly(today.Year, today.Month, 1);
+        _to = _from.AddMonths(1).AddDays(-1);
+    }
+
+    private async Task ExportAsync()
+    {
+        _error = _done = null;
+        if (_to < _from)
+        {
+            _error = L["Ics_RangeError"];
+            return;
+        }
+        var result = await Ics.ExportAsync(_from, _to);
+        var module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/ThreeMustTasks.UI/backup.js");
+        await module.InvokeVoidAsync("downloadText", result.FileName, result.Content, "text/calendar");
+        _done = string.Format(L["Ics_Exported"], result.EventCount);
+    }
+}
