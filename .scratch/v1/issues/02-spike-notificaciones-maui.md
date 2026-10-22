@@ -1,6 +1,6 @@
 # 02 · Spike: notificaciones locales programadas en MAUI (.NET 10)
 
-Status: in-review
+Status: resolved
 Blocked by: ninguno
 Cubre: 3MT-29
 
@@ -27,3 +27,4 @@ None - can start immediately
   - **Criterios NO verificados** (sin Android SDK ni emulador en la máquina; se dejan sin marcar): notificación a 2 min con la app cerrada; tap que abre la página Planificar; comportamiento con `POST_NOTIFICATIONS` denegado y con alarmas exactas denegadas. Tampoco el reinicio del dispositivo. El guion manual para ejecutarlos está en el ADR ("Prototipo").
   - Verificado sin emulador: el plugin compila contra `net10.0-android` (trae `net10.0-android36.0`) y su `ScheduledAlarmReceiver` con `BOOT_COMPLETED`/`MY_PACKAGE_REPLACED` aparece en el manifest fusionado. Que reprograme todo tras reiniciar es una inferencia.
   - Propuesta al PM: el issue 18 debe empezar ejecutando ese guion en emulador o dispositivo; si falla, pasar a AlarmManager nativo tras `INotificationScheduler`. El criterio del ADR está cumplido solo como provisional. Cambios de spec propuestos (no aplicados) al final del ADR.
+- pm-3 (2026-10-22): resolved como decisión PROVISIONAL (ADR 0002, revisar por el usuario). Los 3 criterios de emulador siguen sin verificar: el 18 debe empezar ejecutando el guion manual del ADR; si falla, AlarmManager. Pendiente de decidir: SCHEDULE_EXACT_ALARM sí/no; cambios de spec propuestos en el ADR sin aplicar.

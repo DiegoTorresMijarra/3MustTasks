@@ -1,6 +1,6 @@
 # 17 · Onboarding del primer arranque
 
-Status: in-review
+Status: resolved
 Blocked by: 15
 Cubre: 3MT-27
 
@@ -27,3 +27,4 @@ Tres pasos en el primer arranque: concepto, cupos (aceptar 3 Must o ajustar) y h
 - Cambio de host: web y MAUI arrancan con `AppRoot` (envuelve `Routes`) en vez de `Routes`; actualizado `AndroidHostTests`. Motivo: no romper los tests que renderizan `Routes` con ajustes por defecto.
 - Ambigüedades resueltas por mi cuenta: (1) el mock solo muestra el paso 2; el 1 (concepto) y el 3 (hora + permiso) siguen el mismo estilo. (2) Presets: Equilibrado 1 Must + 2 Recommended, Exigente 2+1, Bestia 3 Must (Recommended 0); Must con mín. completar = mín. añadir, Recommended solo añadir. (3) "Personalizado" no aplica nada y al terminar lleva a Ajustes > Niveles. (4) "Saltar" cuenta como hecho sin cambios. (5) El permiso se pide con el botón del paso 3 y, si no se había pedido, también al pulsar "Empezar". (6) Instalaciones existentes con datos verán el onboarding una vez (flag por defecto false).
 - Fuera: aviso de limitaciones PWA en Ajustes (spec §5.2) y ajuste de la hora de planificación en Ajustes: no los pide este issue.
+- pm-3 (2026-10-22): revisado e integrado en main (build -warnaserror y tests en verde con 02+17+27). Notas para el 18: INotificationPermission es no-op en Android; debe aportar la implementación real (o absorberlo en INotificationScheduler). Fuera de alcance: aviso de limitaciones PWA y hora de planificación en Ajustes (spec §5.2).

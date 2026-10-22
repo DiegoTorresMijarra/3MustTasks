@@ -1,6 +1,6 @@
 # 27 · Backup JSON versionado
 
-Status: in-review
+Status: resolved
 Blocked by: 08
 Cubre: 3MT-40, 41
 
@@ -28,3 +28,4 @@ Exportar toda la información a JSON con `schemaVersion` y restaurarla reemplaza
   - Puertos ampliados (3 implementaciones + contratos): `IDayRepository.ListAssignmentsAsync/ListLogsAsync/DeleteLogAsync` y `IConfigRepository.DeleteFavoriteAsync` (cubre el pendiente DeleteFavorite).
   - Semántica: Reemplazar borra todo y aplica también los ajustes del backup; Fusionar hace upsert por Id (logs por fecha) y conserva los ajustes locales. Los ajustes se guardan fuera de la transacción (puerto síncrono), al final.
   - Limitaciones: tras restaurar, `ThemeService` no notifica el cambio de tema hasta el siguiente render/recarga; no se reprograman recordatorios (aún no existe ReminderPlanner). No se ha ejecutado `tests/browser` (e2e node).
+- pm-3 (2026-10-22): resolved con reserva: criterio "ida y vuelta Android↔PWA" sin marcar (cubierto por tests de contrato, no verificado en dispositivo; descarga por <a download> y selector de archivo en WebView MAUI por probar a mano, quizá haga falta Share/FilePicker nativo). BackupService vive en Core (desviación de spec §1, aceptada). DeleteFavorite ya añadido a los puertos.
