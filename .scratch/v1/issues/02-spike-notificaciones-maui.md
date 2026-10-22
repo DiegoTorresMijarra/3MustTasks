@@ -1,6 +1,6 @@
 # 02 · Spike: notificaciones locales programadas en MAUI (.NET 10)
 
-Status: ready-for-human
+Status: ready-for-agent
 Blocked by: ninguno
 Cubre: 3MT-29
 
@@ -20,3 +20,5 @@ Validar que Plugin.LocalNotification (o AlarmManager nativo) funciona con .NET 1
 None - can start immediately
 
 ## Comments
+
+- usuario (2026-10-22): delega la decisión en el PM, igual que el 01. Criterio: fiabilidad con la app cerrada (reinicio del dispositivo incluido), menos código nativo y mantenimiento, comportamiento con permisos denegados. Plugin.LocalNotification por defecto; AlarmManager solo si falla en el emulador. ADR provisional (`docs/adr/0002-*`) a revisar por el usuario. Si el entorno no tiene emulador Android, el worker prepara el prototipo y lo documenta sin dar la verificación por hecha.

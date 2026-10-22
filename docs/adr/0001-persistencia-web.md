@@ -1,6 +1,6 @@
 # ADR 0001 · Persistencia en la web: IndexedDB frente a SQLite WASM (OPFS)
 
-- **Estado:** aceptado (provisional, ratificado por pm-1 por delegación del usuario; revisar por el usuario)
+- **Estado:** aceptado (ratificado por el usuario el 2026-10-22; pendiente solo el smoke test en iOS Safari antes de la release web)
 - **Fecha:** 2026-10-22
 - **Issue:** 01 (spike persistencia web) · cubre 3MT-06
 - **Autor:** worker-5

@@ -12,7 +12,7 @@ Los números son los de fichero (`NN-slug.md`). 🧑 = `ready-for-human`: lo dec
 
 | Ola | Issues | Paralelismo | Qué se desbloquea |
 |---|---|---|---|
-| **0** | 01 🧑, 02 🧑, 03 | 3 | Esqueleto web y las dos decisiones técnicas |
+| **0** | 01, 02, 03 | 3 | Esqueleto web y las dos decisiones técnicas |
 | **1** | 04, 05, 06 | 3 | Android, persistencia web y primer recorrido de Hoy |
 | **2** | 07, 30 | 2 | Tachar y deploy de la PWA |
 | **3** | 08, 10, 15 | 3 | Cierre de día, edición y ajustes |

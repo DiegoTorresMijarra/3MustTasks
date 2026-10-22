@@ -85,8 +85,8 @@ AppSettings (documento único)
 | **DayAssignment** | `Id`, `TaskId`, `LogicalDate (DateOnly)`, `Outcome {Planned, Completed, NotCompleted, Removed}`, `CompletedAt?`, `Order` |
 | **DayLog** | `LogicalDate (PK)`, `PlanMinimumMetAt?`, `CompletionMinimumMetAt?`, `Fulfilled (bool?)`, `ClosedAt?` |
 | **FavoriteTemplate** | `Id`, `Title`, `LevelId`, `CategoryId?`, `DueTime?`, `ReminderOffset?`, `UseCount` |
-| **RecurrenceRule** | `Id`, `TemplateTitle`, `LevelId`, `CategoryId?`, `DueTime?`, `Frequency {Daily, Weekly, EveryNDays, Monthly}`, `Interval`, `DaysOfWeek (flags)`, `DayOfMonth?`, `StartDate`, `EndDate?`, `LastGeneratedDate?` (se exporta como RRULE) |
-| **AppSettings** | `DayStartsAt (TimeOnly, 00:00)`, `PlanReminder {Enabled, Time 07:30, Days}`, `Nag {Enabled, IntervalMin 30, MaxPerDay 4}`, `CompletionReminder {Enabled, Time 18:00}`, `EveningSummary {Enabled false, Time 21:00}`, `StrictMode false`, `AutoAddScheduled true`, `Theme`, `FirstDayOfWeek Monday`, `SchemaVersion` |
+| **RecurrenceRule** | `Id`, `TemplateTitle`, `LevelId`, `CategoryId?`, `DueTime?`, `Frequency {Daily, Weekly, EveryNDays, Monthly}`, `Interval`, `DaysOfWeek (flags)`, `DayOfMonth?`, `StartDate`, `EndDate?`, `LastGeneratedDate?`, `IsPaused` (pausa la generación sin borrar la regla) (se exporta como RRULE) |
+| **AppSettings** | `DayStartsAt (TimeOnly, 00:00)`, `PlanReminder {Enabled, Time 07:30, Days}`, `Nag {Enabled, IntervalMin 30, MaxPerDay 4}`, `CompletionReminder {Enabled, Time 18:00}`, `EveningSummary {Enabled false, Time 21:00}`, `StrictMode false`, `AutoAddScheduled true`, `ExportVTodo false` (P8), `Theme`, `FirstDayOfWeek Monday`, `SchemaVersion` |
 
 ### 3.1 Consultas derivadas (no se guardan)
 - **Plan de hoy**: `DayAssignment` con `LogicalDate == hoy` y `Outcome ∈ {Planned, Completed}`.
@@ -117,7 +117,7 @@ ReminderPlanner.Rebuild()
 
 ### 4.2 `QuotaPolicy`
 - `CanAdd(level, plannedCountForLevel)` → respeta `Max`.
-- `Evaluate(plan) → QuotaStatus { IsPlanMinimumMet, MissingToAdd: [(Level, n)], IsCompletionMinimumMet, MissingToComplete: [(Level, n)] }`.
+- `Evaluate(levels, entries) → QuotaStatus { IsPlanMinimumMet, MissingToAdd: [(Level, n)], IsCompletionMinimumMet, MissingToComplete: [(Level, n)] }`.
 - Cuando se cumple el mínimo a añadir por primera vez → `DayLog.PlanMinimumMetAt` y se cancelan las insistencias. Igual con el de completar → `CompletionMinimumMetAt` y se cancela el aviso de la tarde.
 
 ### 4.3 `PoolService`
