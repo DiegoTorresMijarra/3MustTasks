@@ -1,3 +1,4 @@
+using ThreeMustTasks.Core.Domain;
 using ThreeMustTasks.Core.Ports;
 
 namespace ThreeMustTasks.Core.Services;
@@ -8,7 +9,8 @@ namespace ThreeMustTasks.Core.Services;
 /// de día (<see cref="Start"/>); los cambios de ajustes y la restauración de backup lo llaman con <see cref="RebuildAsync"/>.
 /// </summary>
 public sealed class ReminderSyncService(
-    ISettingsStore settings, IDayRepository days, INotificationScheduler scheduler, TimeProvider time, PlanEvents events)
+    ISettingsStore settings, IDayRepository days, ITaskRepository tasks, IConfigRepository config,
+    INotificationScheduler scheduler, TimeProvider time, PlanEvents events)
 {
     private readonly SemaphoreSlim _gate = new(1, 1);
     private bool _started;
@@ -25,6 +27,31 @@ public sealed class ReminderSyncService(
         events.RolloverCompleted += d => { _ = RebuildAsync(); };
     }
 
+    /// <summary>
+    /// Mínimos de hoy. Se consideran cumplidos si el log lo anotó alguna vez (<c>PlanMinimumMetAt</c>/<c>CompletionMinimumMetAt</c>,
+    /// spec §4.2) o si se cumplen ahora mismo; así las insistencias se cancelan al cumplir el mínimo y no reaparecen.
+    /// </summary>
+    private async Task<DayProgress> ProgressAsync(DateOnly today, CancellationToken ct)
+    {
+        var log = await days.GetLogAsync(today, ct);
+        var stored = await config.ListLevelsAsync(ct);
+        // Antes de la primera visita a Hoy los niveles aún no se han sembrado: se evalúa con los de fábrica.
+        var levels = (stored.Count > 0 ? stored : DefaultLevels.Create()).Where(l => l.Enabled).ToList();
+        var entries = new List<PlanEntry>();
+        foreach (var a in await days.GetAssignmentsAsync(today, ct))
+        {
+            if (a.Outcome is not (AssignmentOutcome.Planned or AssignmentOutcome.Completed)) continue;
+            var task = await tasks.GetAsync(a.TaskId, ct);
+            if (task is not null) entries.Add(new PlanEntry(task.LevelId, a.Outcome == AssignmentOutcome.Completed));
+        }
+        var status = QuotaPolicy.Evaluate(levels, entries);
+        var completionMet = log?.CompletionMinimumMetAt is not null || status.IsCompletionMinimumMet;
+        return new DayProgress(
+            log?.PlanMinimumMetAt is not null || status.IsPlanMinimumMet,
+            completionMet,
+            completionMet ? [] : status.MissingToComplete.Select(m => (m.Level.Name, m.Missing)).ToList());
+    }
+
     public async Task RebuildAsync(CancellationToken ct = default)
     {
         await _gate.WaitAsync(ct);
@@ -33,8 +60,8 @@ public sealed class ReminderSyncService(
             var s = settings.Load();
             var local = time.GetLocalNow();
             var today = LogicalDayCalculator.For(local, s.DayStartsAt);
-            var log = await days.GetLogAsync(today, ct);
-            var plan = ReminderPlanner.Plan(s, local.DateTime, planMinimumMetToday: log?.PlanMinimumMetAt is not null);
+            var progress = await ProgressAsync(today, ct);
+            var plan = ReminderPlanner.Plan(s, local.DateTime, progress);
             await scheduler.ReplaceAllAsync(plan, ct);
             LastError = null;
         }

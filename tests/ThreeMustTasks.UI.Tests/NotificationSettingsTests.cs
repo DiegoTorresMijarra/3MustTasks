@@ -98,7 +98,7 @@ public sealed class NotificationSettingsTests : BunitContext
 
         Assert.Equal(new TimeOnly(9, 15), Store.Load().PlanningReminderTime);
         Assert.True(_scheduler.Replaces > before);
-        Assert.All(_scheduler.Last, n => Assert.Equal(new TimeOnly(9, 15), TimeOnly.FromDateTime(n.At)));
+        Assert.All(_scheduler.Last.Where(n => n.Kind == NotificationKind.PlanReminder), n => Assert.Equal(new TimeOnly(9, 15), TimeOnly.FromDateTime(n.At)));
     }
 
     [Fact]
@@ -121,8 +121,8 @@ public sealed class NotificationSettingsTests : BunitContext
 
         Assert.False(Store.Load().PlanReminderOnDay(DayOfWeek.Thursday));
         Assert.True(Store.Load().PlanReminderOnDay(DayOfWeek.Friday));
-        Assert.DoesNotContain(_scheduler.Last, n => n.LogicalDate.DayOfWeek == DayOfWeek.Thursday);
-        Assert.Equal(6, _scheduler.Last.Count);
+        Assert.DoesNotContain(_scheduler.Last, n => n.Kind == NotificationKind.PlanReminder && n.LogicalDate.DayOfWeek == DayOfWeek.Thursday);
+        Assert.Equal(6, _scheduler.Last.Count(n => n.Kind == NotificationKind.PlanReminder));
     }
 
     [Fact]
@@ -133,7 +133,7 @@ public sealed class NotificationSettingsTests : BunitContext
         cut.Find("[data-testid=setting-planreminder]").Change(false);
 
         Assert.False(Store.Load().PlanReminderEnabled);
-        Assert.Empty(_scheduler.Last);
+        Assert.DoesNotContain(_scheduler.Last, n => n.Kind is NotificationKind.PlanReminder or NotificationKind.Nag);
         Assert.True(cut.Find("[data-testid=setting-planreminder-time]").HasAttribute("disabled"));
     }
 
@@ -261,7 +261,7 @@ public sealed class NotificationSettingsTests : BunitContext
         await Services.GetRequiredService<ReminderSyncService>().RebuildAsync();
 
         Assert.True(_scheduler.Replaces > before);
-        Assert.Equal(7, _scheduler.Last.Count);
+        Assert.Equal(7, _scheduler.Last.Count(n => n.Kind == NotificationKind.PlanReminder));
     }
 
     // --- Deep link ---

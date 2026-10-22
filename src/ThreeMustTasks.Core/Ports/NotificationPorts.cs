@@ -4,6 +4,10 @@ public enum NotificationKind
 {
     /// <summary>"¡Añade tus tareas!" (PRD §5.6).</summary>
     PlanReminder = 1,
+    /// <summary>Insistencia por plan incompleto (PRD §5.2).</summary>
+    Nag = 2,
+    /// <summary>Aviso de la tarde: falta el mínimo a completar (PRD §5.2).</summary>
+    CompletionReminder = 3,
 }
 
 /// <summary>

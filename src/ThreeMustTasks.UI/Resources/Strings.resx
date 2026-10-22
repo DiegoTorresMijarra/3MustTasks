@@ -253,6 +253,13 @@
   <data name="Settings_PlanReminder" xml:space="preserve"><value>Recordatorio "¡Añade tus tareas!"</value></data>
   <data name="Settings_PlanReminderTime" xml:space="preserve"><value>Hora del recordatorio</value></data>
   <data name="Settings_PlanReminderDays" xml:space="preserve"><value>Días de la semana</value></data>
+  <data name="Settings_Nag" xml:space="preserve"><value>Insistir mientras falte el mínimo a añadir</value></data>
+  <data name="Settings_NagInterval" xml:space="preserve"><value>Minutos entre avisos</value></data>
+  <data name="Settings_NagMax" xml:space="preserve"><value>Máximo de avisos al día</value></data>
+  <data name="Settings_CompletionReminder" xml:space="preserve"><value>Aviso de la tarde si falta completar</value></data>
+  <data name="Settings_CompletionTime" xml:space="preserve"><value>Hora del aviso de la tarde</value></data>
+  <data name="Plan_StrictNotice" xml:space="preserve"><value>Modo estricto: no puedes salir de Planificar hasta añadir el mínimo de tareas de hoy.</value></data>
+  <data name="Plan_StrictBlocked" xml:space="preserve"><value>Aún te faltan tareas por añadir: complétalas para poder salir.</value></data>
   <data name="Notif_PermGranted" xml:space="preserve"><value>Las notificaciones están activadas.</value></data>
   <data name="Notif_PermMissing" xml:space="preserve"><value>Las notificaciones están desactivadas: sin ellas no puedo recordarte que planifiques tu día.</value></data>
   <data name="Notif_RequestPermission" xml:space="preserve"><value>Activar notificaciones</value></data>
