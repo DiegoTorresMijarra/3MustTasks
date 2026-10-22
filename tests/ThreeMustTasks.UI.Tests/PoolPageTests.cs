@@ -168,6 +168,38 @@ public sealed class PoolPageTests : BunitContext
         Assert.Contains("0 seleccionadas", cut.Find("[data-testid=pool-summary]").TextContent);
     }
 
+    [Fact]
+    public async Task Future_tab_groups_scheduled_tasks_by_date_and_links_to_their_edit_page()
+    {
+        await Services.GetRequiredService<TodayService>().GetLevelsAsync();
+        var repo = Services.GetRequiredService<ITaskRepository>();
+        var later = new TaskItem { Title = "después", LevelId = DefaultLevels.MustId, ScheduledDate = new DateOnly(2026, 10, 25) };
+        var soon = new TaskItem { Title = "pronto", LevelId = DefaultLevels.MaybeId, ScheduledDate = new DateOnly(2026, 10, 22) };
+        await repo.UpsertAsync(later);
+        await repo.UpsertAsync(soon);
+        await repo.UpsertAsync(new TaskItem { Title = "hoy", LevelId = DefaultLevels.MustId, ScheduledDate = new DateOnly(2026, 10, 21) });
+
+        Services.GetRequiredService<NavigationManager>().NavigateTo("/pool/futuro");
+        var cut = Render<Routes>();
+
+        Assert.Equal(2, cut.FindAll("[data-testid=future-group]").Count);
+        Assert.Equal(["Jueves, 22 de octubre", "Domingo, 25 de octubre"], cut.FindAll("[data-testid=future-date]").Select(e => e.TextContent.Trim()));
+        Assert.Equal(["pronto", "después"], cut.FindAll("[data-testid=future-title]").Select(e => e.TextContent.Trim()));
+        Assert.Equal($"tarea/{soon.Id}", cut.FindAll("[data-testid=future-title]")[0].GetAttribute("href"));
+        Assert.Equal("page",cut.Find("[data-testid=tab-future]").GetAttribute("aria-current"));
+    }
+
+    [Fact]
+    public async Task Future_tab_shows_empty_state()
+    {
+        await Services.GetRequiredService<TodayService>().GetLevelsAsync();
+        Services.GetRequiredService<NavigationManager>().NavigateTo("/pool/futuro");
+
+        var cut = Render<Routes>();
+
+        Assert.NotNull(cut.Find("[data-testid=future-empty]"));
+    }
+
     private async Task<TaskItem> SeedArchived(string title)
     {
         var t = await Seed(title, DefaultLevels.MustId);

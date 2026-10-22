@@ -5,10 +5,16 @@ namespace ThreeMustTasks.Core.Services;
 
 /// <param name="ClosedDates">Días que se han cerrado en esta ejecución (vacío si no había nada pendiente).</param>
 /// <param name="Generated">Instancias de recurrentes generadas hoy: al plan y al pool (estas últimas, con aviso).</param>
-public sealed record RolloverResult(IReadOnlyList<DateOnly> ClosedDates, GenerationResult? Generated = null)
+/// <param name="ScheduledAdded">Tareas programadas para hoy que entraron solas al plan (AutoAddScheduled).</param>
+/// <param name="ScheduledSkipped">Programadas para hoy que no cupieron en su nivel y se quedan en el pool (aviso).</param>
+public sealed record RolloverResult(
+    IReadOnlyList<DateOnly> ClosedDates, GenerationResult? Generated = null,
+    IReadOnlyList<TaskItem>? ScheduledAdded = null, IReadOnlyList<TaskItem>? ScheduledSkipped = null)
 {
     public GenerationResult Recurrences => Generated ?? GenerationResult.Empty;
-    public bool Changed => ClosedDates.Count > 0 || Recurrences.Any;
+    public IReadOnlyList<TaskItem> ScheduledToPlan => ScheduledAdded ?? [];
+    public IReadOnlyList<TaskItem> ScheduledToPool => ScheduledSkipped ?? [];
+    public bool Changed => ClosedDates.Count > 0 || Recurrences.Any || ScheduledToPlan.Count > 0;
 }
 
 /// <summary>
@@ -19,7 +25,7 @@ public sealed record RolloverResult(IReadOnlyList<DateOnly> ClosedDates, Generat
 /// </summary>
 /// <remarks>
 /// Después de cerrar (haya o no días pendientes) genera las instancias de las recurrentes de hoy con
-/// <see cref="RecurrenceGenerator"/>, en la misma transacción. Quedan para otros issues los pasos de autoañadir las programadas y reconstruir
+/// <see cref="RecurrenceGenerator"/>, en la misma transacción. Con AutoAddScheduled añade además las programadas para hoy que caben. Queda para otros issues reconstruir
 /// recordatorios (la lista de §4.1).
 /// </remarks>
 public sealed class DayRolloverService(
@@ -43,6 +49,7 @@ public sealed class DayRolloverService(
             var today = calendar.Today(settings.Load());
             IReadOnlyList<DateOnly> closed = [];
             var generated = GenerationResult.Empty;
+            IReadOnlyList<TaskItem> scheduledAdded = [], scheduledSkipped = [];
 
             await unit.ExecuteInTransactionAsync(async token =>
             {
@@ -50,10 +57,11 @@ public sealed class DayRolloverService(
                 var levels = (await config.ListLevelsAsync(token)).Where(l => l.Enabled).ToList();
                 var now = time.GetUtcNow();
                 generated = await new RecurrenceGenerator(tasks, days, config).GenerateAsync(today, levels, now, token);
-                if (generated.ToPlan.Count > 0) await RecordPlanMinimumAsync(today, levels, now, token);
+                if (settings.Load().AutoAddScheduled) (scheduledAdded, scheduledSkipped) = await AddScheduledAsync(today, levels, now, token);
+                if (generated.ToPlan.Count > 0 || scheduledAdded.Count > 0) await RecordPlanMinimumAsync(today, levels, now, token);
             }, ct);
 
-            var result = new RolloverResult(closed, generated);
+            var result = new RolloverResult(closed, generated, scheduledAdded, scheduledSkipped);
             if (result.Changed) events.RaisePlanChanged(today);
             return result;
         }
@@ -61,6 +69,43 @@ public sealed class DayRolloverService(
         {
             _gate.Release();
         }
+    }
+
+    /// <summary>
+    /// Spec §4.1: con AutoAddScheduled, las tareas Active con <c>ScheduledDate == hoy</c> entran al plan si caben en el
+    /// cupo de su nivel (QuotaPolicy); las que no, se quedan en el pool y se devuelven para avisar. Las que ya tienen
+    /// alguna asignación hoy (planificadas, completadas o quitadas por el usuario) se respetan. Idempotente.
+    /// </summary>
+    private async Task<(IReadOnlyList<TaskItem> Added, IReadOnlyList<TaskItem> Skipped)> AddScheduledAsync(
+        DateOnly today, IReadOnlyList<Level> levels, DateTimeOffset now, CancellationToken ct)
+    {
+        var assignments = (await days.GetAssignmentsAsync(today, ct)).ToList();
+        var assigned = assignments.Select(a => a.TaskId).ToHashSet();
+        var due = (await tasks.ListAsync(TaskItemStatus.Active, ct))
+            .Where(t => t.ScheduledDate == today && !assigned.Contains(t.Id))
+            .OrderBy(t => t.CreatedAt).ThenBy(t => t.Id).ToList();
+        if (due.Count == 0) return ([], []);
+
+        var order = assignments.Count == 0 ? 0 : assignments.Max(a => a.Order) + 1;
+        var count = new Dictionary<Guid, int>();
+        foreach (var a in assignments.Where(a => a.Outcome is AssignmentOutcome.Planned or AssignmentOutcome.Completed))
+        {
+            var t = await tasks.GetAsync(a.TaskId, ct);
+            if (t is not null) count[t.LevelId] = count.GetValueOrDefault(t.LevelId) + 1;
+        }
+
+        var added = new List<TaskItem>();
+        var skipped = new List<TaskItem>();
+        foreach (var task in due)
+        {
+            var level = levels.FirstOrDefault(l => l.Id == task.LevelId);
+            if (level is null) continue;
+            if (!QuotaPolicy.CanAdd(level, count.GetValueOrDefault(level.Id))) { skipped.Add(task); continue; }
+            await days.UpsertAssignmentAsync(new DayAssignment(Guid.NewGuid(), task.Id, today, AssignmentOutcome.Planned, null, order++), ct);
+            count[level.Id] = count.GetValueOrDefault(level.Id) + 1;
+            added.Add(task);
+        }
+        return (added, skipped);
     }
 
     /// <summary>Las instancias generadas pueden completar el mínimo a añadir: se anota la primera vez que se cumple.</summary>

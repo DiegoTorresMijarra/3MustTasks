@@ -308,4 +308,9 @@
   <data name="Ics_Export" xml:space="preserve"><value>Exportar .ics</value></data>
   <data name="Ics_Exported" xml:space="preserve"><value>Calendario exportado ({0} tareas).</value></data>
   <data name="Ics_RangeError" xml:space="preserve"><value>La fecha final no puede ser anterior a la inicial.</value></data>
+  <data name="Pool_TabPending" xml:space="preserve"><value>Pendientes</value></data>
+  <data name="Pool_TabFuture" xml:space="preserve"><value>A futuro</value></data>
+  <data name="Future_Title" xml:space="preserve"><value>Programadas a futuro</value></data>
+  <data name="Future_Empty" xml:space="preserve"><value>No hay tareas programadas a futuro.</value></data>
+  <data name="Today_ScheduledOverflow" xml:space="preserve"><value>Programadas para hoy que no caben en su nivel y siguen en el pool: {0}.</value></data>
 </root>

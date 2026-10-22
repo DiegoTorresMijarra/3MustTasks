@@ -1,6 +1,6 @@
 # 13 · Tareas programadas a futuro
 
-Status: claimed
+Status: in-review
 Blocked by: 11
 Cubre: 3MT-19, 20
 
@@ -10,9 +10,9 @@ El usuario asigna una fecha futura a una tarea; espera en la sección 'Programad
 
 ## Acceptance criteria
 
-- [ ] Sección 'Programadas a futuro' agrupada por fecha
-- [ ] Con `AutoAddScheduled` activo entra al plan en el cierre de día si hay cupo; si no, queda en el pool con aviso
-- [ ] Test de integración del ciclo completo: crear → no completar → cierre → pool → recuperar → completar, con el día 1 aún como no completada
+- [x] Sección 'Programadas a futuro' agrupada por fecha
+- [x] Con `AutoAddScheduled` activo entra al plan en el cierre de día si hay cupo; si no, queda en el pool con aviso
+- [x] Test de integración del ciclo completo: crear → no completar → cierre → pool → recuperar → completar, con el día 1 aún como no completada
 
 ## Blocked by
 
@@ -20,4 +20,5 @@ El usuario asigna una fecha futura a una tarea; espera en la sección 'Programad
 
 ## Comments
 - pm-2 (nota del 10): A futuro debe enlazar a `tarea/{id}` (edición ya implementada, con selector de fecha).
+- worker-6 (2026-10-22): entregado. Decisiones: (1) Pestañas Pendientes / A futuro / Archivadas como rutas (`pool`, `pool/futuro`, `pool/archivadas`) con el componente `PoolTabs`; sin contadores en las pestañas. (2) El autoañadido faltaba en `DayRolloverService` (solo existía el ajuste): ahora, con AutoAddScheduled, añade las Active con ScheduledDate == hoy si caben (QuotaPolicy); las que ya tienen cualquier asignación hoy (p. ej. quitadas por el usuario) se respetan; es idempotente. Las que no caben se devuelven en `RolloverResult.ScheduledToPool` y Hoy muestra un aviso (`TodayView.ScheduledOverflow`, solo con AutoAddScheduled activo). Con el ajuste apagado quedan en el pool sin aviso. (3) No se permite archivar tareas a futuro (el issue no lo pide). (4) Programadas con fecha ya pasada (app cerrada ese día) no se autoañaden: la spec dice == hoy; quedan en el pool. (5) Sin test bUnit del aviso en Hoy (cubierto a nivel de vista en Core).
 - pm-3 (2026-10-22): asignado a worker-6 (reutilizado, ~25% de contexto; mismo ámbito Pool). Rama issue/13-tareas-a-futuro.

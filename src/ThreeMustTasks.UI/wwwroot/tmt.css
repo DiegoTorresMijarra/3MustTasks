@@ -73,6 +73,8 @@ html, body { margin: 0; height: 100%; font-family: system-ui, -apple-system, "Se
 .tmt-banner-text { flex: 1 1 auto; font-weight: 600; }
 .tmt-chips { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 8px; padding-bottom: 4px; }
 .tmt-chip { min-height: 44px; padding: 0 14px; border-radius: 22px; white-space: nowrap; cursor: pointer; font-weight: 600; border: 1px solid var(--mud-palette-lines-default); background: var(--mud-palette-surface); color: var(--mud-palette-text-primary); }
+a.tmt-chip { display: inline-flex; align-items: center; text-decoration: none; }
+.tmt-chip[aria-current="page"],
 .tmt-chip[aria-pressed="true"] { background: var(--mud-palette-text-primary); color: var(--mud-palette-surface); }
 .tmt-pool-filters { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-size: 0.8125rem; color: var(--mud-palette-text-secondary); }
 .tmt-pool-filters select { min-height: 44px; margin-left: 6px; }

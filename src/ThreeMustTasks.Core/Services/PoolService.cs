@@ -23,6 +23,11 @@ public sealed record PoolItem(TaskItem Task, Level Level, Category? Category, Da
 /// <param name="TotalPending">Pendientes del pool sin filtrar.</param>
 public sealed record PoolView(IReadOnlyList<PoolItem> Items, int TotalPending);
 
+public sealed record FutureItem(TaskItem Task, Level Level, Category? Category);
+
+/// <summary>Tareas programadas para una misma fecha futura.</summary>
+public sealed record FutureGroup(DateOnly Date, IReadOnlyList<FutureItem> Items);
+
 /// <summary>Tarea archivada con su nivel y categoría, para la pantalla Archivadas.</summary>
 public sealed record ArchivedItem(TaskItem Task, Level? Level, Category? Category);
 
@@ -146,6 +151,21 @@ public sealed class PoolService(
             }
         }, ct);
         return archived;
+    }
+
+    /// <summary>Pool a futuro (spec §3.1): Active con <c>ScheduledDate &gt; hoy</c>, agrupado por fecha ascendente.</summary>
+    public async Task<IReadOnlyList<FutureGroup>> GetFutureAsync(CancellationToken ct = default)
+    {
+        var day = calendar.Today(settings.Load());
+        var levels = (await today.GetLevelsAsync(ct)).ToDictionary(l => l.Id);
+        var categories = (await config.ListCategoriesAsync(ct)).ToDictionary(c => c.Id);
+        return (await tasks.ListAsync(TaskItemStatus.Active, ct))
+            .Where(t => t.ScheduledDate > day && levels.ContainsKey(t.LevelId))
+            .OrderBy(t => t.CreatedAt).ThenBy(t => t.Id)
+            .GroupBy(t => t.ScheduledDate!.Value).OrderBy(g => g.Key)
+            .Select(g => new FutureGroup(g.Key, g.Select(t => new FutureItem(t, levels[t.LevelId],
+                t.CategoryId is { } c ? categories.GetValueOrDefault(c) : null)).ToList()))
+            .ToList();
     }
 
     /// <summary>Archivadas, la última archivada primero. No caducan: solo salen al desarchivar o eliminar (P7).</summary>
