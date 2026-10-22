@@ -1,6 +1,6 @@
 # 28 · Pulido: identidad visual, accesibilidad y rendimiento
 
-Status: in-review
+Status: resolved
 Blocked by: 07, 11
 Cubre: 3MT-42, 43, 44
 
@@ -56,3 +56,4 @@ Iconos nuevos (aro con check + tres puntos de nivel sobre #15171C) generados con
 - Guion para Android real (pendiente de dispositivo): instalar la PWA desde el publish servido por HTTPS, `chrome://inspect` → Performance, arranque en frío (cerrar la app y quitarla de recientes), medir desde el toque hasta ver Hoy/onboarding (3 repeticiones, mediana); anotar modelo, versión de Chrome y red; repetir con el APK MAUI para comparar.
 - Propuestas: AOT en el publish web (más tamaño, menos CPU), ICU reducido/invariante si se acepta, precarga del service worker en la primera visita.
 - Carga diferida de las vistas de calendario: **no implementada**. Requiere mover Día/Semana/Mes a un ensamblado propio (p. ej. `ThreeMustTasks.UI.Calendar`), declararlo con `BlazorWebAssemblyLazyLoad`, cargarlo en `Router.OnNavigateAsync` y añadirlo a `AdditionalAssemblies`; toca Routes, los tests bUnit (montan `Routes`) y el cliente MAUI. El ahorro esperado es marginal (esas 3 vistas son una fracción mínima frente a CoreLib/MudBlazor). Propuesta: no hacerla; medir antes con AOT.
+- pm-3 (2026-10-22): resolved con reservas; integrado en main (323/160/235 en verde x2). NO cumplido: arranque en frío <2 s en Android (medición emulada pesimista 8,6 s con CPU x4; guion para Android real y propuestas AOT/ICU/precarga en Comments); carga diferida de calendario no hecha (propuesta: medir antes con AOT). Diferencias visuales con los mocks que quedan están listadas arriba. Se lanza un SEGUNDO PASE de fidelidad visual (worker-12, rama issue/28b-fidelidad-visual) por la petición del usuario; se registra aquí.

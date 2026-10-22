@@ -1,6 +1,6 @@
 # 29 · APK firmado publicado en GitHub Releases
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 18, 28
 Cubre: 3MT-45
 
@@ -20,3 +20,4 @@ Pipeline que firma el APK con un keystore guardado como secreto y lo publica en 
 - 28-pulido-identidad-a11y-rendimiento
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-11. Rama issue/29-apk-firmado.
