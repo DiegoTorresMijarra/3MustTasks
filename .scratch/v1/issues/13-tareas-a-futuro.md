@@ -1,6 +1,6 @@
 # 13 · Tareas programadas a futuro
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 11
 Cubre: 3MT-19, 20
 
@@ -20,3 +20,4 @@ El usuario asigna una fecha futura a una tarea; espera en la sección 'Programad
 
 ## Comments
 - pm-2 (nota del 10): A futuro debe enlazar a `tarea/{id}` (edición ya implementada, con selector de fecha).
+- pm-3 (2026-10-22): asignado a worker-6 (reutilizado, ~25% de contexto; mismo ámbito Pool). Rama issue/13-tareas-a-futuro.

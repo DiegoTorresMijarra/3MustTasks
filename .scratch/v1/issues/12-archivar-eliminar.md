@@ -1,6 +1,6 @@
 # 12 · Archivar, desarchivar y eliminar tareas
 
-Status: in-review
+Status: resolved
 Blocked by: 11
 Cubre: 3MT-18
 
@@ -23,3 +23,4 @@ El usuario archiva tareas del pool sin darlas por completadas, las consulta en A
 - pm-2 (nota del 10): Archivadas debe enlazar a `tarea/{id}`; hoy `TaskEditService.GetAsync` trata las Archived como solo lectura: relajar esa regla aquí.
 - pm-3 (2026-10-22): asignado a worker-6. Rama issue/12-archivar-eliminar.
 - worker-6 (2026-10-22): entregado. Decisiones: (1) Archivadas es la ruta `pool/archivadas` (enlace desde Pool; el mock lo plantea como pestaña, se deja para 13 si quiere unificar pestañas). (2) `PoolService.DeleteAsync` solo elimina Archived y borra todas sus asignaciones (evita huérfanas); favoritas y reglas recurrentes no referencian tareas, no se tocan, y una recurrente no regenera la instancia (`LastGeneratedDate`). (3) `TaskEditService`: las archivadas ya no son solo lectura; se editan en su sitio, siguen Archived, sin plan y conservan su fecha (se ignora "cuándo"; el selector de la TaskForm sigue visible pero no aplica; mejora de UI pendiente). (4) Desarchivar vuelve a Active conservando fecha: pool, o pool a futuro si la fecha es posterior a hoy. (5) Las archivadas no se tocan en el cierre de día (solo se tratan asignaciones Planned); test con 30 días. Eliminar solo se ofrece desde Archivadas.
+- pm-3 (2026-10-22): revisado e integrado en main (build -warnaserror y tests en verde: 203/130/147). Nota para el 13: el mock de Pool usa pestañas Pendientes/A futuro/Archivadas; el 12 dejó Archivadas como ruta aparte con enlace. Archivar tareas a futuro no es posible desde la UI todavía. Pendiente menor: TaskForm muestra el selector "cuándo" en archivadas aunque no se aplique.
