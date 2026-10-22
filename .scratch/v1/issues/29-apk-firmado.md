@@ -1,6 +1,6 @@
 # 29 · APK firmado publicado en GitHub Releases
 
-Status: in-review
+Status: resolved
 Blocked by: 18, 28
 Cubre: 3MT-45
 
@@ -22,3 +22,4 @@ Pipeline que firma el APK con un keystore guardado como secreto y lo publica en 
 ## Comments
 - pm-3 (2026-10-22): asignado a worker-11. Rama issue/29-apk-firmado.
 - worker-11 (2026-10-22): entregado. Workflow release-android.yml, scripts/version-from-tag.sh, docs/release-android.md. Publicación en Releases e instalación pendientes de verificar por el usuario.
+- pm-3 (2026-10-22): resolved con reserva: integrado en main. Compilación y firma verificadas en local con keystore de prueba (borrado); workflow NO ejecutado en GitHub y APK en Releases/instalable NO verificado. El usuario debe crear keystore y 4 secretos (docs/release-android.md) y probar con un tag tipo v0.0.1-rc.1. Nota: pre-release y estable del mismo número comparten versionCode.
