@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ThreeMustTasks.Spikes.Notifications.PlanificarPage"
+             Title="Planificar">
+    <VerticalStackLayout Padding="24" Spacing="12">
+        <Label x:Name="Header" Text="PÁGINA PLANIFICAR (deep link OK)" FontSize="22" />
+        <Label Text="Si ves esto tras tocar la notificación, la ruta interna se abrió." />
+        <Button Text="Volver a inicio" Clicked="OnBack" />
+    </VerticalStackLayout>
+</ContentPage>

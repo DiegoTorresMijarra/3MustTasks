@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ThreeMustTasks.Spikes.Notifications.MainPage"
+             Title="Spike notificaciones">
+    <ScrollView>
+        <VerticalStackLayout Padding="24" Spacing="10">
+            <Button Text="1. Pedir permiso de notificaciones" Clicked="OnRequestPermission" />
+            <Button Text="2. Estado de permisos (notif. + alarmas exactas)" Clicked="OnShowStatus" />
+            <Button Text="3. Abrir ajuste de alarmas exactas" Clicked="OnRequestExact" />
+            <Button Text="4. Programar a 2 min -> Planificar" Clicked="OnSchedule2Min" />
+            <Button Text="5. Programar a 20 s (prueba rápida)" Clicked="OnSchedule20s" />
+            <Button Text="6. Listar pendientes" Clicked="OnListPending" />
+            <Button Text="7. Cancelar todas" Clicked="OnCancelAll" />
+            <Label x:Name="Log" FontFamily="monospace" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
