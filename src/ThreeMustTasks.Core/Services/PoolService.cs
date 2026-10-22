@@ -23,6 +23,9 @@ public sealed record PoolItem(TaskItem Task, Level Level, Category? Category, Da
 /// <param name="TotalPending">Pendientes del pool sin filtrar.</param>
 public sealed record PoolView(IReadOnlyList<PoolItem> Items, int TotalPending);
 
+/// <summary>Tarea archivada con su nivel y categoría, para la pantalla Archivadas.</summary>
+public sealed record ArchivedItem(TaskItem Task, Level? Level, Category? Category);
+
 public enum RecoverRejection { LevelFull, NotInPool }
 
 public sealed record RejectedTask(Guid TaskId, RecoverRejection Reason);
@@ -143,6 +146,62 @@ public sealed class PoolService(
             }
         }, ct);
         return archived;
+    }
+
+    /// <summary>Archivadas, la última archivada primero. No caducan: solo salen al desarchivar o eliminar (P7).</summary>
+    public async Task<IReadOnlyList<ArchivedItem>> ListArchivedAsync(CancellationToken ct = default)
+    {
+        var levels = (await today.GetLevelsAsync(ct)).ToDictionary(l => l.Id);
+        var categories = (await config.ListCategoriesAsync(ct)).ToDictionary(c => c.Id);
+        return (await tasks.ListAsync(TaskItemStatus.Archived, ct))
+            .OrderByDescending(t => t.UpdatedAt).ThenBy(t => t.Id)
+            .Select(t => new ArchivedItem(t, levels.GetValueOrDefault(t.LevelId),
+                t.CategoryId is { } c ? categories.GetValueOrDefault(c) : null))
+            .ToList();
+    }
+
+    /// <summary>
+    /// Devuelve archivadas a Active conservando su fecha: vuelven al pool (o al pool a futuro si su fecha es posterior
+    /// a hoy). Devuelve las desarchivadas; ignora las que no están archivadas.
+    /// </summary>
+    public async Task<IReadOnlyList<Guid>> UnarchiveAsync(IReadOnlyList<Guid> taskIds, CancellationToken ct = default)
+    {
+        var restored = new List<Guid>();
+        await unit.ExecuteInTransactionAsync(async token =>
+        {
+            restored.Clear();
+            foreach (var id in taskIds.Distinct())
+            {
+                var task = await tasks.GetAsync(id, token);
+                if (task is null || task.Status != TaskItemStatus.Archived) continue;
+                await tasks.UpsertAsync(task with { Status = TaskItemStatus.Active, UpdatedAt = time.GetUtcNow() }, token);
+                restored.Add(id);
+            }
+        }, ct);
+        return restored;
+    }
+
+    /// <summary>
+    /// Elimina definitivamente tareas archivadas y todas sus asignaciones (así el historial no queda con huérfanas).
+    /// Las favoritas y las reglas recurrentes no referencian tareas, así que no se tocan. Ignora las no archivadas.
+    /// </summary>
+    public async Task<IReadOnlyList<Guid>> DeleteAsync(IReadOnlyList<Guid> taskIds, CancellationToken ct = default)
+    {
+        var deleted = new List<Guid>();
+        await unit.ExecuteInTransactionAsync(async token =>
+        {
+            deleted.Clear();
+            var assignments = await days.ListAssignmentsAsync(token);
+            foreach (var id in taskIds.Distinct())
+            {
+                var task = await tasks.GetAsync(id, token);
+                if (task is null || task.Status != TaskItemStatus.Archived) continue;
+                foreach (var a in assignments.Where(a => a.TaskId == id)) await days.DeleteAssignmentAsync(a.Id, token);
+                await tasks.DeleteAsync(id, token);
+                deleted.Add(id);
+            }
+        }, ct);
+        return deleted;
     }
 
     /// <summary>Pendientes del pool: Active, sin asignación Planned/Completed hoy y programadas para hoy o antes (o sin fecha).</summary>
