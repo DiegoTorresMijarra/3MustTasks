@@ -1,6 +1,6 @@
 # 26 · Importar desde .ics
 
-Status: ready-for-agent
+Status: claimed
 Blocked by: 25, 11
 Cubre: 3MT-39
 
@@ -21,3 +21,4 @@ El usuario elige un `.ics`, previsualiza los eventos, asigna nivel por defecto e
 - 11-pool-ver-recuperar
 
 ## Comments
+- pm-3 (2026-10-22): asignado a worker-5 (reutilizado, ~30% de contexto; mismo ámbito ICS). Rama issue/26-importar-ics.
