@@ -4,8 +4,8 @@
 @inject PoolService Pool
 
 <PageTitle>@L["App_Name"] · @L["Archived_Title"]</PageTitle>
-<MudText Typo="Typo.h5" Class="tmt-title">@L["Archived_Title"]</MudText>
-<a class="tmt-settings-link" href="pool" data-testid="back-to-pool">@L["Archived_BackToPool"]</a>
+<MudText Typo="Typo.h5" Class="tmt-title">@L["Pool_Title"]</MudText>
+<PoolTabs Active="archived" />
 
 @if (_items is not null)
 {

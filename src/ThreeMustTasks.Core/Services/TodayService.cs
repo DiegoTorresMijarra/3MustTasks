@@ -13,9 +13,11 @@ public sealed record TodayTask(Guid AssignmentId, TaskItem Task, AssignmentOutco
 public sealed record LevelGroup(Level Level, IReadOnlyList<TodayTask> Tasks, int Slots, int EmptySlots, bool IsFull, int Completed);
 
 /// <param name="Quota">Estado de los mínimos a añadir y a completar (alimenta el banner y el progreso).</param>
+/// <param name="ScheduledOverflow">Tareas programadas para hoy que no cupieron en su nivel y esperan en el pool (aviso).</param>
 /// <param name="RecurringOverflow">Instancias de recurrentes de hoy que no cupieron en su nivel y esperan en el pool (aviso).</param>
 public sealed record TodayView(
-    DateOnly Date, IReadOnlyList<LevelGroup> Groups, QuotaStatus Quota, IReadOnlyList<TaskItem>? RecurringOverflow = null);
+    DateOnly Date, IReadOnlyList<LevelGroup> Groups, QuotaStatus Quota, IReadOnlyList<TaskItem>? RecurringOverflow = null,
+    IReadOnlyList<TaskItem>? ScheduledOverflow = null);
 
 public enum AddDestination { Today, Pool }
 
@@ -82,7 +84,13 @@ public sealed class TodayService(
         var overflow = (await tasks.ListAsync(TaskItemStatus.Active, ct))
             .Where(t => t.RecurrenceRuleId is not null && t.ScheduledDate == today && !planned.Contains(t.Id))
             .OrderBy(t => t.CreatedAt).ThenBy(t => t.Title, StringComparer.Ordinal).ToList();
-        return new TodayView(today, groups, Evaluate(levels, plan), overflow);
+        // Programadas para hoy que, con AutoAddScheduled, no cupieron en su nivel: siguen en el pool y se avisa.
+        var scheduledOverflow = settings.Load().AutoAddScheduled
+            ? (await tasks.ListAsync(TaskItemStatus.Active, ct))
+                .Where(t => t.RecurrenceRuleId is null && t.ScheduledDate == today && !planned.Contains(t.Id))
+                .OrderBy(t => t.CreatedAt).ThenBy(t => t.Title, StringComparer.Ordinal).ToList()
+            : [];
+        return new TodayView(today, groups, Evaluate(levels, plan), overflow, scheduledOverflow);
     }
 
     /// <summary>Tacha una tarea de hoy. Devuelve false si no existe en el plan de hoy.</summary>

@@ -1,0 +1,57 @@
+@page "/pool/futuro"
+@using ThreeMustTasks.Core.Services
+@implements IDisposable
+@inject IStringLocalizer<Strings> L
+@inject PoolService Pool
+@using ThreeMustTasks.UI.Services
+@inject PlanEvents Events
+
+<PageTitle>@L["App_Name"] · @L["Future_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="tmt-title">@L["Pool_Title"]</MudText>
+<PoolTabs Active="future" />
+
+@if (_groups is not null)
+{
+    @if (_groups.Count == 0)
+    {
+        <MudText Color="Color.Secondary" data-testid="future-empty">@L["Future_Empty"]</MudText>
+    }
+    @foreach (var group in _groups)
+    {
+        <section data-testid="future-group">
+            <MudText Typo="Typo.subtitle1" Class="mt-3" data-testid="future-date">@SpanishDate.Format(group.Date)</MudText>
+            <ul class="tmt-task-list">
+                @foreach (var item in group.Items)
+                {
+                    <li class="tmt-task tmt-pool-item" data-testid="future-item">
+                        <span class="tmt-pool-label">
+                            <span class="tmt-pool-text">
+                                <a class="tmt-task-title" href="tarea/@item.Task.Id" data-testid="future-title">@item.Task.Title</a>
+                                @if (item.Category is not null) { <span class="tmt-pool-meta">@item.Category.Name</span> }
+                            </span>
+                            <span class="tmt-level-tag" style="--level-color:@item.Level.Color">@item.Level.Name</span>
+                        </span>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}
+
+@code {
+    private IReadOnlyList<FutureGroup>? _groups;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Events.PlanChanged += OnPlanChanged;
+        _groups = await Pool.GetFutureAsync();
+    }
+
+    private void OnPlanChanged(DateOnly _) => InvokeAsync(async () =>
+    {
+        _groups = await Pool.GetFutureAsync();
+        StateHasChanged();
+    });
+
+    public void Dispose() => Events.PlanChanged -= OnPlanChanged;
+}

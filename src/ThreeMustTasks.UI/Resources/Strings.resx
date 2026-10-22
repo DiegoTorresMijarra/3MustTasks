@@ -301,4 +301,9 @@
   <data name="Archived_BackToPool" xml:space="preserve"><value>Volver al pool</value></data>
   <data name="Archived_Empty" xml:space="preserve"><value>No hay tareas archivadas.</value></data>
   <data name="Archived_Unarchive" xml:space="preserve"><value>Desarchivar</value></data>
+  <data name="Pool_TabPending" xml:space="preserve"><value>Pendientes</value></data>
+  <data name="Pool_TabFuture" xml:space="preserve"><value>A futuro</value></data>
+  <data name="Future_Title" xml:space="preserve"><value>Programadas a futuro</value></data>
+  <data name="Future_Empty" xml:space="preserve"><value>No hay tareas programadas a futuro.</value></data>
+  <data name="Today_ScheduledOverflow" xml:space="preserve"><value>Programadas para hoy que no caben en su nivel y siguen en el pool: {0}.</value></data>
 </root>

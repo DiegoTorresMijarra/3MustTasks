@@ -29,6 +29,14 @@
         </MudAlert>
     }
 
+    @if (_view.ScheduledOverflow is { Count: > 0 } scheduledOverflow)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mb-3" data-testid="scheduled-overflow">
+            @L["Today_ScheduledOverflow", string.Join(", ", scheduledOverflow.Select(t => t.Title))]
+            <a class="tmt-banner-action" href="pool" data-testid="scheduled-overflow-action">@L["Today_RecurringOverflowAction"]</a>
+        </MudAlert>
+    }
+
     @if (_view.Groups.All(g => g.Tasks.Count == 0))
     {
         <MudText Color="Color.Secondary" Class="mb-4" data-testid="today-empty">@L["Today_Empty"]</MudText>
