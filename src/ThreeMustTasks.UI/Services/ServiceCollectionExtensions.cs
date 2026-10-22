@@ -41,6 +41,8 @@ public static class ServiceCollectionExtensions
         // El escritor .ics (Ical.Net) vive en Infrastructure.Shared; se registra aquí para que web y MAUI lo tengan sin tocar los hosts.
         services.TryAddSingleton<IIcsWriter, ThreeMustTasks.Infrastructure.Shared.Ics.IcalNetWriter>();
         services.AddScoped<IcsExportService>();
+        services.TryAddSingleton<IIcsReader, ThreeMustTasks.Infrastructure.Shared.Ics.IcalNetReader>();
+        services.AddScoped<IcsImportService>();
         return services;
     }
 }

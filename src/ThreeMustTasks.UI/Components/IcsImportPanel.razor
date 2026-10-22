@@ -1,0 +1,150 @@
+@using ThreeMustTasks.Core.Domain
+@using ThreeMustTasks.Core.Services
+@using Microsoft.AspNetCore.Components.Forms
+@inject IStringLocalizer<Strings> L
+@inject IcsImportService Import
+@inject TodayService Today
+
+@* Import .ics: elige fichero, previsualiza (con selección y nivel por defecto) e importa. *@
+<MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["IcsImport_Title"]</MudText>
+<p class="tmt-level-hint">@L["IcsImport_Hint"]</p>
+
+<label class="tmt-field">
+    <span>@L["IcsImport_Choose"]</span>
+    <InputFile OnChange="OnFileAsync" accept=".ics,text/calendar" data-testid="ics-file" />
+</label>
+
+@if (_error is not null)
+{
+    <p role="alert" class="tmt-error" data-testid="ics-import-error">@_error</p>
+}
+@if (_done is not null)
+{
+    <p role="status" data-testid="ics-import-done">@_done</p>
+}
+
+@if (_preview is not null)
+{
+    <div class="tmt-form" role="group" aria-label="@L["IcsImport_PreviewTitle"]" data-testid="ics-preview">
+        <strong>@L["IcsImport_PreviewTitle"]</strong>
+        @if (_preview.DuplicatesInFile > 0)
+        {
+            <p class="tmt-level-hint" data-testid="ics-dup-note">@string.Format(L["IcsImport_DuplicatesInFile"], _preview.DuplicatesInFile)</p>
+        }
+        @if (_preview.Items.Count == 0)
+        {
+            <p data-testid="ics-empty">@L["IcsImport_Empty"]</p>
+        }
+        else
+        {
+            <label class="tmt-field">
+                <span>@L["IcsImport_DefaultLevel"]</span>
+                <select @bind="_levelId" data-testid="ics-level">
+                    @foreach (var level in _levels)
+                    {
+                        <option value="@level.Id">@level.Name</option>
+                    }
+                </select>
+            </label>
+            <ul class="tmt-list" data-testid="ics-items">
+                @foreach (var item in _preview.Items)
+                {
+                    var key = item.Key;
+                    <li data-testid="ics-item">
+                        <label class="tmt-field tmt-check-row">
+                            <input type="checkbox" checked="@_selected.Contains(key)" @onchange="e => Toggle(key, (bool)e.Value!)" data-testid="ics-item-check" />
+                            <span>
+                                <strong>@item.Event.Title</strong>
+                                — @item.Event.Date.ToString("yyyy-MM-dd")@(item.Event.Time is { } t ? " " + t.ToString("HH:mm") : "")
+                                · @DestinationText(item)
+                                @if (item.Status == IcsImportStatus.Existing)
+                                {
+                                    <em data-testid="ics-existing"> · @L["IcsImport_Existing"]</em>
+                                }
+                                @if (item.RecurrenceIgnored)
+                                {
+                                    <em data-testid="ics-rrule-ignored"> · @L["IcsImport_RuleIgnored"]</em>
+                                }
+                            </span>
+                        </label>
+                    </li>
+                }
+            </ul>
+            <div class="tmt-chip-row">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ImportAsync" Disabled="@(_selected.Count == 0)" data-testid="ics-import">@L["IcsImport_Import"]</MudButton>
+                <MudButton Variant="Variant.Text" OnClick="Cancel" data-testid="ics-import-cancel">@L["Backup_Cancel"]</MudButton>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    /// <summary>Se invoca tras importar para que la página recargue lo que muestra.</summary>
+    [Parameter] public EventCallback OnImported { get; set; }
+
+    private const long MaxBytes = 10L * 1024 * 1024;
+
+    private IcsPreview? _preview;
+    private IReadOnlyList<Level> _levels = [];
+    private Guid _levelId;
+    private readonly HashSet<string> _selected = [];
+    private string? _error;
+    private string? _done;
+
+    private string DestinationText(IcsPreviewItem i) => i.Destination switch
+    {
+        IcsImportDestination.Today => L["IcsImport_DestToday"],
+        IcsImportDestination.Future => L["IcsImport_DestFuture"],
+        IcsImportDestination.Recurring => L["IcsImport_DestRecurring"],
+        _ => L["IcsImport_DestPast"],
+    };
+
+    private async Task OnFileAsync(InputFileChangeEventArgs e)
+    {
+        _error = _done = null;
+        _preview = null;
+        try
+        {
+            using var reader = new StreamReader(e.File.OpenReadStream(MaxBytes));
+            var preview = await Import.PreviewAsync(await reader.ReadToEndAsync());
+            _levels = await Today.GetLevelsAsync();
+            _levelId = _levels.FirstOrDefault()?.Id ?? Guid.Empty;
+            _selected.Clear();
+            foreach (var i in preview.Items.Where(i => i.SelectedByDefault)) _selected.Add(i.Key);
+            _preview = preview;
+        }
+        catch (IcsFormatException ex)
+        {
+            _error = ex.Message;
+        }
+        catch (IOException)
+        {
+            _error = L["IcsImport_ReadError"];
+        }
+    }
+
+    private void Toggle(string key, bool on)
+    {
+        if (on) _selected.Add(key); else _selected.Remove(key);
+    }
+
+    private async Task ImportAsync()
+    {
+        if (_preview is null) return;
+        var chosen = _preview.Items.Where(i => _selected.Contains(i.Key)).ToList();
+        try
+        {
+            var r = await Import.ImportAsync(chosen, _levelId);
+            _done = string.Format(L["IcsImport_Done"], r.ToPlan, r.ToPool, r.Scheduled, r.Recurring, r.Updated, r.Skipped);
+        }
+        catch (Exception)
+        {
+            _error = L["IcsImport_Error"];
+            return;
+        }
+        _preview = null;
+        await OnImported.InvokeAsync();
+    }
+
+    private void Cancel() => _preview = null;
+}

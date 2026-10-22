@@ -49,7 +49,7 @@ public sealed class BackupPanelTests : BunitContext
 
     private static Task UploadAsync(IRenderedComponent<Routes> cut, string content)
     {
-        cut.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromText(content, "backup.json"));
+        cut.FindComponents<InputFile>().Single(f => f.Instance.AdditionalAttributes?["data-testid"] as string == "backup-file").UploadFiles(InputFileContent.CreateFromText(content, "backup.json"));
         // La lectura del fichero es asíncrona: se espera a que aparezca la confirmación o el error.
         cut.WaitForState(() => cut.FindAll("[data-testid=backup-confirm]").Count + cut.FindAll("[data-testid=backup-error]").Count > 0);
         return Task.CompletedTask;

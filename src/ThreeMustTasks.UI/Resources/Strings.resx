@@ -321,6 +321,23 @@
   <data name="Archived_BackToPool" xml:space="preserve"><value>Volver al pool</value></data>
   <data name="Archived_Empty" xml:space="preserve"><value>No hay tareas archivadas.</value></data>
   <data name="Archived_Unarchive" xml:space="preserve"><value>Desarchivar</value></data>
+  <data name="IcsImport_Title" xml:space="preserve"><value>Importar calendario (.ics)</value></data>
+  <data name="IcsImport_Hint" xml:space="preserve"><value>Elige un archivo .ics (Google Calendar, Apple, Outlook...). Verás los eventos antes de importar; los que ya importaste se actualizan en lugar de duplicarse.</value></data>
+  <data name="IcsImport_Choose" xml:space="preserve"><value>Archivo .ics</value></data>
+  <data name="IcsImport_PreviewTitle" xml:space="preserve"><value>Eventos encontrados</value></data>
+  <data name="IcsImport_Empty" xml:space="preserve"><value>El archivo no contiene eventos que importar.</value></data>
+  <data name="IcsImport_DefaultLevel" xml:space="preserve"><value>Nivel por defecto</value></data>
+  <data name="IcsImport_DuplicatesInFile" xml:space="preserve"><value>{0} eventos repetidos en el archivo se han agrupado.</value></data>
+  <data name="IcsImport_DestToday" xml:space="preserve"><value>hoy (al plan si cabe)</value></data>
+  <data name="IcsImport_DestFuture" xml:space="preserve"><value>futuro (programada)</value></data>
+  <data name="IcsImport_DestPast" xml:space="preserve"><value>pasado (al pool)</value></data>
+  <data name="IcsImport_DestRecurring" xml:space="preserve"><value>recurrente</value></data>
+  <data name="IcsImport_Existing" xml:space="preserve"><value>ya existe, se actualizará</value></data>
+  <data name="IcsImport_RuleIgnored" xml:space="preserve"><value>repetición no soportada, se importa una sola vez</value></data>
+  <data name="IcsImport_Import" xml:space="preserve"><value>Importar seleccionados</value></data>
+  <data name="IcsImport_Done" xml:space="preserve"><value>Importado: {0} al plan, {1} al pool, {2} programadas, {3} recurrentes, {4} actualizadas, {5} omitidas.</value></data>
+  <data name="IcsImport_ReadError" xml:space="preserve"><value>No se pudo leer el archivo.</value></data>
+  <data name="IcsImport_Error" xml:space="preserve"><value>No se pudo completar la importación.</value></data>
   <data name="Ics_Title" xml:space="preserve"><value>Exportar calendario (.ics)</value></data>
   <data name="Ics_Hint" xml:space="preserve"><value>Exporta tus tareas planificadas de un rango de fechas a un archivo .ics para abrirlo en Google Calendar, Apple Calendar u Outlook. Pierde información respecto al backup JSON.</value></data>
   <data name="Ics_From" xml:space="preserve"><value>Desde</value></data>
