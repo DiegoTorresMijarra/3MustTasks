@@ -1,6 +1,8 @@
 @using ThreeMustTasks.Core.Services
+@implements IDisposable
 @inject OnboardingService Onboarding
 @inject NavigationManager Nav
+@inject PendingNavigation Pending
 
 <Routes />
 
@@ -11,5 +13,21 @@
         var path = Nav.ToBaseRelativePath(Nav.Uri);
         if (Onboarding.IsPending && !path.StartsWith("onboarding", StringComparison.Ordinal))
             Nav.NavigateTo("onboarding", replace: true);
+        Pending.Requested += OnRequested;
     }
+
+    // Arranque en frío: la petición del host puede haber llegado antes del primer render.
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender) Consume();
+    }
+
+    private void OnRequested() => _ = InvokeAsync(Consume);
+
+    private void Consume()
+    {
+        if (Pending.Take() is { } route) Nav.NavigateTo(route);
+    }
+
+    public void Dispose() => Pending.Requested -= OnRequested;
 }

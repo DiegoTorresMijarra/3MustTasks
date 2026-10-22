@@ -86,5 +86,23 @@ public sealed record AppSettings
     public bool OnboardingCompleted { get; init; }
     /// <summary>Hora del recordatorio "¡Añade tus tareas!" (PRD §5.6); por defecto 07:30.</summary>
     public TimeOnly PlanningReminderTime { get; init; } = new(7, 30);
+    /// <summary>Si el recordatorio "¡Añade tus tareas!" está activo (spec §3 <c>PlanReminder.Enabled</c>).</summary>
+    public bool PlanReminderEnabled { get; init; } = true;
+    /// <summary>
+    /// Días de la semana en que suena el recordatorio, como máscara de bits (bit <c>(int)DayOfWeek</c>); por defecto
+    /// todos (127). Se guarda como entero para persistirlo en una sola columna. Ver <see cref="PlanReminderOnDay"/>.
+    /// </summary>
+    public int PlanReminderDaysMask { get; init; } = AllDaysMask;
+
+    public const int AllDaysMask = 0b111_1111;
+
+    /// <summary>true si el recordatorio de planificación está activo el día de la semana indicado.</summary>
+    public bool PlanReminderOnDay(DayOfWeek day) => (PlanReminderDaysMask & (1 << (int)day)) != 0;
+
+    /// <summary>Copia con el día de la semana activado o desactivado en la máscara.</summary>
+    public AppSettings WithPlanReminderDay(DayOfWeek day, bool on) => this with
+    {
+        PlanReminderDaysMask = on ? PlanReminderDaysMask | (1 << (int)day) : PlanReminderDaysMask & ~(1 << (int)day),
+    };
     public int SchemaVersion { get; init; } = 1;
 }
