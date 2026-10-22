@@ -1,6 +1,6 @@
-// Descarga de texto como fichero (backup JSON). Se carga como módulo ES desde BackupPanel.
-export function downloadText(fileName, text) {
-    const blob = new Blob([text], { type: "application/json" });
+// Descarga de texto como fichero (backup JSON, export .ics). Se carga como módulo ES desde BackupPanel e IcsExportPanel.
+export function downloadText(fileName, text, mimeType = "application/json") {
+    const blob = new Blob([text], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

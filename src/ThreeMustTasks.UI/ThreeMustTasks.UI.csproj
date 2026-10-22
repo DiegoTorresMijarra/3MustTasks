@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ThreeMustTasks.Core\ThreeMustTasks.Core.csproj" />
+    <ProjectReference Include="..\ThreeMustTasks.Infrastructure.Shared\ThreeMustTasks.Infrastructure.Shared.csproj" />
   </ItemGroup>
 
 </Project>
