@@ -9,7 +9,7 @@
         <MudAlert Severity="Severity.Error" Class="mb-3" data-testid="form-error">@Error</MudAlert>
     }
 
-    <MudTextField T="string" @bind-Value="_title" Immediate="true" Label="@L["Form_Title"]" Variant="Variant.Outlined"
+    <MudTextField T="string" @bind-Value="_title" Immediate="true" Label="@L["Form_Title"]" Variant="Variant.Text" Class="tmt-title-field"
                   data-testid="title-input" AutoFocus="true" MaxLength="120" />
 
     <div class="tmt-form-label">@L["Form_Level"]</div>
@@ -47,15 +47,15 @@
         </div>
 
         <div class="tmt-form-label">@L["Form_When"]</div>
-        <div class="tmt-chip-row" role="radiogroup" aria-label="@L["Form_When"]">
+        <div class="tmt-segment tmt-segment-lg" role="radiogroup" aria-label="@L["Form_When"]">
             <button type="button" role="radio" aria-checked="@(_when == TaskWhen.Today ? "true" : "false")"
-                    class="tmt-chip @(_when == TaskWhen.Today ? "selected" : "")" data-testid="when-today"
+                    class="tmt-seg" data-testid="when-today"
                     @onclick="() => _when = TaskWhen.Today">@L["Form_WhenToday"]</button>
             <button type="button" role="radio" aria-checked="@(_when == TaskWhen.OtherDay ? "true" : "false")"
-                    class="tmt-chip @(_when == TaskWhen.OtherDay ? "selected" : "")" data-testid="when-other"
+                    class="tmt-seg" data-testid="when-other"
                     @onclick="() => _when = TaskWhen.OtherDay">@L["Form_WhenOther"]</button>
             <button type="button" role="radio" aria-checked="@(_when == TaskWhen.Pool ? "true" : "false")"
-                    class="tmt-chip @(_when == TaskWhen.Pool ? "selected" : "")" data-testid="when-pool"
+                    class="tmt-seg" data-testid="when-pool"
                     @onclick="() => _when = TaskWhen.Pool">@L["Form_WhenPool"]</button>
         </div>
         @if (_when == TaskWhen.OtherDay)
@@ -95,15 +95,17 @@
     }
     <RecurrenceEditor Value="_recurrence" ValueChanged="spec => _recurrence = spec" AllowNone="@(!IsInstance)" Anchor="TodayDate" />
 
-    <label class="tmt-pin-option">
-        <input type="checkbox" @bind="_pinned" data-testid="pin-input" />
-        <span>@L["Form_Pin"]</span>
-    </label>
+    <div class="tmt-card">
+        <label class="tmt-pin-option">
+            <input type="checkbox" @bind="_pinned" data-testid="pin-input" />
+            <span>@L["Form_Pin"]</span>
+        </label>
 
-    <label class="tmt-pin-option">
-        <input type="checkbox" @bind="_favorite" disabled="@(Existing?.Task.IsFavoriteSource == true)" data-testid="favorite-input" />
-        <span>@L["Form_Favorite"]</span>
-    </label>
+        <label class="tmt-pin-option">
+            <input type="checkbox" @bind="_favorite" disabled="@(Existing?.Task.IsFavoriteSource == true)" data-testid="favorite-input" />
+            <span>@L["Form_Favorite"]</span>
+        </label>
+    </div>
 
     @if (FullLevelId is { } fullId && fullId == _levelId)
     {

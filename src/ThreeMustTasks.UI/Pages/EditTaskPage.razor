@@ -9,7 +9,7 @@
 @inject NavigationManager Navigation
 
 <PageTitle>@L["App_Name"] · @L["Form_EditTitle"]</PageTitle>
-<MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Form_EditTitle"]</MudText>
+<MudText Typo="Typo.h5" HtmlTag="h1" Class="mb-4 tmt-title">@L["Form_EditTitle"]</MudText>
 
 @if (_loaded && _task is null)
 {
@@ -20,7 +20,7 @@ else if (_task is { ReadOnly: true })
 {
     <div class="tmt-readonly" data-testid="task-readonly">
         <MudAlert Severity="Severity.Info" Class="mb-3">@L["Form_ReadOnly"]</MudAlert>
-        <MudText Typo="Typo.h6" data-testid="readonly-title">@_task.Task.Title</MudText>
+        <MudText Typo="Typo.subtitle1" data-testid="readonly-title">@_task.Task.Title</MudText>
         @if (!string.IsNullOrWhiteSpace(_task.Task.Notes))
         {
             <MudText Color="Color.Secondary">@_task.Task.Notes</MudText>

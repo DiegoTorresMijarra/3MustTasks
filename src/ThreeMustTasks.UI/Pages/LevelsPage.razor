@@ -4,7 +4,7 @@
 @inject LevelService Service
 
 <PageTitle>@L["App_Name"] · @L["Levels_Title"]</PageTitle>
-<MudText Typo="Typo.h5" Class="mb-2 tmt-title">@L["Levels_Title"]</MudText>
+<MudText Typo="Typo.h5" HtmlTag="h1" Class="mb-2 tmt-title">@L["Levels_Title"]</MudText>
 <MudText Typo="Typo.caption" Class="mb-3" Color="Color.Secondary">@L["Levels_DragHint"]</MudText>
 
 @if (_error is not null && _editingForm is false)

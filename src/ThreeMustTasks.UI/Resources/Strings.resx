@@ -63,6 +63,8 @@
   <data name="Today_ProgressDone" xml:space="preserve"><value>Mínimo completado</value></data>
   <data name="Today_Done" xml:space="preserve"><value>{0}/{1} hechas</value></data>
   <data name="Today_Optional" xml:space="preserve"><value>Opcional</value></data>
+  <data name="Today_RingLabel" xml:space="preserve"><value>{0} de {1} tareas hechas</value></data>
+  <data name="Today_RingCaption" xml:space="preserve"><value>HECHAS</value></data>
   <data name="Today_Check" xml:space="preserve"><value>Tachar {0}</value></data>
   <data name="Today_Uncheck" xml:space="preserve"><value>Destachar {0}</value></data>
   <data name="Today_PinnedDay" xml:space="preserve"><value>Fijada · día {0}</value></data>
