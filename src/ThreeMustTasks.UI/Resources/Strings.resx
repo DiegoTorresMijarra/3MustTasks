@@ -248,4 +248,36 @@
   <data name="Today_Recurring" xml:space="preserve"><value>Recurrente</value></data>
   <data name="Today_RecurringOverflow" xml:space="preserve"><value>No caben en su nivel y se han dejado en el pool: {0}.</value></data>
   <data name="Today_RecurringOverflowAction" xml:space="preserve"><value>Ver pool</value></data>
+  <data name="Settings_Onboarding" xml:space="preserve"><value>Repetir la introducción</value></data>
+  <data name="Onb_Title" xml:space="preserve"><value>Bienvenida</value></data>
+  <data name="Onb_StepOf" xml:space="preserve"><value>Paso {0} de {1}</value></data>
+  <data name="Onb_Skip" xml:space="preserve"><value>Saltar</value></data>
+  <data name="Onb_Back" xml:space="preserve"><value>Atrás</value></data>
+  <data name="Onb_Continue" xml:space="preserve"><value>Continuar</value></data>
+  <data name="Onb_Finish" xml:space="preserve"><value>Empezar</value></data>
+  <data name="Onb_ConceptTitle" xml:space="preserve"><value>Tres tareas que importan</value></data>
+  <data name="Onb_ConceptBody" xml:space="preserve"><value>3 Must Tasks te ayuda a decidir cada día qué de verdad importa, en lugar de perderte en una lista infinita.</value></data>
+  <data name="Onb_ConceptPoint1" xml:space="preserve"><value>Planifica pocas tareas, agrupadas por nivel (Must, Recommended, Maybe).</value></data>
+  <data name="Onb_ConceptPoint2" xml:space="preserve"><value>Las Must son lo que haría el día un éxito: complétalas y el día cuenta como cumplido.</value></data>
+  <data name="Onb_ConceptPoint3" xml:space="preserve"><value>Lo que no hagas pasa al pool, para recuperarlo o archivarlo sin culpa.</value></data>
+  <data name="Onb_QuotaTitle" xml:space="preserve"><value>¿Cuántas tareas quieres cada día?</value></data>
+  <data name="Onb_QuotaBody" xml:space="preserve"><value>Pocas y claras. Podrás cambiarlo cuando quieras en Ajustes.</value></data>
+  <data name="Onb_QuotaLegend" xml:space="preserve"><value>Composición del día</value></data>
+  <data name="Onb_Recommended" xml:space="preserve"><value>RECOMENDADO</value></data>
+  <data name="Onb_Preset_Balanced" xml:space="preserve"><value>Equilibrado</value></data>
+  <data name="Onb_Preset_Demanding" xml:space="preserve"><value>Exigente</value></data>
+  <data name="Onb_Preset_Beast" xml:space="preserve"><value>Modo bestia</value></data>
+  <data name="Onb_Preset_Custom" xml:space="preserve"><value>Personalizado</value></data>
+  <data name="Onb_CustomHint" xml:space="preserve"><value>Elige niveles, mínimos y colores</value></data>
+  <data name="Onb_MustCount" xml:space="preserve"><value>{0} Must</value></data>
+  <data name="Onb_RecCount" xml:space="preserve"><value>{0} Recommended</value></data>
+  <data name="Onb_Summary" xml:space="preserve"><value>Cada día te pediremos añadir estas {0} tareas. El día cuenta como cumplido si completas la Must.</value></data>
+  <data name="Onb_PlanTitle" xml:space="preserve"><value>¿Cuándo planificas tu día?</value></data>
+  <data name="Onb_PlanBody" xml:space="preserve"><value>Te avisaremos a esta hora para que añadas tus tareas.</value></data>
+  <data name="Onb_PlanTime" xml:space="preserve"><value>Hora de planificación</value></data>
+  <data name="Onb_PermAction" xml:space="preserve"><value>Activar notificaciones</value></data>
+  <data name="Onb_PermGranted" xml:space="preserve"><value>Notificaciones activadas.</value></data>
+  <data name="Onb_PermDenied" xml:space="preserve"><value>Has bloqueado las notificaciones. Puedes activarlas más tarde desde los ajustes del navegador o del sistema.</value></data>
+  <data name="Onb_PermUnsupported" xml:space="preserve"><value>Este dispositivo no permite activar notificaciones todavía.</value></data>
+  <data name="Onb_PwaWarning" xml:space="preserve"><value>En la versión web las notificaciones solo funcionan con la pestaña o la app abierta. Para recordatorios fiables con la app cerrada, usa la app de Android.</value></data>
 </root>

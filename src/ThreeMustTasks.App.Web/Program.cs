@@ -13,6 +13,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddSingleton(TimeProvider.System);
 // Persistencia real de la web: IndexedDB + localStorage (ADR 0001).
 builder.Services.AddBrowserPersistence();
+// Antes que la UI: el puerto de permisos de la PWA gana al no-op por defecto (TryAdd).
+builder.Services.AddSingleton<ThreeMustTasks.Core.Ports.INotificationPermission, WebNotificationPermission>();
 builder.Services.AddThreeMustTasksUI();
 
 var host = builder.Build();

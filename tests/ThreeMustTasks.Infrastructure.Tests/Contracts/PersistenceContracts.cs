@@ -395,6 +395,8 @@ public abstract class SettingsStoreContract : PersistenceContract
             AutoAddScheduled = false,
             FirstDayOfWeek = DayOfWeek.Sunday,
             ExportVTodo = true,
+            OnboardingCompleted = true,
+            PlanningReminderTime = new TimeOnly(8, 15),
         };
 
         p.Settings.Save(settings);

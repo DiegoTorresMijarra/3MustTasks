@@ -25,9 +25,9 @@ public sealed class AndroidHostTests
         var page = Maui("MainPage.xaml");
 
         Assert.Contains("<BlazorWebView", page);
-        Assert.Contains("ComponentType=\"{x:Type ui:Routes}\"", page);
+        Assert.Contains("ComponentType=\"{x:Type ui:AppRoot}\"", page);
         Assert.Contains("assembly=ThreeMustTasks.UI", page);
-        Assert.True(File.Exists(Path.Combine(Root, "src", "ThreeMustTasks.UI", "Routes.razor")));
+        Assert.True(File.Exists(Path.Combine(Root, "src", "ThreeMustTasks.UI", "AppRoot.razor")));
     }
 
     [Fact]

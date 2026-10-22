@@ -13,6 +13,8 @@
         @Body
     </main>
 
+    @if (!OnOnboarding)
+    {
     <nav class="tmt-bottom-nav" aria-label="@L["Nav_Label"]">
         <NavLink class="tmt-nav-item" href="" Match="NavLinkMatch.All">
             <MudIcon Icon="@Icons.Material.Filled.Today" />
@@ -31,9 +33,15 @@
             <span>@L["Nav_Settings"]</span>
         </NavLink>
     </nav>
+    }
 </div>
 
 @code {
+    [Inject] private NavigationManager Nav { get; set; } = default!;
+
+    // El onboarding va a pantalla completa, sin la barra de pestañas.
+    private bool OnOnboarding => Nav.ToBaseRelativePath(Nav.Uri).StartsWith("onboarding", StringComparison.Ordinal);
+
     private MudThemeProvider? _themeProvider;
     private bool _systemDark;
     private bool _isDark;

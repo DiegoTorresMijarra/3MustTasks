@@ -1,0 +1,15 @@
+@using ThreeMustTasks.Core.Services
+@inject OnboardingService Onboarding
+@inject NavigationManager Nav
+
+<Routes />
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Solo en el arranque: la primera vez se entra por el onboarding. Si ya se hizo (o se saltó) no vuelve a salir.
+        var path = Nav.ToBaseRelativePath(Nav.Uri);
+        if (Onboarding.IsPending && !path.StartsWith("onboarding", StringComparison.Ordinal))
+            Nav.NavigateTo("onboarding", replace: true);
+    }
+}

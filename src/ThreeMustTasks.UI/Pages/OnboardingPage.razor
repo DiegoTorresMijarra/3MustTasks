@@ -1,0 +1,160 @@
+@page "/onboarding"
+@using ThreeMustTasks.Core.Ports
+@using ThreeMustTasks.Core.Services
+@inject IStringLocalizer<Strings> L
+@inject OnboardingService Onboarding
+@inject INotificationPermission Permission
+@inject NavigationManager Nav
+
+<PageTitle>@L["App_Name"] · @L["Onb_Title"]</PageTitle>
+
+<div class="tmt-onb" data-testid="onboarding">
+    <div class="tmt-onb-top">
+        <div class="tmt-onb-steps" role="img" aria-label="@L["Onb_StepOf", _step, 3]" data-testid="onb-steps">
+            @for (var i = 1; i <= 3; i++)
+            {
+                <span class="@(i <= _step ? "on" : "")"></span>
+            }
+        </div>
+        <button type="button" class="tmt-onb-skip" @onclick="Skip" data-testid="onb-skip">@L["Onb_Skip"]</button>
+    </div>
+
+    @if (_step == 1)
+    {
+        <h1 class="tmt-onb-h tmt-title" tabindex="-1" data-testid="onb-step1">@L["Onb_ConceptTitle"]</h1>
+        <p class="tmt-onb-p">@L["Onb_ConceptBody"]</p>
+        <ul class="tmt-onb-points">
+            <li>@L["Onb_ConceptPoint1"]</li>
+            <li>@L["Onb_ConceptPoint2"]</li>
+            <li>@L["Onb_ConceptPoint3"]</li>
+        </ul>
+    }
+    else if (_step == 2)
+    {
+        <h1 class="tmt-onb-h tmt-title" tabindex="-1" data-testid="onb-step2">@L["Onb_QuotaTitle"]</h1>
+        <p class="tmt-onb-p">@L["Onb_QuotaBody"]</p>
+        <fieldset class="tmt-onb-presets">
+            <legend class="tmt-sr-only">@L["Onb_QuotaLegend"]</legend>
+            @foreach (var preset in _presets)
+            {
+                var p = preset;
+                <label class="tmt-onb-preset @(_preset == p ? "selected" : "")" data-testid="onb-preset-@p">
+                    <input type="radio" name="preset" checked="@(_preset == p)" @onchange="() => _preset = p" data-testid="onb-preset-input-@p" />
+                    <span class="tmt-onb-preset-body">
+                        <span class="tmt-onb-preset-name">
+                            @L[$"Onb_Preset_{p}"]
+                            @if (p == QuotaPreset.Balanced)
+                            {
+                                <span class="tmt-onb-badge" data-testid="onb-recommended">@L["Onb_Recommended"]</span>
+                            }
+                        </span>
+                        @if (OnboardingService.Counts(p) is var (must, rec))
+                        {
+                            <span class="tmt-onb-chips">
+                                @if (must > 0) { <span class="tmt-onb-chip must">@L["Onb_MustCount", must]</span> }
+                                @if (rec > 0) { <span class="tmt-onb-chip rec">@L["Onb_RecCount", rec]</span> }
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="tmt-level-hint">@L["Onb_CustomHint"]</span>
+                        }
+                    </span>
+                </label>
+            }
+        </fieldset>
+        @if (OnboardingService.Counts(_preset) is var (m, r))
+        {
+            <div class="tmt-onb-note" data-testid="onb-summary">@L["Onb_Summary", m + r]</div>
+        }
+    }
+    else
+    {
+        <h1 class="tmt-onb-h tmt-title" tabindex="-1" data-testid="onb-step3">@L["Onb_PlanTitle"]</h1>
+        <p class="tmt-onb-p">@L["Onb_PlanBody"]</p>
+        <label class="tmt-field">
+            <span>@L["Onb_PlanTime"]</span>
+            <input type="time" value="@_time" @onchange="OnTime" data-testid="onb-time" />
+        </label>
+
+        <div class="tmt-onb-note" data-testid="onb-permission">
+            @if (_permission is NotificationPermissionState.Granted)
+            {
+                <span data-testid="onb-permission-granted">@L["Onb_PermGranted"]</span>
+            }
+            else
+            {
+                <button type="button" class="tmt-onb-secondary" @onclick="RequestPermissionAsync" data-testid="onb-request-permission">@L["Onb_PermAction"]</button>
+                @if (_permission is NotificationPermissionState.Denied)
+                {
+                    <p class="tmt-onb-p" data-testid="onb-permission-denied">@L["Onb_PermDenied"]</p>
+                }
+                else if (_permission is NotificationPermissionState.Unsupported)
+                {
+                    <p class="tmt-onb-p" data-testid="onb-permission-unsupported">@L["Onb_PermUnsupported"]</p>
+                }
+            }
+        </div>
+
+        @if (Permission.OnlyWorksWhileOpen)
+        {
+            <MudAlert Severity="Severity.Warning" Class="mt-3" data-testid="onb-pwa-warning">@L["Onb_PwaWarning"]</MudAlert>
+        }
+    }
+
+    <div class="tmt-onb-footer">
+        @if (_step > 1)
+        {
+            <button type="button" class="tmt-onb-secondary" @onclick="() => _step--" data-testid="onb-back">@L["Onb_Back"]</button>
+        }
+        @if (_step < 3)
+        {
+            <button type="button" class="tmt-onb-primary" @onclick="NextAsync" data-testid="onb-next">@L["Onb_Continue"]</button>
+        }
+        else
+        {
+            <button type="button" class="tmt-onb-primary" @onclick="FinishAsync" data-testid="onb-finish">@L["Onb_Finish"]</button>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly QuotaPreset[] _presets = [QuotaPreset.Balanced, QuotaPreset.Demanding, QuotaPreset.Beast, QuotaPreset.Custom];
+
+    private int _step = 1;
+    private QuotaPreset _preset = QuotaPreset.Balanced;
+    private string _time = "07:30";
+    private NotificationPermissionState _permission = NotificationPermissionState.NotAsked;
+
+    protected override void OnInitialized() => _time = Onboarding.PlanningTime.ToString("HH:mm");
+
+    private async Task NextAsync()
+    {
+        // Los cupos se aplican al salir del paso 2, así "Atrás" y "Saltar" no dejan cambios a medias.
+        if (_step == 2) await Onboarding.ApplyPresetAsync(_preset);
+        _step++;
+    }
+
+    private void OnTime(ChangeEventArgs e)
+    {
+        // Un valor vacío o inválido se ignora y se conserva el anterior.
+        if (TimeOnly.TryParseExact(e.Value?.ToString(), "HH:mm", out _)) _time = e.Value!.ToString()!;
+    }
+
+    private async Task RequestPermissionAsync() => _permission = await Permission.RequestAsync();
+
+    private async Task FinishAsync()
+    {
+        if (_permission is NotificationPermissionState.NotAsked) _permission = await Permission.RequestAsync();
+        Onboarding.Complete(TimeOnly.ParseExact(_time, "HH:mm"));
+        // "Personalizado" termina directamente en la configuración de niveles.
+        Nav.NavigateTo(_preset == QuotaPreset.Custom ? "ajustes/niveles" : "");
+    }
+
+    private void Skip()
+    {
+        // Saltar no cambia nada, pero cuenta como hecho: no vuelve a salir (se puede repetir desde Ajustes).
+        Onboarding.Complete();
+        Nav.NavigateTo("");
+    }
+}
