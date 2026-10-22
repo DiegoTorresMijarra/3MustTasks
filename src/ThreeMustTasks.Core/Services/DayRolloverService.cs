@@ -84,7 +84,7 @@ public sealed class DayRolloverService(
         var assigned = assignments.Select(a => a.TaskId).ToHashSet();
         var due = (await tasks.ListAsync(TaskItemStatus.Active, ct))
             .Where(t => t.ScheduledDate == today && !assigned.Contains(t.Id))
-            .OrderBy(t => t.CreatedAt).ThenBy(t => t.Id).ToList();
+            .OrderBy(t => t.CreatedAt).ThenBy(t => t.Title, StringComparer.Ordinal).ThenBy(t => t.Id).ToList();
         if (due.Count == 0) return ([], []);
 
         var order = assignments.Count == 0 ? 0 : assignments.Max(a => a.Order) + 1;

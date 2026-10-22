@@ -178,4 +178,39 @@ public sealed class TodayPageTests : BunitContext
 
         Assert.Contains("Maybe", link.TextContent);
     }
+
+    [Fact]
+    public async Task Scheduled_task_for_today_that_did_not_fit_shows_a_warning()
+    {
+        await SeedScheduledOverflow();
+
+        var cut = RenderApp();
+
+        Assert.Contains("no cabe", cut.Find("[data-testid=scheduled-overflow]").TextContent);
+        Assert.Equal("pool", cut.Find("[data-testid=scheduled-overflow-action]").GetAttribute("href"));
+    }
+
+    [Fact]
+    public async Task Scheduled_overflow_warning_is_hidden_when_AutoAddScheduled_is_off()
+    {
+        await SeedScheduledOverflow();
+        var settings = Services.GetRequiredService<ISettingsStore>();
+        settings.Save(settings.Load() with { AutoAddScheduled = false });
+
+        var cut = RenderApp();
+
+        Assert.Empty(cut.FindAll("[data-testid=scheduled-overflow]"));
+    }
+
+    private async Task SeedScheduledOverflow()
+    {
+        await SetMax(DefaultLevels.MustId, 1);
+        var tasks = Services.GetRequiredService<ITaskRepository>();
+        var today = new DateOnly(2026, 10, 21);
+        var inPlan = new TaskItem { Title = "ya en el plan", LevelId = DefaultLevels.MustId, ScheduledDate = today };
+        await tasks.UpsertAsync(inPlan);
+        await Services.GetRequiredService<IDayRepository>().UpsertAssignmentAsync(
+            new DayAssignment(Guid.NewGuid(), inPlan.Id, today, AssignmentOutcome.Planned, null, 0));
+        await tasks.UpsertAsync(new TaskItem { Title = "no cabe", LevelId = DefaultLevels.MustId, ScheduledDate = today });
+    }
 }
