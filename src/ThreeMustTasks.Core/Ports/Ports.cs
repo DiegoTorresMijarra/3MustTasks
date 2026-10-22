@@ -63,3 +63,26 @@ public interface IUnitOfWork
     /// </summary>
     Task ExecuteInTransactionAsync(Func<CancellationToken, Task> work, CancellationToken ct = default);
 }
+
+public enum NotificationPermissionState
+{
+    /// <summary>Aún no se ha pedido o la plataforma no lo dice.</summary>
+    NotAsked,
+    Granted,
+    Denied,
+    /// <summary>Esta plataforma no puede mostrar notificaciones (p. ej. implementación no-op).</summary>
+    Unsupported,
+}
+
+/// <summary>
+/// Permiso de notificaciones, tras un puerto para que la UI no dependa de la plataforma. Es la parte de permisos
+/// de <c>INotificationScheduler.RequestPermissionAsync</c> (spec §2.2), separada hasta que exista el planificador
+/// (spike 02): cuando llegue, su implementación puede delegar aquí o sustituir a este puerto.
+/// </summary>
+public interface INotificationPermission
+{
+    /// <summary>true si las notificaciones solo salen con la app abierta (PWA), para avisar al usuario.</summary>
+    bool OnlyWorksWhileOpen { get; }
+
+    Task<NotificationPermissionState> RequestAsync(CancellationToken ct = default);
+}

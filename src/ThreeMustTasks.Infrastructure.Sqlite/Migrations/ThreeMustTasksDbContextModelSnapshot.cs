@@ -34,6 +34,12 @@ namespace ThreeMustTasks.Infrastructure.Sqlite.Migrations
                     b.Property<int>("FirstDayOfWeek")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("OnboardingCompleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<TimeOnly>("PlanningReminderTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("SchemaVersion")
                         .HasColumnType("INTEGER");
 

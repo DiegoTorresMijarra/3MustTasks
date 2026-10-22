@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MudBlazor.Services;
+using ThreeMustTasks.Core.Ports;
 using ThreeMustTasks.Core.Services;
 using ThreeMustTasks.UI.Services;
 
@@ -29,6 +30,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<LevelService>();
         services.AddScoped<HistoryService>();
         services.AddScoped<RecurrenceService>();
+        services.AddScoped<OnboardingService>();
+        // Por defecto no-op; el host (PWA, o Android cuando exista la implementación del spike 02) la sustituye.
+        services.TryAddSingleton<INotificationPermission, NoOpNotificationPermission>();
         return services;
     }
 }

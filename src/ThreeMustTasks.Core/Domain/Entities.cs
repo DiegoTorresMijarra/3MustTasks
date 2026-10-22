@@ -82,5 +82,9 @@ public sealed record AppSettings
     public DayOfWeek FirstDayOfWeek { get; init; } = DayOfWeek.Monday;
     /// <summary>Si el export .ics añade además un VTODO por tarea (spec §10). Desactivado por defecto.</summary>
     public bool ExportVTodo { get; init; }
+    /// <summary>Si ya se completó (o saltó) el onboarding del primer arranque. Se puede repetir desde Ajustes.</summary>
+    public bool OnboardingCompleted { get; init; }
+    /// <summary>Hora del recordatorio "¡Añade tus tareas!" (PRD §5.6); por defecto 07:30.</summary>
+    public TimeOnly PlanningReminderTime { get; init; } = new(7, 30);
     public int SchemaVersion { get; init; } = 1;
 }
