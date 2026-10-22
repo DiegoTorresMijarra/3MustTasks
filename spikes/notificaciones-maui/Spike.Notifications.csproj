@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Spike 02 (ADR 0002). Fuera de ThreeMustTasks.sln: requiere el workload maui-android. -->
+    <PropertyGroup>
+        <TargetFramework>net10.0-android</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>ThreeMustTasks.Spikes.Notifications</RootNamespace>
+        <UseMaui>true</UseMaui>
+        <SingleProject>true</SingleProject>
+
+        <ApplicationTitle>Spike notificaciones</ApplicationTitle>
+        <ApplicationId>com.threemusttasks.spike.notifications</ApplicationId>
+        <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+        <ApplicationVersion>1</ApplicationVersion>
+
+        <!-- Igual que la app real (spec §5.1) -->
+        <SupportedOSPlatformVersion>26.0</SupportedOSPlatformVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#3f51b5" />
+        <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#3f51b5" BaseSize="128,128" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+        <PackageReference Include="Plugin.LocalNotification" Version="14.1.2" />
+    </ItemGroup>
+
+</Project>
