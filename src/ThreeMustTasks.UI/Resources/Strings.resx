@@ -29,6 +29,28 @@
   <data name="Nav_Calendar" xml:space="preserve"><value>Calendario</value></data>
   <data name="Nav_Settings" xml:space="preserve"><value>Ajustes</value></data>
   <data name="Nav_Label" xml:space="preserve"><value>Navegación principal</value></data>
+  <data name="Today_Streak" xml:space="preserve"><value>Racha de {0} días cumplidos</value></data>
+  <data name="Today_StreakOne" xml:space="preserve"><value>Racha de 1 día cumplido</value></data>
+  <data name="Today_Fulfilled" xml:space="preserve"><value>Día cumplido. Lo que hagas ahora es extra.</value></data>
+  <data name="Nav_PoolBadge" xml:space="preserve"><value>{0} pendientes</value></data>
+  <data name="Plan_Close" xml:space="preserve"><value>Cerrar</value></data>
+  <data name="Plan_PoolHint" xml:space="preserve"><value>Elige lo que quieres rescatar para hoy</value></data>
+  <data name="Plan_AddToToday" xml:space="preserve"><value>Añadir {0} a hoy</value></data>
+  <data name="Pool_MoreFilters" xml:space="preserve"><value>Más filtros</value></data>
+  <data name="Pool_SectionWeek" xml:space="preserve"><value>ESTA SEMANA</value></data>
+  <data name="Pool_SectionOlder" xml:space="preserve"><value>MÁS ANTIGUAS</value></data>
+  <data name="Form_NoTime" xml:space="preserve"><value>Sin hora</value></data>
+  <data name="Levels_StepAdd" xml:space="preserve"><value>AÑADIR</value></data>
+  <data name="Levels_StepComplete" xml:space="preserve"><value>COMPLETAR</value></data>
+  <data name="Levels_StepMax" xml:space="preserve"><value>MÁXIMO</value></data>
+  <data name="Levels_StepUp" xml:space="preserve"><value>Subir {0}</value></data>
+  <data name="Levels_StepDown" xml:space="preserve"><value>Bajar {0}</value></data>
+  <data name="Levels_Section" xml:space="preserve"><value>NIVELES Y MÍNIMOS DIARIOS</value></data>
+  <data name="Levels_Total" xml:space="preserve"><value>Total: {0}/día</value></data>
+  <data name="Levels_AddLevel" xml:space="preserve"><value>+ Añadir nivel</value></data>
+  <data name="Week_Number" xml:space="preserve"><value>Semana {0}</value></data>
+  <data name="Today_Prompt" xml:space="preserve"><value>¿Qué tiene que pasar hoy sí o sí?</value></data>
+  <data name="Today_BannerNag" xml:space="preserve"><value>Te lo recordaremos cada {0} min hasta que completes el plan.</value></data>
   <data name="Today_Title" xml:space="preserve"><value>Hoy</value></data>
   <data name="Today_Empty" xml:space="preserve"><value>Aún no hay nada planificado para hoy.</value></data>
   <data name="Pool_Title" xml:space="preserve"><value>Pool</value></data>

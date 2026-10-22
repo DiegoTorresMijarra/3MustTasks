@@ -20,7 +20,7 @@
         </a>
         <div class="tmt-week-title">
             <MudText Typo="Typo.subtitle1" data-testid="week-title">@SpanishDate.FormatShort(_week.Start) – @SpanishDate.FormatShort(_week.End)</MudText>
-            <MudText Typo="Typo.caption" Color="Color.Secondary" data-testid="week-summary">@L["Week_Summary", _week.TotalCompleted, _week.TotalPlanned]</MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary" data-testid="week-summary">@L["Week_Number", ISOWeek.GetWeekOfYear(_week.Start.ToDateTime(TimeOnly.MinValue))] · @L["Week_Summary", _week.TotalCompleted, _week.TotalPlanned]</MudText>
         </div>
         <a href="calendario/semana/@Iso(_week.Start.AddDays(7))" data-testid="week-next" aria-label="@L["Week_Next"]">
             <MudIcon Icon="@Icons.Material.Filled.ChevronRight" />
@@ -50,7 +50,7 @@
 }
 
 @code {
-    private const int MaxShown = 3;
+    private const int MaxShown = 2;
 
     [Parameter] public string? DateText { get; set; }
 
@@ -61,7 +61,6 @@
         <div class="tmt-week-head">
             <span class="tmt-week-dow">@SpanishDate.DayAbbreviation(d.Date)</span>
             <span class="tmt-week-num">@d.Date.Day</span>
-            <span class="tmt-week-score" data-testid="week-score">@Score(d)</span>
         </div>
         if (d.Kind == WeekDayKind.Past && !d.HasPlan)
         {
@@ -69,6 +68,7 @@
         }
         else
         {
+            <div class="tmt-week-body">
             <ul class="tmt-week-tasks">
                 @foreach (var item in d.Items.Take(MaxShown))
                 {
@@ -80,11 +80,13 @@
                     </li>
                 }
             </ul>
-            if (d.Items.Count > MaxShown)
+            @if (d.Items.Count > MaxShown)
             {
                 <span class="tmt-week-more" data-testid="week-more">@L["Week_More", d.Items.Count - MaxShown]</span>
             }
+            </div>
         }
+        <span class="tmt-week-score" data-testid="week-score">@Score(d)</span>
     };
 
     protected override async Task OnParametersSetAsync()

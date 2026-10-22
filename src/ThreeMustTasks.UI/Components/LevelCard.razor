@@ -1,0 +1,65 @@
+@using ThreeMustTasks.Core.Domain
+@using ThreeMustTasks.Core.Services
+@inject IStringLocalizer<Strings> L
+@inject LevelService Service
+
+@* Tarjeta de nivel del mock Ajustes: asa, muestra de color, nombre y tres contadores con pasos (+/−): añadir, completar y máximo. *@
+<div class="tmt-level-card @(Level.Enabled ? "" : "off")" style="--level-color:@Level.Color" data-testid="level-card">
+    <div class="tmt-level-card-head">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="tmt-grip" aria-hidden="true"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>
+        <span class="tmt-level-swatch" aria-hidden="true"></span>
+        <span class="tmt-level-card-name" data-testid="level-name">@Level.Name</span>
+        @if (!Level.Enabled)
+        {
+            <span class="tmt-level-card-off" data-testid="level-disabled">@L["Levels_Disabled"]</span>
+        }
+        @Head
+    </div>
+    <div class="tmt-stepper-grid">
+        <div class="tmt-stepper" data-testid="stepper-add">
+            <span class="tmt-stepper-text"><span class="tmt-stepper-label">@L["Levels_StepAdd"]</span><span class="tmt-stepper-value" data-testid="stepper-add-value">@Level.MinToAdd</span></span>
+            <span class="tmt-stepper-btns">
+                <button type="button" aria-label="@L["Levels_StepUp", L["Levels_StepAdd"]]" data-testid="stepper-add-up" @onclick="() => ApplyAsync(Level.MinToAdd + 1, Level.MinToComplete, Level.Max)">+</button>
+                <button type="button" aria-label="@L["Levels_StepDown", L["Levels_StepAdd"]]" data-testid="stepper-add-down" disabled="@(Level.MinToAdd <= 0)" @onclick="() => ApplyAsync(Level.MinToAdd - 1, Level.MinToComplete, Level.Max)">−</button>
+            </span>
+        </div>
+        <div class="tmt-stepper" data-testid="stepper-complete">
+            <span class="tmt-stepper-text"><span class="tmt-stepper-label">@L["Levels_StepComplete"]</span><span class="tmt-stepper-value" data-testid="stepper-complete-value">@Level.MinToComplete</span></span>
+            <span class="tmt-stepper-btns">
+                <button type="button" aria-label="@L["Levels_StepUp", L["Levels_StepComplete"]]" data-testid="stepper-complete-up" @onclick="() => ApplyAsync(Level.MinToAdd, Level.MinToComplete + 1, Level.Max)">+</button>
+                <button type="button" aria-label="@L["Levels_StepDown", L["Levels_StepComplete"]]" data-testid="stepper-complete-down" disabled="@(Level.MinToComplete <= 0)" @onclick="() => ApplyAsync(Level.MinToAdd, Level.MinToComplete - 1, Level.Max)">−</button>
+            </span>
+        </div>
+        <div class="tmt-stepper" data-testid="stepper-max">
+            <span class="tmt-stepper-text"><span class="tmt-stepper-label">@L["Levels_StepMax"]</span><span class="tmt-stepper-value" data-testid="stepper-max-value">@(Level.Max?.ToString() ?? "—")</span></span>
+            <span class="tmt-stepper-btns">
+                <button type="button" aria-label="@L["Levels_StepUp", L["Levels_StepMax"]]" data-testid="stepper-max-up" @onclick="() => ApplyAsync(Level.MinToAdd, Level.MinToComplete, Level.Max is { } m ? m + 1 : Math.Max(1, Math.Max(Level.MinToAdd, Level.MinToComplete)))">+</button>
+                <button type="button" aria-label="@L["Levels_StepDown", L["Levels_StepMax"]]" data-testid="stepper-max-down" disabled="@(Level.Max is null)" @onclick="() => ApplyAsync(Level.MinToAdd, Level.MinToComplete, Level.Max is > 1 ? Level.Max - 1 : null)">−</button>
+            </span>
+        </div>
+    </div>
+    @if (_error is not null)
+    {
+        <p role="alert" class="tmt-error tmt-level-card-error" data-testid="stepper-error">@_error</p>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Level Level { get; set; } = default!;
+
+    /// <summary>Botones extra de la cabecera (editar, mover, borrar) según la pantalla que aloja la tarjeta.</summary>
+    [Parameter] public RenderFragment? Head { get; set; }
+
+    /// <summary>Se invoca tras guardar un cambio para que quien aloja la tarjeta recargue los niveles.</summary>
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    private string? _error;
+
+    private async Task ApplyAsync(int add, int complete, int? max)
+    {
+        _error = null;
+        var result = await Service.SaveAsync(Level.Id, new LevelInput(Level.Name, Level.Color, Level.Icon, add, complete, max, Level.Enabled));
+        if (result.Succeeded) await OnChanged.InvokeAsync();
+        else _error = result.Outcome == SaveLevelOutcome.InvalidQuota ? L["Levels_ErrQuota"].Value : L["Err_Generic"].Value;
+    }
+}

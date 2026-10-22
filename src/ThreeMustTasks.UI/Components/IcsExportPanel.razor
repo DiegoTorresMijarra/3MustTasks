@@ -7,6 +7,7 @@
 
 @* Export .ics: el usuario elige un rango de fechas y descarga el calendario (VEVENT por asignación; VTODO si está activo en ajustes). *@
 <MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Ics_Title"]</MudText>
+<div class="tmt-panel">
 <p class="tmt-level-hint">@L["Ics_Hint"]</p>
 
 <div class="tmt-field-row">
@@ -31,6 +32,7 @@
 {
     <p role="status" data-testid="ics-done">@_done</p>
 }
+</div>
 
 @code {
     private DateOnly _from;

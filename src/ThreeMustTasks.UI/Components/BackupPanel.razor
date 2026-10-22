@@ -8,6 +8,7 @@
 
 @* Backup JSON: exportar todo y restaurar (reemplazar o fusionar) con confirmación previa. *@
 <MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Backup_Title"]</MudText>
+<div class="tmt-panel">
 <p class="tmt-level-hint">@L["Backup_Hint"]</p>
 
 <div class="tmt-chip-row">
@@ -53,6 +54,7 @@
         </div>
     </div>
 }
+</div>
 
 @code {
     /// <summary>Se invoca tras restaurar para que la página que lo aloja recargue lo que muestra.</summary>

@@ -8,8 +8,17 @@
 @inject ThreeMustTasks.Core.Ports.ISettingsStore Store
 
 <PageTitle>@L["App_Name"] · @L["Plan_Title"]</PageTitle>
-<MudText Typo="Typo.h5" HtmlTag="h1" Class="mb-2 tmt-title">@L["Plan_Title"]</MudText>
-
+@* Hoja inferior (mock Planificar): el fondo se atenúa y la página sube como un panel con asa; no cambia la ruta. *@
+<div class="tmt-sheet-ghost" aria-hidden="true"><span></span><span></span></div>
+<section class="tmt-sheet" aria-label="@L["Plan_Title"]" data-testid="plan-sheet">
+<div class="tmt-sheet-handle" aria-hidden="true"><span></span></div>
+<div class="tmt-sheet-head">
+    <MudText Typo="Typo.h5" HtmlTag="h1" Class="tmt-title">@L["Plan_Title"]</MudText>
+    <a class="tmt-sheet-close" href="" aria-label="@L["Plan_Close"]" data-testid="plan-close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </a>
+</div>
+<div class="tmt-sheet-body">
 @if (_view is not null)
 {
     @if (StrictBlocking)
@@ -24,7 +33,7 @@
         @foreach (var g in _view.Groups)
         {
             <span class="tmt-quota @(g.IsFull ? "full" : "")" style="--level-color:@g.Level.Color" data-testid="quota-@g.Level.Name">
-                <span class="tmt-quota-name">@g.Level.Name</span> <span class="tmt-quota-count">@g.Tasks.Count/@g.Slots</span>
+                <span class="tmt-quota-name">@g.Level.Name</span> <span class="tmt-quota-count">@g.Tasks.Count<small>/@g.Slots</small></span>
             </span>
         }
     </div>
@@ -46,13 +55,15 @@
             <FavoritesPanel />
             break;
         case "pool":
-            <PoolPanel />
+            <PoolPanel Sheet="true" />
             break;
         default:
             <NewTaskPanel InitialLevelId="LevelId" />
             break;
     }
 </div>
+</div>
+</section>
 
 @code {
     private TodayView? _view;

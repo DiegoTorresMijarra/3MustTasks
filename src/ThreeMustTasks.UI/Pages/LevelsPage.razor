@@ -12,34 +12,28 @@
     <MudAlert Severity="Severity.Error" Class="mb-3" data-testid="level-error">@_error</MudAlert>
 }
 
-<ul class="tmt-task-list" data-testid="level-list">
+<ul class="tmt-task-list tmt-level-list" data-testid="level-list">
     @for (var i = 0; i < _levels.Count; i++)
     {
         var index = i;
         var lvl = _levels[i];
-        <li class="tmt-task @(lvl.Enabled ? "" : "tmt-level-off")" data-testid="level-row" draggable="true"
+        <li class="tmt-level-li" data-testid="level-row" draggable="true"
             @ondragstart="() => _dragId = lvl.Id"
             @ondragover="() => { }" @ondragover:preventDefault
             @ondrop="() => DropOnAsync(index)" @ondrop:preventDefault>
-            <MudIcon Icon="@LevelIcons.Resolve(lvl.Icon)" Style="@($"color:{lvl.Color}")" Class="mx-2" />
-            <span class="tmt-task-title">
-                <span data-testid="level-name">@lvl.Name</span>
-                <span class="tmt-level-hint" data-testid="level-summary">
-                    @L["Levels_Summary", lvl.MinToAdd, lvl.MinToComplete, lvl.Max?.ToString() ?? L["Levels_NoMax"].Value]
-                </span>
-                @if (!lvl.Enabled)
-                {
-                    <span class="tmt-level-hint" data-testid="level-disabled">· @L["Levels_Disabled"]</span>
-                }
-            </span>
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" aria-label="@L["Levels_MoveUp", lvl.Name]"
-                           Disabled="@(index == 0)" OnClick="() => MoveAsync(lvl.Id, index - 1)" data-testid="level-up" />
-            <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" aria-label="@L["Levels_MoveDown", lvl.Name]"
-                           Disabled="@(index == _levels.Count - 1)" OnClick="() => MoveAsync(lvl.Id, index + 1)" data-testid="level-down" />
-            <MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="@L["Levels_Edit", lvl.Name]"
-                           OnClick="() => StartEdit(lvl)" data-testid="level-edit" />
-            <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="@L["Levels_Delete", lvl.Name]"
-                           OnClick="() => DeleteAsync(lvl)" data-testid="level-delete" />
+            <LevelCard Level="lvl" OnChanged="RefreshAsync">
+                <Head>
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowUpward" aria-label="@L["Levels_MoveUp", lvl.Name]"
+                                   Disabled="@(index == 0)" OnClick="() => MoveAsync(lvl.Id, index - 1)" data-testid="level-up" />
+                    <MudIconButton Icon="@Icons.Material.Filled.ArrowDownward" aria-label="@L["Levels_MoveDown", lvl.Name]"
+                                   Disabled="@(index == _levels.Count - 1)" OnClick="() => MoveAsync(lvl.Id, index + 1)" data-testid="level-down" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" aria-label="@L["Levels_Edit", lvl.Name]"
+                                   OnClick="() => StartEdit(lvl)" data-testid="level-edit" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" aria-label="@L["Levels_Delete", lvl.Name]"
+                                   OnClick="() => DeleteAsync(lvl)" data-testid="level-delete" />
+                </Head>
+            </LevelCard>
+            <span class="tmt-sr-only" data-testid="level-summary">@L["Levels_Summary", lvl.MinToAdd, lvl.MinToComplete, lvl.Max?.ToString() ?? L["Levels_NoMax"].Value]</span>
         </li>
     }
 </ul>
