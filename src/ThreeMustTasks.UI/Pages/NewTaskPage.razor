@@ -3,9 +3,8 @@
 @inject NavigationManager Navigation
 
 <PageTitle>@L["App_Name"] · @L["Form_NewTitle"]</PageTitle>
-<MudText Typo="Typo.h5" HtmlTag="h1" Class="mb-4 tmt-title">@L["Form_NewTitle"]</MudText>
 
-<NewTaskPanel InitialLevelId="LevelId" OnDone="GoBack" />
+<NewTaskPanel InitialLevelId="LevelId" Title="@L["Form_NewTitle"]" OnDone="GoBack" />
 
 @code {
     [SupplyParameterFromQuery(Name = "nivel")] public Guid? LevelId { get; set; }

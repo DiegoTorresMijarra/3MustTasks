@@ -9,7 +9,7 @@
 @* Alta de tarea nueva (formulario rápido). Lo usan la página /tarea/nueva y la pestaña Nueva de Planificar. *@
 @if (_view is not null)
 {
-    <TaskForm @key="_formKey" Groups="_view.Groups" InitialLevelId="InitialLevelId" FullLevelId="_fullLevelId" TodayDate="_view.Date" Error="@_error"
+    <TaskForm @key="_formKey" Title="Title" Groups="_view.Groups" InitialLevelId="InitialLevelId" FullLevelId="_fullLevelId" TodayDate="_view.Date" Error="@_error"
               OnSave="SaveAsync" OnSendToPool="SaveToPoolAsync" OnCancel="() => OnDone.InvokeAsync()" />
 }
 
@@ -20,6 +20,9 @@
     private Guid _formKey = Guid.NewGuid();
 
     [Parameter] public Guid? InitialLevelId { get; set; }
+
+    /// <summary>Título con cabecera Cancelar · título · Guardar (página /tarea/nueva); null en la pestaña de Planificar.</summary>
+    [Parameter] public string? Title { get; set; }
 
     /// <summary>Tarea guardada (o cancelado): el host decide si vuelve a Hoy o deja el formulario en blanco.</summary>
     [Parameter] public EventCallback OnDone { get; set; }

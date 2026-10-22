@@ -9,7 +9,10 @@
 @inject NavigationManager Navigation
 
 <PageTitle>@L["App_Name"] · @L["Form_EditTitle"]</PageTitle>
-<MudText Typo="Typo.h5" HtmlTag="h1" Class="mb-4 tmt-title">@L["Form_EditTitle"]</MudText>
+@if (_task is not { ReadOnly: false })
+{
+    <MudText Typo="Typo.h5" HtmlTag="h1" Class="mb-4 tmt-title">@L["Form_EditTitle"]</MudText>
+}
 
 @if (_loaded && _task is null)
 {
@@ -30,7 +33,7 @@ else if (_task is { ReadOnly: true })
 }
 else if (_task is not null && _view is not null)
 {
-    <TaskForm Groups="_view.Groups" Existing="_task" Categories="_categories" TodayDate="_view.Date"
+    <TaskForm Title="@L["Form_EditTitle"]" Groups="_view.Groups" Existing="_task" Categories="_categories" TodayDate="_view.Date"
               FullLevelId="_fullLevelId" Error="@_error" Rule="_rule"
               OnSaveEdit="SaveAsync" OnSaveRecurring="SaveRecurringAsync" OnDelete="DeleteAsync" OnCancel="GoBack" />
 }

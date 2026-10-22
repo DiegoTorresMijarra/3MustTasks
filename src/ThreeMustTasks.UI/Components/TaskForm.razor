@@ -3,7 +3,16 @@
 @inject ThreeMustTasks.Core.Ports.ISettingsStore SettingsStore
 
 @* Formulario de tarea. Nueva: título y nivel. Edición (Existing != null): además categoría, cuándo, hora, recordatorio y notas. *@
-<form class="tmt-form" @onsubmit="SubmitAsync" @onsubmit:preventDefault data-testid="task-form">
+<form class="tmt-form @(HasHeader ? "tmt-form-page" : "")" @onsubmit="SubmitAsync" @onsubmit:preventDefault data-testid="task-form">
+    @if (HasHeader)
+    {
+        @* Cabecera del mock NuevaTarea: Cancelar · título · Guardar. *@
+        <header class="tmt-form-head">
+            <button type="button" class="tmt-head-btn" data-testid="cancel" @onclick="() => OnCancel.InvokeAsync()">@L["Form_Cancel"]</button>
+            <h1 class="tmt-title">@Title</h1>
+            <button type="submit" class="tmt-head-btn strong" disabled="@string.IsNullOrWhiteSpace(_title)" data-testid="save">@L["Form_Save"]</button>
+        </header>
+    }
     @if (!string.IsNullOrEmpty(Error))
     {
         <MudAlert Severity="Severity.Error" Class="mb-3" data-testid="form-error">@Error</MudAlert>
@@ -66,42 +75,70 @@
             </label>
         }
 
-        <div class="tmt-form-label">@L["Form_TimeReminder"]</div>
-        <div class="tmt-field-row">
-            <label class="tmt-field">
-                <span>@L["Form_Time"]</span>
-                <input type="time" @bind="_time" @bind:format="HH:mm" @bind:after="OnTimeChanged" data-testid="time-input" />
-            </label>
-            <label class="tmt-field">
-                <span>@L["Form_Reminder"]</span>
-                <select @bind="_reminderMinutes" disabled="@(_time is null)" data-testid="reminder-select">
-                    <option value="">@L["Form_ReminderNone"]</option>
-                    @foreach (var m in ReminderOptions)
-                    {
-                        <option value="@m">@(m == 0 ? L["Form_ReminderAtTime"].Value : L["Form_ReminderBefore", m].Value)</option>
-                    }
-                </select>
-            </label>
-        </div>
-
-        <div class="tmt-form-label">@L["Form_Notes"]</div>
-        <textarea class="tmt-notes" aria-label="@L["Form_Notes"]" rows="3" maxlength="1000" @bind="_notes" @bind:event="oninput" data-testid="notes-input"></textarea>
     }
 
-    <div class="tmt-form-label">@L["Rec_Section"]</div>
-    @if (IsInstance)
-    {
-        <div class="tmt-level-hint" data-testid="recurrence-instance-hint">@L["Rec_InstanceHint"]</div>
-    }
-    <RecurrenceEditor Value="_recurrence" ValueChanged="spec => _recurrence = spec" AllowNone="@(!IsInstance)" Anchor="TodayDate" />
-
-    <div class="tmt-card">
+    @* Tarjeta de filas del mock: Fijar, Hora y recordatorio, Repetir, Notas y Favorita (las tres del medio se despliegan). *@
+    <div class="tmt-card tmt-rows">
         <label class="tmt-pin-option">
+            <svg class="tmt-row-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6l-1 6 4 4H6l4-4z"/><path d="M12 13v8"/></svg>
             <input type="checkbox" @bind="_pinned" data-testid="pin-input" />
             <span>@L["Form_Pin"]</span>
         </label>
 
+        @if (IsEdit)
+        {
+            <details class="tmt-row-detail" data-testid="row-time">
+                <summary>
+                    <svg class="tmt-row-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                    <span class="tmt-row-label">@L["Form_TimeReminder"]</span>
+                    <span class="tmt-row-value">@(_time is { } tm ? tm.ToString("HH:mm") : L["Form_NoTime"].Value)</span>
+                </summary>
+                <div class="tmt-field-row">
+                    <label class="tmt-field">
+                        <span>@L["Form_Time"]</span>
+                        <input type="time" @bind="_time" @bind:format="HH:mm" @bind:after="OnTimeChanged" data-testid="time-input" />
+                    </label>
+                    <label class="tmt-field">
+                        <span>@L["Form_Reminder"]</span>
+                        <select @bind="_reminderMinutes" disabled="@(_time is null)" data-testid="reminder-select">
+                            <option value="">@L["Form_ReminderNone"]</option>
+                            @foreach (var m in ReminderOptions)
+                            {
+                                <option value="@m">@(m == 0 ? L["Form_ReminderAtTime"].Value : L["Form_ReminderBefore", m].Value)</option>
+                            }
+                        </select>
+                    </label>
+                </div>
+            </details>
+        }
+
+        <details class="tmt-row-detail" data-testid="row-repeat">
+            <summary>
+                <svg class="tmt-row-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></svg>
+                <span class="tmt-row-label">@L["Rec_Section"]</span>
+                <span class="tmt-row-value">@(_recurrence is null ? L["Rec_None"].Value : RecurrenceText.Describe(L, _recurrence))</span>
+            </summary>
+            @if (IsInstance)
+            {
+                <div class="tmt-level-hint" data-testid="recurrence-instance-hint">@L["Rec_InstanceHint"]</div>
+            }
+            <RecurrenceEditor Value="_recurrence" ValueChanged="spec => _recurrence = spec" AllowNone="@(!IsInstance)" Anchor="TodayDate" />
+        </details>
+
+        @if (IsEdit)
+        {
+            <details class="tmt-row-detail" data-testid="row-notes">
+                <summary>
+                    <svg class="tmt-row-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
+                    <span class="tmt-row-label">@L["Form_Notes"]</span>
+                    <span class="tmt-row-value">@(string.IsNullOrWhiteSpace(_notes) ? "" : _notes)</span>
+                </summary>
+                <textarea class="tmt-notes" aria-label="@L["Form_Notes"]" rows="3" maxlength="1000" @bind="_notes" @bind:event="oninput" data-testid="notes-input"></textarea>
+            </details>
+        }
+
         <label class="tmt-pin-option">
+            <svg class="tmt-row-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/></svg>
             <input type="checkbox" @bind="_favorite" disabled="@(Existing?.Task.IsFavoriteSource == true)" data-testid="favorite-input" />
             <span>@L["Form_Favorite"]</span>
         </label>
@@ -140,15 +177,27 @@
         </MudAlert>
     }
 
-    <div class="tmt-form-actions">
-        <MudButton Variant="Variant.Text" OnClick="() => OnCancel.InvokeAsync()" data-testid="cancel">@L["Form_Cancel"]</MudButton>
+    @if (HasHeader)
+    {
         @if (IsEdit && OnDelete.HasDelegate)
         {
-            <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => _confirmDelete = true" data-testid="delete">@L["Form_Delete"]</MudButton>
+            <div class="tmt-form-actions tmt-form-actions-page">
+                <button type="button" class="tmt-danger-btn" @onclick="() => _confirmDelete = true" data-testid="delete">@L["Form_Delete"]</button>
+            </div>
         }
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
-                   Disabled="@string.IsNullOrWhiteSpace(_title)" data-testid="save">@L["Form_Save"]</MudButton>
-    </div>
+    }
+    else
+    {
+        <div class="tmt-form-actions">
+            <MudButton Variant="Variant.Text" OnClick="() => OnCancel.InvokeAsync()" data-testid="cancel">@L["Form_Cancel"]</MudButton>
+            @if (IsEdit && OnDelete.HasDelegate)
+            {
+                <MudButton Variant="Variant.Text" Color="Color.Error" OnClick="() => _confirmDelete = true" data-testid="delete">@L["Form_Delete"]</MudButton>
+            }
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
+                       Disabled="@string.IsNullOrWhiteSpace(_title)" data-testid="save">@L["Form_Save"]</MudButton>
+        </div>
+    }
 </form>
 
 @code {
@@ -200,6 +249,11 @@
     [Parameter] public EventCallback<NewTaskRequest> OnSendToPool { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
+
+    /// <summary>Título de la pantalla: si se da, el formulario lleva la cabecera Cancelar · título · Guardar del mock.</summary>
+    [Parameter] public string? Title { get; set; }
+
+    private bool HasHeader => Title is not null;
 
     private bool IsEdit => Existing is not null;
 

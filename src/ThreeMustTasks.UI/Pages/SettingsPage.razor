@@ -8,11 +8,34 @@
 @inject INotificationScheduler Scheduler
 @inject INotificationPermission Permission
 @inject ThreeMustTasks.Core.Services.ReminderSyncService Reminders
+@inject LevelService LevelSvc
 
 <PageTitle>@L["App_Name"] · @L["Settings_Title"]</PageTitle>
 <MudText Typo="Typo.h5" HtmlTag="h1" Class="mb-4 tmt-title">@L["Settings_Title"]</MudText>
 
-<MudText Typo="Typo.h6" Class="mb-2">@L["Settings_Appearance"]</MudText>
+@* Niveles y mínimos diarios (mock Ajustes): tarjetas con contadores; la gestión completa (orden, color, icono, borrar) vive en Niveles y cupos. *@
+<section class="tmt-levels-section" data-testid="levels-section">
+    <div class="tmt-section-row">
+        <h2 class="tmt-section-label">@L["Levels_Section"]</h2>
+        <span class="tmt-section-aside" data-testid="levels-total">@L["Levels_Total", _levels.Where(l => l.Enabled).Sum(l => l.MinToAdd)]</span>
+    </div>
+    @foreach (var lvl in _levels)
+    {
+        <LevelCard Level="lvl" OnChanged="LoadLevelsAsync">
+            <Head>
+                <a class="tmt-icon-btn" href="ajustes/niveles" aria-label="@L["Levels_Edit", lvl.Name]">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></svg>
+                </a>
+            </Head>
+        </LevelCard>
+    }
+    <div class="tmt-levels-actions">
+        <a class="tmt-dashed-btn" href="ajustes/niveles" data-testid="levels-add">@L["Levels_AddLevel"]</a>
+        <button type="button" class="tmt-link-btn" @onclick="RestoreLevelsAsync" data-testid="levels-restore-defaults">@L["Levels_Restore"]</button>
+    </div>
+</section>
+
+<MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Settings_Appearance"]</MudText>
 <MudRadioGroup T="ThemeMode" Value="Theme.Mode" ValueChanged="Theme.SetMode" aria-label="@L["Settings_Theme"]">
     <MudRadio T="ThemeMode" Value="ThemeMode.System" Color="Color.Primary" data-testid="theme-system">@L["Theme_System"]</MudRadio>
     <MudRadio T="ThemeMode" Value="ThemeMode.Light" Color="Color.Primary" data-testid="theme-light">@L["Theme_Light"]</MudRadio>
@@ -164,10 +187,12 @@
 </div>
 
 <MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Settings_Organization"]</MudText>
-<a class="tmt-settings-link" href="ajustes/niveles" data-testid="levels-link">@L["Settings_Levels"]</a><br />
-<a class="tmt-settings-link" href="ajustes/categorias" data-testid="categories-link">@L["Categories_Title"]</a><br />
-<a class="tmt-settings-link" href="ajustes/recurrentes" data-testid="recurrences-link">@L["Rec_Title"]</a><br />
-<a class="tmt-settings-link" href="onboarding" data-testid="onboarding-link">@L["Settings_Onboarding"]</a>
+<div class="tmt-card tmt-link-card">
+    <a class="tmt-settings-link" href="ajustes/niveles" data-testid="levels-link">@L["Settings_Levels"]</a>
+    <a class="tmt-settings-link" href="ajustes/categorias" data-testid="categories-link">@L["Categories_Title"]</a>
+    <a class="tmt-settings-link" href="ajustes/recurrentes" data-testid="recurrences-link">@L["Rec_Title"]</a>
+    <a class="tmt-settings-link" href="onboarding" data-testid="onboarding-link">@L["Settings_Onboarding"]</a>
+</div>
 
 <IcsExportPanel />
 
@@ -190,7 +215,21 @@
     private NotificationStatus? _status;
     private string _planTime = "07:30";
 
-    protected override async Task OnInitializedAsync() => _status = await Scheduler.GetStatusAsync();
+    private IReadOnlyList<ThreeMustTasks.Core.Domain.Level> _levels = [];
+
+    private async Task LoadLevelsAsync() => _levels = await LevelSvc.ListAsync();
+
+    private async Task RestoreLevelsAsync()
+    {
+        await LevelSvc.RestoreDefaultsAsync();
+        await LoadLevelsAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _status = await Scheduler.GetStatusAsync();
+        await LoadLevelsAsync();
+    }
 
     private async Task RequestPermissionAsync()
     {

@@ -8,14 +8,33 @@
 @inject IConfigRepository Config
 @inject PlanEvents Events
 
+@if (!Sheet)
+{
+    @* Cabecera del mock Pool: título con resumen a la izquierda y "Cancelar" a la derecha mientras hay selección. *@
+    <header class="tmt-pool-head">
+        <div class="tmt-pool-head-text">
+            <MudText Typo="Typo.h5" HtmlTag="h1" Class="tmt-title">@L["Pool_Title"]</MudText>
+            @if (_view is not null)
+            {
+                <div class="tmt-subtitle" data-testid="pool-summary">@L["Pool_Summary", _view.TotalPending, _selected.Count]</div>
+            }
+        </div>
+        @if (_selected.Count > 0)
+        {
+            <button type="button" class="tmt-pill-btn" data-testid="clear-selection" @onclick="ClearSelection">@L["Pool_Cancel"]</button>
+        }
+    </header>
+    @Tabs
+}
 
 @if (_view is not null)
 {
-    <MudText Color="Color.Secondary" Class="tmt-subtitle" data-testid="pool-summary">
-        @L["Pool_Summary", _view.TotalPending, _selected.Count]
-    </MudText>
+    @if (Sheet)
+    {
+        <div class="tmt-sheet-hint" data-testid="pool-summary">@L["Plan_PoolHint"]</div>
+    }
 
-    @if (_view.TotalPending > 0 || HasFilters)
+    @if (!Sheet && (_view.TotalPending > 0 || HasFilters))
     {
         <div class="tmt-chips" role="group" aria-label="@L["Pool_FilterLevel"]">
             <button type="button" class="tmt-chip" aria-pressed="@Pressed(_levelId is null)" data-testid="filter-all"
@@ -30,34 +49,38 @@
                     @onclick="ToggleSortAsync">@L["Pool_SortPostponed"]</button>
         </div>
 
-        <div class="tmt-pool-filters">
-            @if (_categories.Count > 0)
-            {
-                <label>@L["Pool_FilterCategory"]
-                    <select data-testid="filter-category" @onchange="e => SetCategoryAsync(e.Value?.ToString())">
+        @* Filtros extra (no están en el mock): plegados bajo "Más filtros". *@
+        <details class="tmt-more-filters" open="@(_categoryId is not null || _minAge is not null || _minPostponed is not null)">
+            <summary>@L["Pool_MoreFilters"]</summary>
+            <div class="tmt-pool-filters">
+                @if (_categories.Count > 0)
+                {
+                    <label>@L["Pool_FilterCategory"]
+                        <select data-testid="filter-category" @onchange="e => SetCategoryAsync(e.Value?.ToString())">
+                            <option value="">@L["Pool_Any"]</option>
+                            @foreach (var c in _categories)
+                            {
+                                <option value="@c.Id" selected="@(_categoryId == c.Id)">@c.Name</option>
+                            }
+                        </select>
+                    </label>
+                }
+                <label>@L["Pool_FilterAge"]
+                    <select data-testid="filter-age" @onchange="e => SetAgeAsync(e.Value?.ToString())">
                         <option value="">@L["Pool_Any"]</option>
-                        @foreach (var c in _categories)
-                        {
-                            <option value="@c.Id" selected="@(_categoryId == c.Id)">@c.Name</option>
-                        }
+                        <option value="7" selected="@(_minAge == 7)">@L["Pool_AgeAtLeast", 7]</option>
+                        <option value="30" selected="@(_minAge == 30)">@L["Pool_AgeAtLeast", 30]</option>
                     </select>
                 </label>
-            }
-            <label>@L["Pool_FilterAge"]
-                <select data-testid="filter-age" @onchange="e => SetAgeAsync(e.Value?.ToString())">
-                    <option value="">@L["Pool_Any"]</option>
-                    <option value="7" selected="@(_minAge == 7)">@L["Pool_AgeAtLeast", 7]</option>
-                    <option value="30" selected="@(_minAge == 30)">@L["Pool_AgeAtLeast", 30]</option>
-                </select>
-            </label>
-            <label>@L["Pool_FilterPostponed"]
-                <select data-testid="filter-postponed" @onchange="e => SetPostponedAsync(e.Value?.ToString())">
-                    <option value="">@L["Pool_Any"]</option>
-                    <option value="1" selected="@(_minPostponed == 1)">@L["Pool_PostponedAtLeast", 1]</option>
-                    <option value="3" selected="@(_minPostponed == 3)">@L["Pool_PostponedAtLeast", 3]</option>
-                </select>
-            </label>
-        </div>
+                <label>@L["Pool_FilterPostponed"]
+                    <select data-testid="filter-postponed" @onchange="e => SetPostponedAsync(e.Value?.ToString())">
+                        <option value="">@L["Pool_Any"]</option>
+                        <option value="1" selected="@(_minPostponed == 1)">@L["Pool_PostponedAtLeast", 1]</option>
+                        <option value="3" selected="@(_minPostponed == 3)">@L["Pool_PostponedAtLeast", 3]</option>
+                    </select>
+                </label>
+            </div>
+        </details>
     }
 
     @if (_message is not null)
@@ -74,41 +97,69 @@
     }
     else
     {
-        <ul class="tmt-task-list">
-            @foreach (var item in _view.Items)
-            {
-                var id = item.Task.Id;
-                var picked = _selected.Contains(id);
-                <li class="tmt-task tmt-pool-item @(picked ? "selected" : "")" data-testid="pool-item">
-                    <label class="tmt-pool-label">
-                        <input type="checkbox" checked="@picked" data-testid="pool-select"
-                               aria-label="@L["Pool_Select", item.Task.Title]"
-                               @onchange="e => Toggle(id, (bool)(e.Value ?? false))" />
-                        <span class="tmt-pool-text">
-                            <span class="tmt-task-title" data-testid="pool-title">@item.Task.Title</span>
-                            <span class="tmt-pool-meta">
-                                @if (item.Category is not null) { <span data-testid="pool-category">@item.Category.Name · </span> }
-                                <span data-testid="pool-age">@AgeText(item.AgeDays)</span>
-                                @if (item.TimesPostponed > 0)
-                                {
-                                    <span data-testid="pool-postponed"> · @PostponedText(item.TimesPostponed)</span>
-                                }
-                            </span>
-                        </span>
-                        <span class="tmt-level-tag" style="--level-color:@item.Level.Color" data-testid="pool-level">@item.Level.Name</span>
-                    </label>
-                </li>
-            }
-        </ul>
+        @foreach (var section in Sections())
+        {
+            <section class="tmt-pool-section">
+                @if (section.Title is not null)
+                {
+                    <h2 class="tmt-pool-section-title">@section.Title</h2>
+                }
+                <ul class="tmt-task-list">
+                    @foreach (var item in section.Items)
+                    {
+                        var id = item.Task.Id;
+                        var picked = _selected.Contains(id);
+                        <li class="tmt-task tmt-pool-item @(picked ? "selected" : "")" data-testid="pool-item">
+                            <label class="tmt-pool-label">
+                                <input type="checkbox" checked="@picked" data-testid="pool-select"
+                                       aria-label="@L["Pool_Select", item.Task.Title]"
+                                       @onchange="e => Toggle(id, (bool)(e.Value ?? false))" />
+                                <span class="tmt-pool-text">
+                                    <span class="tmt-task-title" data-testid="pool-title">@item.Task.Title</span>
+                                    <span class="tmt-pool-meta">
+                                        @if (item.Category is not null) { <span data-testid="pool-category">@item.Category.Name · </span> }
+                                        <span data-testid="pool-age">@AgeText(item)</span>
+                                        @if (item.TimesPostponed > 0)
+                                        {
+                                            <span data-testid="pool-postponed"> · @PostponedText(item.TimesPostponed)</span>
+                                        }
+                                    </span>
+                                </span>
+                                <span class="tmt-level-tag" style="--level-color:@item.Level.Color" data-testid="pool-level">@item.Level.Name</span>
+                            </label>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
     }
 
     @if (_selected.Count > 0)
     {
         <div class="tmt-action-spacer" aria-hidden="true"></div>
-        <div class="tmt-action-bar" data-testid="pool-actions">
-            <button type="button" class="tmt-action primary" data-testid="recover" @onclick="RecoverAsync">@L["Pool_Recover"]</button>
-            <button type="button" class="tmt-action" data-testid="archive" @onclick="ArchiveAsync">@L["Pool_Archive"]</button>
-            <button type="button" class="tmt-action" data-testid="clear-selection" @onclick="ClearSelection">@L["Pool_Cancel"]</button>
+        <div class="tmt-action-bar @(Sheet ? "in-sheet" : "")" data-testid="pool-actions">
+            <button type="button" class="tmt-action primary" data-testid="recover" @onclick="RecoverAsync">
+                @if (Sheet)
+                {
+                    @L["Plan_AddToToday", _selected.Count]
+                }
+                else
+                {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+                    @L["Pool_Recover"]
+                }
+            </button>
+            <button type="button" class="tmt-action" data-testid="archive" @onclick="ArchiveAsync">
+                @if (!Sheet)
+                {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1.5"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/></svg>
+                }
+                @L["Pool_Archive"]
+            </button>
+            @if (Sheet)
+            {
+                <button type="button" class="tmt-action" data-testid="clear-selection" @onclick="ClearSelection">@L["Pool_Cancel"]</button>
+            }
         </div>
     }
 }
@@ -124,6 +175,28 @@
     private int? _minPostponed;
     private PoolSort _sort = PoolSort.Oldest;
     private string? _message;
+
+    /// <summary>Dentro de la hoja de Planificar: lista plana, sin cabecera ni filtros y con el pie "Añadir N a hoy".</summary>
+    [Parameter] public bool Sheet { get; set; }
+
+    /// <summary>Pestañas (Pendientes · A futuro · Archivadas) que van bajo el título en la página Pool.</summary>
+    [Parameter] public RenderFragment? Tabs { get; set; }
+
+    private sealed record PoolSection(string? Title, IReadOnlyList<PoolItem> Items);
+
+    // Secciones por antigüedad del mock: Esta semana (7 días o menos) y Más antiguas. En la hoja, lista plana.
+    private IEnumerable<PoolSection> Sections()
+    {
+        if (Sheet) { yield return new PoolSection(null, _view!.Items); yield break; }
+        var week = _view!.Items.Where(i => i.AgeDays <= 7).ToList();
+        var older = _view.Items.Where(i => i.AgeDays > 7).ToList();
+        // El orden de las secciones sigue al de la lista (la spec ordena por más antiguas primero; el mock pinta "esta semana" arriba).
+        var weekFirst = _view.Items[0].AgeDays <= 7;
+        var weekSection = new PoolSection(L["Pool_SectionWeek"], week);
+        var olderSection = new PoolSection(L["Pool_SectionOlder"], older);
+        foreach (var s in weekFirst ? new[] { weekSection, olderSection } : new[] { olderSection, weekSection })
+            if (s.Items.Count > 0) yield return s;
+    }
 
     private bool HasFilters => _levelId is not null || _categoryId is not null || _minAge is not null || _minPostponed is not null;
 
@@ -194,11 +267,12 @@
         await ReloadAsync();
     }
 
-    private string AgeText(int days) => days switch
+    // Como en el mock: "Hoy", "Ayer" o la fecha corta ("18 oct").
+    private string AgeText(PoolItem item) => item.AgeDays switch
     {
         0 => L["Pool_AgeToday"],
         1 => L["Pool_AgeYesterday"],
-        _ => L["Pool_AgeDays", days],
+        _ => SpanishDate.FormatShort(item.CreatedOn),
     };
 
     private string PostponedText(int n) => n == 1 ? L["Pool_PostponedOne"] : L["Pool_PostponedMany", n];

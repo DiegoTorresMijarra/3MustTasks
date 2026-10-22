@@ -1,9 +1,13 @@
 @page "/"
+@using ThreeMustTasks.Core.Domain
 @using ThreeMustTasks.Core.Services
 @implements IDisposable
 @inject IStringLocalizer<Strings> L
 @inject TodayService Today
 @inject PlanEvents Events
+@inject StreakCalculator Streak
+@inject CategoryService Categories
+@inject ThreeMustTasks.Core.Ports.ISettingsStore Store
 
 <PageTitle>@L["App_Name"] · @L["Today_Title"]</PageTitle>
 @* Cabecera del mock Main: fecha, título y anillo de tareas hechas. *@
@@ -14,8 +18,19 @@
             <div class="tmt-today-date" data-testid="today-date">@SpanishDate.Format(_view.Date)</div>
         }
         <MudText Typo="Typo.h5" HtmlTag="h1" Class="tmt-title">@L["Today_Title"]</MudText>
+        @if (_view is not null && _view.Groups.All(g => g.Tasks.Count == 0) && !_view.Quota.IsPlanMinimumMet)
+        {
+            <div class="tmt-today-prompt" data-testid="today-prompt">@L["Today_Prompt"]</div>
+        }
+        else if (_streak > 0)
+        {
+            <div class="tmt-today-streak" data-testid="today-streak">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 3 4 4.5 4 8.5a4 4 0 0 1-8 0c0-1.7.7-2.9 1.6-3.8.3 1.3 1 2 1.9 2.3C11 7.8 11.4 5.2 12 3z"/></svg>
+                @(_streak == 1 ? L["Today_StreakOne"] : L["Today_Streak", _streak])
+            </div>
+        }
     </div>
-    @if (_view is not null)
+    @if (_view is not null && _view.Groups.Any(g => g.Tasks.Count > 0))
     {
         var doneCount = _view.Groups.Sum(g => g.Completed);
         var total = _view.Groups.Sum(g => g.Tasks.Count);
@@ -37,12 +52,25 @@
 
 @if (_view is not null)
 {
+    @if (_view.Quota.IsCompletionMinimumMet && _view.Groups.Sum(g => g.Completed) > 0)
+    {
+        <div class="tmt-fulfilled" role="status" data-testid="day-fulfilled">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+            @L["Today_Fulfilled"]
+        </div>
+    }
 
     @if (!_view.Quota.IsPlanMinimumMet)
     {
         <div class="tmt-banner" role="status" data-testid="plan-banner">
             <MudIcon Icon="@Icons.Material.Filled.WarningAmber" />
-            <span class="tmt-banner-text" data-testid="plan-banner-text">@BannerText(_view.Quota)</span>
+            <div class="tmt-banner-copy">
+                <span class="tmt-banner-text" data-testid="plan-banner-text">@BannerText(_view.Quota)</span>
+                @if (Store.Load() is { NagEnabled: true } nag)
+                {
+                    <span class="tmt-banner-sub" data-testid="plan-banner-nag">@L["Today_BannerNag", nag.NagIntervalMin]</span>
+                }
+            </div>
             <a class="tmt-banner-action" href="@PlanUrl(_view.Quota)" data-testid="plan-banner-action">@L["Today_BannerAction"]</a>
         </div>
     }
@@ -118,7 +146,7 @@
                             </button>
                             <div class="tmt-task-body">
                                 <a class="tmt-task-title" href="tarea/@t.Task.Id" data-testid="task-title">@t.Task.Title</a>
-                                @if (t.Task.RecurrenceRuleId is not null || t.PinnedDay is not null)
+                                @if (t.Task.RecurrenceRuleId is not null || t.PinnedDay is not null || t.Task.CategoryId is not null || t.Task.DueTime is not null)
                                 {
                                     <span class="tmt-task-meta">
                                         @if (t.PinnedDay is { } day)
@@ -126,6 +154,16 @@
                                             <span class="tmt-pinned" data-testid="pinned-badge">
                                                 <MudIcon Icon="@Icons.Material.Filled.PushPin" Size="Size.Small" />
                                                 @L["Today_PinnedDay", day]
+                                            </span>
+                                        }
+                                        @if (t.Task.CategoryId is { } catId && _cats.TryGetValue(catId, out var cat))
+                                        {
+                                            <span class="tmt-task-cat" data-testid="task-category"><span class="tmt-cat-dot" style="background:@cat.Color" aria-hidden="true"></span>@cat.Name</span>
+                                        }
+                                        @if (t.Task.DueTime is { } due)
+                                        {
+                                            <span class="tmt-task-time" data-testid="task-time">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>@due.ToString("HH:mm")
                                             </span>
                                         }
                                         @if (t.Task.RecurrenceRuleId is not null)
@@ -190,6 +228,15 @@
 @code {
     private TodayView? _view;
     private Guid? _menuFor;
+    private int _streak;
+    private Dictionary<Guid, Category> _cats = [];
+
+    private async Task LoadAsync()
+    {
+        _view = await Today.GetAsync();
+        _streak = await Streak.GetAsync();
+        _cats = (await Categories.ListAsync()).ToDictionary(c => c.Id);
+    }
 
     private async Task SetPinnedAsync(Guid taskId, bool pinned)
     {
@@ -200,12 +247,12 @@
     protected override async Task OnInitializedAsync()
     {
         Events.PlanChanged += OnPlanChanged;
-        _view = await Today.GetAsync();
+        await LoadAsync();
     }
 
     private void OnPlanChanged(DateOnly _) => InvokeAsync(async () =>
     {
-        _view = await Today.GetAsync();
+        await LoadAsync();
         StateHasChanged();
     });
 
