@@ -64,6 +64,53 @@ public sealed class HistoryService(
         return new DayDetail(date, items, Summarize(date, closedLog, assignments));
     }
 
+    /// <summary>Primer día de la semana (según Ajustes) que contiene <paramref name="date"/>.</summary>
+    public DateOnly WeekStart(DateOnly date)
+    {
+        var offset = ((int)date.DayOfWeek - (int)settings.Load().FirstDayOfWeek + 7) % 7;
+        return date.AddDays(-offset);
+    }
+
+    /// <summary>Vista Semana (3MT-36): los 7 días de la semana que contiene <paramref name="anyDateInWeek"/>.</summary>
+    public async Task<WeekView> GetWeekAsync(DateOnly anyDateInWeek, CancellationToken ct = default)
+    {
+        var start = WeekStart(anyDateInWeek);
+        var today = Today;
+        var taskMap = (await tasks.ListAsync(null, ct)).ToDictionary(t => t.Id);
+        var levels = (await config.ListLevelsAsync(ct)).ToDictionary(l => l.Id);
+        var result = new List<WeekDay>(7);
+        for (var i = 0; i < 7; i++)
+        {
+            var date = start.AddDays(i);
+            if (date > today)
+            {
+                var scheduled = taskMap.Values
+                    .Where(t => t.ScheduledDate == date && t.Status == TaskItemStatus.Active)
+                    .OrderBy(t => t.DueTime ?? TimeOnly.MaxValue).ThenBy(t => t.CreatedAt)
+                    .Select((t, n) => new HistoryItem(t, levels.GetValueOrDefault(t.LevelId), AssignmentOutcome.Planned, n))
+                    .ToList();
+                result.Add(new WeekDay(date, WeekDayKind.Future, scheduled, scheduled.Count, 0, null, scheduled.Count > 0));
+                continue;
+            }
+            var assignments = (await days.GetAssignmentsAsync(date, ct)).Where(a => taskMap.ContainsKey(a.TaskId)).OrderBy(a => a.Order).ToList();
+            var items = assignments
+                .Select(a => new HistoryItem(taskMap[a.TaskId], levels.GetValueOrDefault(taskMap[a.TaskId].LevelId), a.Outcome, a.Order))
+                .ToList();
+            if (date == today)
+            {
+                var live = assignments.Count(a => a.Outcome != AssignmentOutcome.Removed);
+                result.Add(new WeekDay(date, WeekDayKind.Today, items.Where(i => i.Outcome != AssignmentOutcome.Removed).ToList(),
+                    live, assignments.Count(a => a.Outcome == AssignmentOutcome.Completed), null, live > 0));
+                continue;
+            }
+            var log = await days.GetLogAsync(date, ct);
+            var summary = Summarize(date, log?.ClosedAt is null ? null : log, assignments);
+            result.Add(new WeekDay(date, WeekDayKind.Past, items.Where(i => i.Outcome != AssignmentOutcome.Removed).ToList(),
+                summary.Planned, summary.Completed, summary.Fulfilled, summary.HasPlan));
+        }
+        return new WeekView(start, result);
+    }
+
     /// <summary>Cumplimiento del rango (% de días con plan cumplidos), racha actual y mejor racha.</summary>
     public async Task<HistoryMetrics> GetMetricsAsync(DateOnly from, DateOnly to, CancellationToken ct = default)
     {

@@ -3,12 +3,14 @@
 @using System.Globalization
 @using ThreeMustTasks.Core.Domain
 @using ThreeMustTasks.Core.Services
+@using ThreeMustTasks.UI.Components
 @using ThreeMustTasks.UI.Services
 @inject IStringLocalizer<Strings> L
 @inject HistoryService History
 
 <PageTitle>@L["App_Name"] · @L["Calendar_Title"]</PageTitle>
-<MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Calendar_Title"]</MudText>
+<MudText Typo="Typo.h5" Class="mb-2 tmt-title">@L["Calendar_Title"]</MudText>
+<CalendarTabs Active="day" />
 
 @if (_metrics is not null && _day is not null)
 {

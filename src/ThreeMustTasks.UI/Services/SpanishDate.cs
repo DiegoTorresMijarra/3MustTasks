@@ -8,5 +8,13 @@ public static class SpanishDate
     private static readonly string[] Months =
         ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
+    private static readonly string[] DayAbbreviations = ["DOM", "LUN", "MAR", "MIÉ", "JUE", "VIE", "SÁB"];
+
+    /// <summary>"19 oct".</summary>
+    public static string FormatShort(DateOnly date) => $"{date.Day} {Months[date.Month - 1][..3]}";
+
+    /// <summary>"LUN", "MIÉ"…</summary>
+    public static string DayAbbreviation(DateOnly date) => DayAbbreviations[(int)date.DayOfWeek];
+
     public static string Format(DateOnly date) => $"{Days[(int)date.DayOfWeek]}, {date.Day} de {Months[date.Month - 1]}";
 }
