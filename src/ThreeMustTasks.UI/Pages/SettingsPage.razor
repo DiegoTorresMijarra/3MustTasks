@@ -1,5 +1,6 @@
 @page "/ajustes"
 @using ThreeMustTasks.Core.Ports
+@using ThreeMustTasks.Core.Services
 @implements IDisposable
 @inject IStringLocalizer<Strings> L
 @inject ThemeService Theme
@@ -71,6 +72,29 @@
         </div>
     </fieldset>
 
+    <label class="tmt-field tmt-check-row">
+        <span>@L["Settings_Nag"]</span>
+        <input type="checkbox" checked="@_s.NagEnabled" @onchange="e => Update(s => s with { NagEnabled = (bool)e.Value! })" data-testid="setting-nag" />
+    </label>
+    <label class="tmt-field">
+        <span>@L["Settings_NagInterval"]</span>
+        <input type="number" min="5" max="240" step="5" value="@_s.NagIntervalMin" disabled="@(!_s.NagEnabled)"
+               @onchange="e => OnNumber(e, 5, 240, (s, n) => s with { NagIntervalMin = n })" data-testid="setting-nag-interval" />
+    </label>
+    <label class="tmt-field">
+        <span>@L["Settings_NagMax"]</span>
+        <input type="number" min="1" max="@ReminderPlanner.MaxNagsPerDay" value="@_s.NagMaxPerDay" disabled="@(!_s.NagEnabled)"
+               @onchange="e => OnNumber(e, 1, ReminderPlanner.MaxNagsPerDay, (s, n) => s with { NagMaxPerDay = n })" data-testid="setting-nag-max" />
+    </label>
+    <label class="tmt-field tmt-check-row">
+        <span>@L["Settings_CompletionReminder"]</span>
+        <input type="checkbox" checked="@_s.CompletionReminderEnabled" @onchange="e => Update(s => s with { CompletionReminderEnabled = (bool)e.Value! })" data-testid="setting-completion" />
+    </label>
+    <label class="tmt-field">
+        <span>@L["Settings_CompletionTime"]</span>
+        <input type="time" value="@_completionTime" @onchange="OnCompletionTime" disabled="@(!_s.CompletionReminderEnabled)" data-testid="setting-completion-time" />
+    </label>
+
     @if (_status is { Supported: true })
     {
         <div class="tmt-onb-note" data-testid="notif-status">
@@ -120,6 +144,7 @@
         _s = Store.Load();
         _dayStart = _s.DayStartsAt.ToString("HH:mm");
         _planTime = _s.PlanningReminderTime.ToString("HH:mm");
+        _completionTime = _s.CompletionReminderTime.ToString("HH:mm");
         // Tras restaurar un backup los ajustes y el plan han cambiado: se reprograman los avisos.
         await Reminders.RebuildAsync();
         _status = await Scheduler.GetStatusAsync();
@@ -138,6 +163,21 @@
     }
 
     private async Task OpenAsync(SystemSettingsTarget target) => await Scheduler.OpenSystemSettingsAsync(target);
+
+    private string _completionTime = "18:00";
+
+    // Fuera de rango o no numérico: se ignora y se conserva el valor anterior.
+    private void OnNumber(ChangeEventArgs e, int min, int max, Func<AppSettings, int, AppSettings> apply)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var n) && n >= min && n <= max) Update(s => apply(s, n));
+    }
+
+    private void OnCompletionTime(ChangeEventArgs e)
+    {
+        if (!TimeOnly.TryParseExact(e.Value?.ToString(), "HH:mm", out var time)) return;
+        _completionTime = e.Value!.ToString()!;
+        Update(s => s with { CompletionReminderTime = time });
+    }
 
     private void OnPlanTime(ChangeEventArgs e)
     {
@@ -158,6 +198,7 @@
         _s = Store.Load();
         _dayStart = _s.DayStartsAt.ToString("HH:mm");
         _planTime = _s.PlanningReminderTime.ToString("HH:mm");
+        _completionTime = _s.CompletionReminderTime.ToString("HH:mm");
     }
 
     private void OnChanged() => InvokeAsync(StateHasChanged);

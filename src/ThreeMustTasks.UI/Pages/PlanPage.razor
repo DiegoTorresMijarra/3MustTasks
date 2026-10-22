@@ -4,12 +4,22 @@
 @inject IStringLocalizer<Strings> L
 @inject TodayService Today
 @inject PlanEvents Events
+@inject NavigationManager Nav
+@inject ThreeMustTasks.Core.Ports.ISettingsStore Store
 
 <PageTitle>@L["App_Name"] · @L["Plan_Title"]</PageTitle>
 <MudText Typo="Typo.h5" Class="mb-2 tmt-title">@L["Plan_Title"]</MudText>
 
 @if (_view is not null)
 {
+    @if (StrictBlocking)
+    {
+        <MudAlert Severity="Severity.Warning" Class="mb-2" data-testid="plan-strict-notice">@L["Plan_StrictNotice"]</MudAlert>
+    }
+    @if (_blocked)
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-2" data-testid="plan-strict-blocked">@L["Plan_StrictBlocked"]</MudAlert>
+    }
     <div class="tmt-quota-strip" role="status" aria-label="@L["Plan_Quotas"]" data-testid="plan-quotas">
         @foreach (var g in _view.Groups)
         {
@@ -48,6 +58,8 @@
     private TodayView? _view;
     private string _tab = "nueva";
     private string? _appliedTab;
+    private IDisposable? _lock;
+    private bool _blocked;
 
     [SupplyParameterFromQuery(Name = "nivel")] public Guid? LevelId { get; set; }
 
@@ -57,6 +69,7 @@
     protected override async Task OnInitializedAsync()
     {
         Events.PlanChanged += OnPlanChanged;
+        _lock = Nav.RegisterLocationChangingHandler(OnLocationChanging);
         _view = await Today.GetAsync();
     }
 
@@ -70,10 +83,30 @@
     private void OnPlanChanged(DateOnly _) => InvokeAsync(async () =>
     {
         _view = await Today.GetAsync();
+        if (!StrictBlocking) _blocked = false;
         StateHasChanged();
     });
 
     private string Sel(string tab) => _tab == tab ? "true" : "false";
 
-    public void Dispose() => Events.PlanChanged -= OnPlanChanged;
+    // Modo estricto (PRD §5.2): no se sale de Planificar hasta cumplir el mínimo a añadir. Cambiar de pestaña o de
+    // parámetros dentro de la misma página sí se permite.
+    private bool StrictBlocking => _view is { Quota.IsPlanMinimumMet: false } && Store.Load().StrictMode;
+
+    private ValueTask OnLocationChanging(LocationChangingContext context)
+    {
+        if (!StrictBlocking) return ValueTask.CompletedTask;
+        var target = Nav.ToAbsoluteUri(context.TargetLocation).AbsolutePath.TrimEnd('/');
+        if (target.EndsWith("/planificar", StringComparison.Ordinal)) return ValueTask.CompletedTask;
+        context.PreventNavigation();
+        _blocked = true;
+        InvokeAsync(StateHasChanged);
+        return ValueTask.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        Events.PlanChanged -= OnPlanChanged;
+        _lock?.Dispose();
+    }
 }

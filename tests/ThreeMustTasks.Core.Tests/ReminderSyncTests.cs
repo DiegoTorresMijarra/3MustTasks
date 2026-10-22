@@ -12,12 +12,13 @@ public class ReminderSyncTests
     private sealed class FakeScheduler : INotificationScheduler
     {
         public List<IReadOnlyList<PlannedNotification>> Calls { get; } = [];
+        public List<IReadOnlyList<PlannedNotification>> Full { get; } = [];
         public bool Throw { get; set; }
 
         public Task ReplaceAllAsync(IReadOnlyList<PlannedNotification> notifications, CancellationToken ct = default)
         {
             if (Throw) throw new InvalidOperationException("boom");
-            lock (Calls) Calls.Add(notifications);
+            lock (Calls) { Calls.Add(notifications.Where(n => n.Kind == NotificationKind.PlanReminder).ToList()); Full.Add(notifications); }
             return Task.CompletedTask;
         }
 

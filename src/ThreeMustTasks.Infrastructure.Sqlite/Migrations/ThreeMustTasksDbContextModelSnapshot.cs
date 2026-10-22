@@ -25,6 +25,12 @@ namespace ThreeMustTasks.Infrastructure.Sqlite.Migrations
                     b.Property<bool>("AutoAddScheduled")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("CompletionReminderEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<TimeOnly>("CompletionReminderTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<TimeOnly>("DayStartsAt")
                         .HasColumnType("TEXT");
 
@@ -32,6 +38,15 @@ namespace ThreeMustTasks.Infrastructure.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("FirstDayOfWeek")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("NagEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("NagIntervalMin")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("NagMaxPerDay")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("OnboardingCompleted")

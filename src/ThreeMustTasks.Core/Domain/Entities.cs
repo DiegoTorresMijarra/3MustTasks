@@ -96,6 +96,16 @@ public sealed record AppSettings
 
     public const int AllDaysMask = 0b111_1111;
 
+    /// <summary>Insistencia por plan incompleto (PRD §5.2): activa por defecto.</summary>
+    public bool NagEnabled { get; init; } = true;
+    /// <summary>Minutos entre insistencias, desde la hora de planificación (por defecto 30).</summary>
+    public int NagIntervalMin { get; init; } = 30;
+    /// <summary>Tope diario de insistencias (por defecto 4).</summary>
+    public int NagMaxPerDay { get; init; } = 4;
+    /// <summary>Aviso de la tarde si falta el mínimo a completar (PRD §5.2): activo por defecto.</summary>
+    public bool CompletionReminderEnabled { get; init; } = true;
+    public TimeOnly CompletionReminderTime { get; init; } = new(18, 0);
+
     /// <summary>true si el recordatorio de planificación está activo el día de la semana indicado.</summary>
     public bool PlanReminderOnDay(DayOfWeek day) => (PlanReminderDaysMask & (1 << (int)day)) != 0;
 
