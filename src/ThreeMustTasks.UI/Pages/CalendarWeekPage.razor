@@ -1,0 +1,106 @@
+@page "/calendario/semana"
+@page "/calendario/semana/{DateText}"
+@using System.Globalization
+@using ThreeMustTasks.Core.Domain
+@using ThreeMustTasks.Core.Services
+@using ThreeMustTasks.UI.Components
+@using ThreeMustTasks.UI.Services
+@inject IStringLocalizer<Strings> L
+@inject HistoryService History
+
+<PageTitle>@L["App_Name"] · @L["Calendar_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="mb-2 tmt-title">@L["Calendar_Title"]</MudText>
+<CalendarTabs Active="week" />
+
+@if (_week is not null)
+{
+    <div class="tmt-day-nav">
+        <a href="calendario/semana/@Iso(_week.Start.AddDays(-7))" data-testid="week-prev" aria-label="@L["Week_Prev"]">
+            <MudIcon Icon="@Icons.Material.Filled.ChevronLeft" />
+        </a>
+        <div class="tmt-week-title">
+            <MudText Typo="Typo.subtitle1" data-testid="week-title">@SpanishDate.FormatShort(_week.Start) – @SpanishDate.FormatShort(_week.End)</MudText>
+            <MudText Typo="Typo.caption" Color="Color.Secondary" data-testid="week-summary">@L["Week_Summary", _week.TotalCompleted, _week.TotalPlanned]</MudText>
+        </div>
+        <a href="calendario/semana/@Iso(_week.Start.AddDays(7))" data-testid="week-next" aria-label="@L["Week_Next"]">
+            <MudIcon Icon="@Icons.Material.Filled.ChevronRight" />
+        </a>
+    </div>
+
+    <div class="tmt-week" data-testid="week-grid">
+        @foreach (var d in _week.Days)
+        {
+            var cls = $"tmt-week-day {d.Kind.ToString().ToLowerInvariant()} {StatusClass(d)}";
+            var kind = d.Kind.ToString().ToLowerInvariant();
+            if (d.Kind == WeekDayKind.Future)
+            {
+                <div class="@cls" data-testid="week-day" data-date="@Iso(d.Date)" data-kind="@kind">
+                    @DayBody(d)
+                </div>
+            }
+            else
+            {
+                var href = d.Kind == WeekDayKind.Today ? "" : "calendario/" + Iso(d.Date);
+                <a class="@cls" href="@href" data-testid="week-day" data-date="@Iso(d.Date)" data-kind="@kind">
+                    @DayBody(d)
+                </a>
+            }
+        }
+    </div>
+}
+
+@code {
+    private const int MaxShown = 3;
+
+    [Parameter] public string? DateText { get; set; }
+
+    private WeekView? _week;
+
+    private RenderFragment DayBody(WeekDay d) => __builder =>
+    {
+        <div class="tmt-week-head">
+            <span class="tmt-week-dow">@SpanishDate.DayAbbreviation(d.Date)</span>
+            <span class="tmt-week-num">@d.Date.Day</span>
+            <span class="tmt-week-score" data-testid="week-score">@Score(d)</span>
+        </div>
+        if (d.Kind == WeekDayKind.Past && !d.HasPlan)
+        {
+            <span class="tmt-week-empty" data-testid="week-no-plan">@L["History_NoPlan"]</span>
+        }
+        else
+        {
+            <ul class="tmt-week-tasks">
+                @foreach (var item in d.Items.Take(MaxShown))
+                {
+                    var done = item.Outcome == AssignmentOutcome.Completed;
+                    <li class="@(done ? "done" : "")" data-testid="week-task" data-outcome="@item.Outcome">
+                        <span class="tmt-week-dot" style="--level-color:@(item.Level?.Color ?? "#999")"></span>
+                        <span class="tmt-week-task-title">@item.Task.Title</span>
+                        <span class="tmt-week-mark" aria-label="@(done ? L["History_Completed"] : L["History_Pending"])">@(done ? "✓" : "")</span>
+                    </li>
+                }
+            </ul>
+            if (d.Items.Count > MaxShown)
+            {
+                <span class="tmt-week-more" data-testid="week-more">@L["Week_More", d.Items.Count - MaxShown]</span>
+            }
+        }
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var anchor = DateOnly.TryParseExact(DateText, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : History.Today;
+        _week = await History.GetWeekAsync(anchor);
+    }
+
+    private string Score(WeekDay d) => d.Kind switch
+    {
+        WeekDayKind.Future => d.Planned > 0 ? L["Week_Scheduled", d.Planned].Value : "",
+        WeekDayKind.Past when !d.HasPlan => "",
+        _ => d.Planned > 0 ? $"{d.Completed}/{d.Planned}" : "",
+    };
+
+    private static string StatusClass(WeekDay d) => d.Kind == WeekDayKind.Past && d.HasPlan ? (d.Fulfilled == true ? "ok" : "miss") : "";
+
+    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+}

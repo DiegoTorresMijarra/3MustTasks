@@ -155,3 +155,29 @@ a.tmt-chip { display: inline-flex; align-items: center; text-decoration: none; }
 .tmt-onb-primary { flex: 1; border: 0; background: var(--mud-palette-text-primary); color: var(--mud-palette-surface); }
 .tmt-onb-secondary { min-height: 44px; padding: 0 16px; border: 1px solid var(--mud-palette-lines-default); background: transparent; color: var(--mud-palette-text-primary); }
 .tmt-onb-footer .tmt-onb-secondary { min-height: 56px; }
+
+/* Calendario: vista Semana (mock design/mocks/Semana.dc.html). 7 columnas; filas en móvil estrecho. */
+.tmt-week-title { text-align: center; }
+.tmt-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.tmt-week-day { display: flex; flex-direction: column; gap: 6px; min-height: 120px; padding: 8px 6px; border-radius: 10px; border: 1px solid var(--mud-palette-lines-default); background: var(--mud-palette-surface); color: inherit; text-decoration: none; box-sizing: border-box; }
+.tmt-week-day.today { border: 2px solid var(--mud-palette-text-primary); }
+.tmt-week-day.future { background: transparent; border: 1.5px dashed var(--mud-palette-lines-default); }
+.tmt-week-head { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tmt-week-dow { font-size: 0.7rem; color: var(--mud-palette-text-secondary); }
+.tmt-week-num { font-weight: 700; }
+.tmt-week-score { font-size: 0.7rem; padding: 0 6px; border-radius: 999px; min-height: 1em; }
+.tmt-week-day.ok .tmt-week-score { background: var(--mud-palette-text-primary); color: var(--mud-palette-surface); }
+.tmt-week-day.miss .tmt-week-score { background: #FBEAE8; color: #7E1F19; }
+.tmt-week-tasks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.tmt-week-tasks li { display: flex; align-items: center; gap: 4px; font-size: 0.75rem; min-width: 0; }
+.tmt-week-tasks li.done .tmt-week-task-title { text-decoration: line-through; color: var(--mud-palette-text-secondary); }
+.tmt-week-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--level-color); }
+.tmt-week-task-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tmt-week-mark { flex: none; font-size: 0.7rem; }
+.tmt-week-more, .tmt-week-empty { font-size: 0.7rem; color: var(--mud-palette-text-secondary); text-align: center; }
+@media (max-width: 599px) {
+  .tmt-week { grid-template-columns: 1fr; }
+  .tmt-week-day { flex-direction: row; align-items: center; min-height: 56px; }
+  .tmt-week-head { flex-direction: row; gap: 8px; flex: none; min-width: 120px; }
+  .tmt-week-tasks { flex: 1; min-width: 0; }
+}
