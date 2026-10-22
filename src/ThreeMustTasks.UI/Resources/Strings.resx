@@ -249,6 +249,26 @@
   <data name="Today_RecurringOverflow" xml:space="preserve"><value>No caben en su nivel y se han dejado en el pool: {0}.</value></data>
   <data name="Today_RecurringOverflowAction" xml:space="preserve"><value>Ver pool</value></data>
   <data name="Settings_Onboarding" xml:space="preserve"><value>Repetir la introducción</value></data>
+  <data name="Settings_Notifications" xml:space="preserve"><value>Notificaciones</value></data>
+  <data name="Settings_PlanReminder" xml:space="preserve"><value>Recordatorio "¡Añade tus tareas!"</value></data>
+  <data name="Settings_PlanReminderTime" xml:space="preserve"><value>Hora del recordatorio</value></data>
+  <data name="Settings_PlanReminderDays" xml:space="preserve"><value>Días de la semana</value></data>
+  <data name="Notif_PermGranted" xml:space="preserve"><value>Las notificaciones están activadas.</value></data>
+  <data name="Notif_PermMissing" xml:space="preserve"><value>Las notificaciones están desactivadas: sin ellas no puedo recordarte que planifiques tu día.</value></data>
+  <data name="Notif_RequestPermission" xml:space="preserve"><value>Activar notificaciones</value></data>
+  <data name="Notif_OpenSettings" xml:space="preserve"><value>Abrir ajustes del sistema</value></data>
+  <data name="Notif_Inexact" xml:space="preserve"><value>Sin el permiso de alarmas exactas, el aviso puede llegar con unos minutos de retraso. Puedes concederlo en los ajustes del sistema.</value></data>
+  <data name="Notif_OpenExact" xml:space="preserve"><value>Permitir alarmas exactas</value></data>
+  <data name="Notif_BatteryLink" xml:space="preserve"><value>Ayuda: ahorro de batería</value></data>
+  <data name="Notif_Unsupported" xml:space="preserve"><value>Este dispositivo no programa avisos con la app cerrada. Usa la app de Android para recibir recordatorios.</value></data>
+  <data name="Battery_Title" xml:space="preserve"><value>Ahorro de batería</value></data>
+  <data name="Battery_Intro" xml:space="preserve"><value>Algunos móviles (Xiaomi, Huawei, Samsung, OnePlus…) cierran las apps en segundo plano para ahorrar batería y pueden retrasar o suprimir los recordatorios. Para que lleguen con la app cerrada:</value></data>
+  <data name="Battery_Step1" xml:space="preserve"><value>Abre los ajustes de batería de 3MustTasks (botón de abajo).</value></data>
+  <data name="Battery_Step2" xml:space="preserve"><value>Elige "Sin restricciones" o excluye la app de la optimización de batería.</value></data>
+  <data name="Battery_Step3" xml:space="preserve"><value>Si tu fabricante tiene "inicio automático" o "apps protegidas", activa 3MustTasks ahí.</value></data>
+  <data name="Battery_ForceStop" xml:space="preserve"><value>Si fuerzas la detención de la app desde los ajustes de Android, no llegarán avisos hasta que la abras de nuevo.</value></data>
+  <data name="Battery_Open" xml:space="preserve"><value>Abrir ajustes de batería</value></data>
+  <data name="Battery_Back" xml:space="preserve"><value>Volver a Ajustes</value></data>
   <data name="Onb_Title" xml:space="preserve"><value>Bienvenida</value></data>
   <data name="Onb_StepOf" xml:space="preserve"><value>Paso {0} de {1}</value></data>
   <data name="Onb_Skip" xml:space="preserve"><value>Saltar</value></data>

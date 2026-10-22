@@ -1,0 +1,26 @@
+@page "/ajustes/bateria"
+@using ThreeMustTasks.Core.Ports
+@inject IStringLocalizer<Strings> L
+@inject INotificationScheduler Scheduler
+
+<PageTitle>@L["App_Name"] · @L["Battery_Title"]</PageTitle>
+<MudText Typo="Typo.h5" Class="mb-3 tmt-title">@L["Battery_Title"]</MudText>
+
+<div class="tmt-onb-note" data-testid="battery-help">
+    <p class="tmt-onb-p">@L["Battery_Intro"]</p>
+    <ol>
+        <li>@L["Battery_Step1"]</li>
+        <li>@L["Battery_Step2"]</li>
+        <li>@L["Battery_Step3"]</li>
+    </ol>
+    <p class="tmt-onb-p">@L["Battery_ForceStop"]</p>
+</div>
+
+<div class="mt-3">
+    <button type="button" class="tmt-onb-secondary" @onclick="OpenBattery" data-testid="battery-open-settings">@L["Battery_Open"]</button>
+</div>
+<a class="tmt-settings-link" href="ajustes" data-testid="battery-back">@L["Battery_Back"]</a>
+
+@code {
+    private Task OpenBattery() => Scheduler.OpenSystemSettingsAsync(SystemSettingsTarget.BatteryOptimization);
+}

@@ -55,6 +55,7 @@ public sealed class DayRolloverService(
 
             var result = new RolloverResult(closed, generated);
             if (result.Changed) events.RaisePlanChanged(today);
+            events.RaiseRolloverCompleted(today);
             return result;
         }
         finally

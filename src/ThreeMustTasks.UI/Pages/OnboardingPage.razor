@@ -4,6 +4,7 @@
 @inject IStringLocalizer<Strings> L
 @inject OnboardingService Onboarding
 @inject INotificationPermission Permission
+@inject ThreeMustTasks.Core.Services.ReminderSyncService Reminders
 @inject NavigationManager Nav
 
 <PageTitle>@L["App_Name"] · @L["Onb_Title"]</PageTitle>
@@ -147,14 +148,16 @@
     {
         if (_permission is NotificationPermissionState.NotAsked) _permission = await Permission.RequestAsync();
         Onboarding.Complete(TimeOnly.ParseExact(_time, "HH:mm"));
-        // "Personalizado" termina directamente en la configuración de niveles.
+        await Reminders.RebuildAsync();
+        //"Personalizado" termina directamente en la configuración de niveles.
         Nav.NavigateTo(_preset == QuotaPreset.Custom ? "ajustes/niveles" : "");
     }
 
-    private void Skip()
+    private async Task Skip()
     {
         // Saltar no cambia nada, pero cuenta como hecho: no vuelve a salir (se puede repetir desde Ajustes).
         Onboarding.Complete();
+        await Reminders.RebuildAsync();
         Nav.NavigateTo("");
     }
 }

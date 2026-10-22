@@ -33,6 +33,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<OnboardingService>();
         // Por defecto no-op; el host (PWA, o Android cuando exista la implementación del spike 02) la sustituye.
         services.TryAddSingleton<INotificationPermission, NoOpNotificationPermission>();
+        services.TryAddSingleton<INotificationScheduler, NoOpNotificationScheduler>();
+        // Singleton: lo arranca el host (Start) y escucha PlanChanged / cierre de día fuera del ámbito del WebView.
+        services.AddSingleton<ReminderSyncService>();
+        services.AddSingleton<PendingNavigation>();
         services.AddScoped<BackupService>();
         return services;
     }

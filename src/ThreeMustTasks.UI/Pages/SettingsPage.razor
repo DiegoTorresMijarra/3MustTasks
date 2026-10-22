@@ -4,6 +4,8 @@
 @inject IStringLocalizer<Strings> L
 @inject ThemeService Theme
 @inject ISettingsStore Store
+@inject INotificationScheduler Scheduler
+@inject ThreeMustTasks.Core.Services.ReminderSyncService Reminders
 
 <PageTitle>@L["App_Name"] · @L["Settings_Title"]</PageTitle>
 <MudText Typo="Typo.h5" Class="mb-4 tmt-title">@L["Settings_Title"]</MudText>
@@ -45,6 +47,63 @@
     </label>
 </div>
 
+<MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Settings_Notifications"]</MudText>
+<div class="tmt-form" data-testid="notif-settings">
+    <label class="tmt-field tmt-check-row">
+        <span>@L["Settings_PlanReminder"]</span>
+        <input type="checkbox" checked="@_s.PlanReminderEnabled" @onchange="e => Update(s => s with { PlanReminderEnabled = (bool)e.Value! })" data-testid="setting-planreminder" />
+    </label>
+    <label class="tmt-field">
+        <span>@L["Settings_PlanReminderTime"]</span>
+        <input type="time" value="@_planTime" @onchange="OnPlanTime" disabled="@(!_s.PlanReminderEnabled)" data-testid="setting-planreminder-time" />
+    </label>
+    <fieldset class="tmt-field" disabled="@(!_s.PlanReminderEnabled)">
+        <span>@L["Settings_PlanReminderDays"]</span>
+        <div class="tmt-chips">
+            @foreach (var d in _weekDays)
+            {
+                var day = d;
+                <label class="tmt-chip">
+                    <input type="checkbox" checked="@_s.PlanReminderOnDay(day)" @onchange="e => Update(s => s.WithPlanReminderDay(day, (bool)e.Value!))" data-testid="@($"setting-planreminder-day-{(int)day}")" />
+                    @L[$"Day_{day}"]
+                </label>
+            }
+        </div>
+    </fieldset>
+
+    @if (_status is { Supported: true })
+    {
+        <div class="tmt-onb-note" data-testid="notif-status">
+            @if (_status.NotificationsEnabled)
+            {
+                <span data-testid="notif-permission-granted">@L["Notif_PermGranted"]</span>
+            }
+            else
+            {
+                <span data-testid="notif-permission-missing">@L["Notif_PermMissing"]</span>
+                <div>
+                    <button type="button" class="tmt-onb-secondary" @onclick="RequestPermissionAsync" data-testid="notif-request-permission">@L["Notif_RequestPermission"]</button>
+                    <button type="button" class="tmt-onb-secondary" @onclick="() => OpenAsync(SystemSettingsTarget.Notifications)" data-testid="notif-open-settings">@L["Notif_OpenSettings"]</button>
+                </div>
+            }
+        </div>
+        @if (!_status.ExactAlarmsAllowed)
+        {
+            <div class="tmt-onb-note" data-testid="notif-inexact">
+                <span>@L["Notif_Inexact"]</span>
+                <div>
+                    <button type="button" class="tmt-onb-secondary" @onclick="() => OpenAsync(SystemSettingsTarget.ExactAlarms)" data-testid="notif-open-exact">@L["Notif_OpenExact"]</button>
+                </div>
+            </div>
+        }
+        <a class="tmt-settings-link" href="ajustes/bateria" data-testid="battery-link">@L["Notif_BatteryLink"]</a>
+    }
+    else if (_status is not null)
+    {
+        <div class="tmt-onb-note" data-testid="notif-unsupported">@L["Notif_Unsupported"]</div>
+    }
+</div>
+
 <MudText Typo="Typo.h6" Class="mt-6 mb-2">@L["Settings_Organization"]</MudText>
 <a class="tmt-settings-link" href="ajustes/niveles" data-testid="levels-link">@L["Settings_Levels"]</a><br />
 <a class="tmt-settings-link" href="ajustes/categorias" data-testid="categories-link">@L["Categories_Title"]</a><br />
@@ -54,10 +113,35 @@
 <BackupPanel OnRestored="ReloadSettings" />
 
 @code {
-    private void ReloadSettings()
+    private async Task ReloadSettings()
     {
         _s = Store.Load();
         _dayStart = _s.DayStartsAt.ToString("HH:mm");
+        _planTime = _s.PlanningReminderTime.ToString("HH:mm");
+        // Tras restaurar un backup los ajustes y el plan han cambiado: se reprograman los avisos.
+        await Reminders.RebuildAsync();
+        _status = await Scheduler.GetStatusAsync();
+    }
+
+    private NotificationStatus? _status;
+    private string _planTime = "07:30";
+
+    protected override async Task OnInitializedAsync() => _status = await Scheduler.GetStatusAsync();
+
+    private async Task RequestPermissionAsync()
+    {
+        await Scheduler.RequestPermissionAsync();
+        await Reminders.RebuildAsync();
+        _status = await Scheduler.GetStatusAsync();
+    }
+
+    private async Task OpenAsync(SystemSettingsTarget target) => await Scheduler.OpenSystemSettingsAsync(target);
+
+    private void OnPlanTime(ChangeEventArgs e)
+    {
+        if (!TimeOnly.TryParseExact(e.Value?.ToString(), "HH:mm", out var time)) return;
+        _planTime = e.Value!.ToString()!;
+        Update(s => s with { PlanningReminderTime = time });
     }
 
     private static readonly DayOfWeek[] _weekDays =
@@ -71,6 +155,7 @@
         Theme.OnChange += OnChanged;
         _s = Store.Load();
         _dayStart = _s.DayStartsAt.ToString("HH:mm");
+        _planTime = _s.PlanningReminderTime.ToString("HH:mm");
     }
 
     private void OnChanged() => InvokeAsync(StateHasChanged);
@@ -81,6 +166,8 @@
         // Se relee antes de guardar para no pisar otros cambios (p. ej. el tema).
         _s = change(Store.Load());
         Store.Save(_s);
+        // Hora, días, activación o inicio del día lógico cambian lo que debe estar programado.
+        _ = Reminders.RebuildAsync();
     }
 
     private void OnDayStart(ChangeEventArgs e)
