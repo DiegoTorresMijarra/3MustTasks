@@ -59,7 +59,7 @@ public sealed class PoolPageTests : BunitContext
     }
 
     [Fact]
-    public async Task Lists_pending_tasks_oldest_first_with_postponed_indicator()
+    public async Task Lists_this_week_first_then_older_with_postponed_indicator()
     {
         await Seed("nueva", DefaultLevels.MustId, daysOld: 1, postponed: 1);
         await Seed("vieja", DefaultLevels.RecommendedId, daysOld: 14, postponed: 4);
@@ -67,10 +67,10 @@ public sealed class PoolPageTests : BunitContext
 
         var cut = RenderPool();
 
-        Assert.Equal(["vieja", "nueva", "fresca"], Titles(cut));
+        Assert.Equal(["nueva", "fresca", "vieja"], Titles(cut)); // "Esta semana" arriba, "Más antiguas" debajo
         var postponed = cut.FindAll("[data-testid=pool-postponed]").Select(e => e.TextContent.Trim()).ToArray();
-        Assert.Contains("pospuesta 4 veces", postponed[0]);
-        Assert.Contains("pospuesta 1 vez", postponed[1]);
+        Assert.Contains("pospuesta 1 vez", postponed[0]);
+        Assert.Contains("pospuesta 4 veces", postponed[1]);
         Assert.Equal(2, postponed.Length); // la fresca nunca se pospuso: sin indicador
         Assert.Contains("3 pendientes · 0 seleccionadas", cut.Find("[data-testid=pool-summary]").TextContent);
     }
@@ -84,7 +84,7 @@ public sealed class PoolPageTests : BunitContext
         var cut = RenderPool();
 
         cut.Find("[data-testid=filter-Must]").Click();
-        Assert.Equal(["m-vieja", "m-pospuesta"], Titles(cut));
+        Assert.Equal(["m-pospuesta", "m-vieja"], Titles(cut)); // esta semana primero
         Assert.Equal("true", cut.Find("[data-testid=filter-Must]").GetAttribute("aria-pressed"));
 
         cut.Find("[data-testid=sort-postponed]").Click();

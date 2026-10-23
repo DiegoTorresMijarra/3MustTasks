@@ -130,7 +130,7 @@ Valores por defecto (total por defecto: **3 tareas**):
 1. **Inicio / Hoy**: las tareas del día agrupadas por nivel con huecos visibles y progreso de completado por nivel; tocar el círculo tacha, tocar el texto edita; banner de mínimo y botón para añadir.
 2. **Añadir/editar tarea**: título, nivel, categoría, hora y recordatorio, notas, recurrencia, fecha (hoy / futura / sin fecha → pool), fijar y favorita; en edición, eliminar.
 3. **Planificar**: selector rápido con pestañas *Nueva · Favoritas · Pool*.
-4. **Pool**: lista filtrable (nivel, categoría, antigüedad, veces pospuesta), selección múltiple para *recuperar a hoy* o *archivar*. Con sección "Programadas a futuro".
+4. **Pool**: lista filtrable (nivel, categoría, antigüedad, veces pospuesta), selección múltiple para *recuperar a hoy* o *archivar*. Se agrupa por antigüedad: sección "Esta semana" arriba y "Más antiguas" debajo (dentro de cada una, según el orden elegido). Con sección "Programadas a futuro".
 5. **Archivadas**.
 6. **Historial / Calendario** con vistas:
    - **Día**: detalle de un día pasado.
