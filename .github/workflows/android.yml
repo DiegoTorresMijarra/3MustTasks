@@ -1,15 +1,29 @@
 name: Android
 
+# Compila el APK Release en cada PR y push a main. En main lo publica como pre-release móvil "nightly"
+# (siempre el último de main) para descargarlo directamente desde GitHub Releases en el móvil.
+# Firma con el keystore de los secretos si existen (ver docs/release-android.md); si no, con uno desechable
+# generado en cada ejecución (el APK instala, pero para actualizar encima hay que desinstalar el anterior).
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # publicar la pre-release "nightly" (solo en push a main)
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD || 'tmt-throwaway-pass' }}
+  KEY_PASS: ${{ secrets.ANDROID_KEY_PASSWORD || 'tmt-throwaway-pass' }}
+  KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS || 'tmt' }}
 
 jobs:
-  apk-debug:
+  apk:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,18 +40,65 @@ jobs:
       - name: Install MAUI Android workload
         run: dotnet workload install maui-android
 
-      - name: Build debug APK
+      - name: Prepare keystore
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "Usando el keystore de los secretos"
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/app.keystore"
+          else
+            echo "::warning::Sin secretos de firma: keystore desechable (no se podrá actualizar encima de una instalación previa)"
+            keytool -genkeypair -keystore "$RUNNER_TEMP/app.keystore" -alias "$KS_ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 3650 \
+              -storepass "$KS_PASS" -keypass "$KEY_PASS" -dname "CN=3MustTasks CI"
+          fi
+          echo "KEYSTORE_PATH=$RUNNER_TEMP/app.keystore" >> "$GITHUB_ENV"
+
+      # Las contraseñas se pasan como "env:NOMBRE": MSBuild las lee de la variable de entorno.
+      # versionCode = nº de ejecución, para que un APK nuevo firmado con la misma clave sea una actualización.
+      - name: Build signed Release APK
         run: >
-          dotnet publish src/ThreeMustTasks.App.Maui -c Debug
+          dotnet publish src/ThreeMustTasks.App.Maui -f net10.0-android -c Release
           -p:AndroidPackageFormat=apk
-          -p:EmbedAssembliesIntoApk=true
+          -p:ApplicationVersion=${{ github.run_number }}
+          -p:AndroidKeyStore=true
+          -p:AndroidSigningKeyStore="$KEYSTORE_PATH"
+          -p:AndroidSigningStorePass=env:KS_PASS
+          -p:AndroidSigningKeyAlias="$KS_ALIAS"
+          -p:AndroidSigningKeyPass=env:KEY_PASS
           -p:InstallAndroidDependencies=true
           -p:AcceptAndroidSDKLicenses=true
           -o publish/android
 
+      - name: Rename and verify APK
+        run: |
+          shopt -s nullglob
+          apks=(publish/android/*-Signed.apk)
+          [ ${#apks[@]} -eq 1 ] || { echo "::error::Se esperaba un único *-Signed.apk, hay ${#apks[@]}"; ls -R publish/android; exit 1; }
+          out="publish/android/3MustTasks-nightly.apk"
+          mv "${apks[0]}" "$out"
+          apksigner="$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)"
+          "$apksigner" verify --print-certs "$out"
+          echo "APK_PATH=$out" >> "$GITHUB_ENV"
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/app.keystore"
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: apk-debug
-          path: publish/android/*-Signed.apk
+          name: apk
+          path: ${{ env.APK_PATH }}
           if-no-files-found: error
+
+      - name: Publish nightly pre-release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete nightly --cleanup-tag --yes || true
+          gh release create nightly "$APK_PATH" --prerelease --target "$GITHUB_SHA" \
+            --title "3MustTasks nightly (main ${GITHUB_SHA::7})" \
+            --notes "APK Release del último commit de main (ejecución $GITHUB_RUN_NUMBER). Solo para pruebas; las versiones estables salen con tags v*."

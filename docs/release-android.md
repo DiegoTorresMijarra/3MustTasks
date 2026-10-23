@@ -64,3 +64,10 @@ Verificado en local (sin CI, sin keystore real):
 - La ejecución del workflow en `ubuntu-latest` (secretos reales, `base64 --decode`, `apksigner` en el runner, `gh release create`).
 - Que el APK se publique en Releases y se **instale y abra** en un dispositivo real.
 - Una actualización sobre una versión ya instalada.
+
+## APK de pruebas (nightly)
+
+Cada push a `main` ejecuta `.github/workflows/android.yml`: compila el APK Release, lo firma y lo publica como pre-release **`nightly`** en la pestaña Releases del repo (siempre el último de `main`). Desde el móvil: abre `https://github.com/DiegoTorresMijarra/3MustTasks/releases/tag/nightly` y descarga `3MustTasks-nightly.apk`. También queda como artifact `apk` de la ejecución (Actions).
+
+- Con los 4 secretos de firma creados, el APK nightly se firma con tu keystore y se puede actualizar encima de una instalación previa.
+- Sin secretos, se firma con una clave desechable por ejecución: instala igual, pero para instalar una versión posterior hay que **desinstalar** la anterior (se pierden los datos locales; exporta antes el backup JSON).
