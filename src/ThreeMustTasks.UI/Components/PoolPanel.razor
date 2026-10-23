@@ -190,11 +190,10 @@
         if (Sheet) { yield return new PoolSection(null, _view!.Items); yield break; }
         var week = _view!.Items.Where(i => i.AgeDays <= 7).ToList();
         var older = _view.Items.Where(i => i.AgeDays > 7).ToList();
-        // El orden de las secciones sigue al de la lista (la spec ordena por más antiguas primero; el mock pinta "esta semana" arriba).
-        var weekFirst = _view.Items[0].AgeDays <= 7;
+        // Como el mock: "Esta semana" arriba y "Más antiguas" debajo; dentro de cada sección se conserva el orden de la lista.
         var weekSection = new PoolSection(L["Pool_SectionWeek"], week);
         var olderSection = new PoolSection(L["Pool_SectionOlder"], older);
-        foreach (var s in weekFirst ? new[] { weekSection, olderSection } : new[] { olderSection, weekSection })
+        foreach (var s in new[] { weekSection, olderSection })
             if (s.Items.Count > 0) yield return s;
     }
 

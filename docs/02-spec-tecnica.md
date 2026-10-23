@@ -122,6 +122,7 @@ ReminderPlanner.Rebuild()
 
 ### 4.3 `PoolService`
 `Recover(taskIds, today)` (valida cupos y devuelve los rechazados con su motivo), `Archive(ids)`, `Unarchive(ids)`, `Delete(ids)`.
+En la UI el pool pendiente se agrupa por antigüedad como el mock: sección "Esta semana" (7 días o menos) arriba y "Más antiguas" debajo; el orden dentro de cada sección es el de la consulta (más antigua o más pospuesta).
 
 ### 4.4 `RecurrenceGenerator`
 Genera las instancias de `TaskItem` para una fecha si la regla aplica y no se generaron ya (`LastGeneratedDate`). Si se supera el máximo del nivel, la instancia va al pool y se avisa.

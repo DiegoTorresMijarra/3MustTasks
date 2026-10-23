@@ -231,8 +231,42 @@ public sealed class SettingsLevelsTests : BunitContext
         Assert.Equal("Crítico", Names(cut)[0]);
 
         cut.Find("[data-testid=levels-restore]").Click();
+        cut.Find("[data-testid=levels-restore-yes]").Click();
 
         Assert.Equal(["Must", "Recommended", "Maybe"], Names(cut));
+        Assert.Equal(DefaultLevels.Create(), await LevelService.ListAsync());
+    }
+
+    [Fact]
+    public async Task Restore_defaults_cancel_keeps_the_levels()
+    {
+        var cut = Render("/ajustes/niveles");
+        cut.FindAll("[data-testid=level-edit]")[0].Click();
+        cut.Find("[data-testid=level-name-input]").Input("Crítico");
+        cut.Find("[data-testid=level-save]").Click();
+
+        cut.Find("[data-testid=levels-restore]").Click();
+        Assert.Single(cut.FindAll("[data-testid=levels-restore-confirm]"));
+        cut.Find("[data-testid=levels-restore-no]").Click();
+
+        Assert.Empty(cut.FindAll("[data-testid=levels-restore-confirm]"));
+        Assert.Equal("Crítico", Names(cut)[0]);
+        Assert.Equal("Crítico", (await LevelService.ListAsync())[0].Name);
+    }
+
+    [Fact]
+    public async Task Settings_restore_defaults_asks_for_confirmation()
+    {
+        var first = (await LevelService.ListAsync())[0];
+        await LevelService.SaveAsync(first.Id, new LevelInput("Crítico", first.Color, first.Icon, first.MinToAdd, first.MinToComplete, first.Max, true));
+        var cut = Render("/ajustes");
+
+        cut.Find("[data-testid=levels-restore-defaults]").Click();
+        cut.Find("[data-testid=levels-restore-no]").Click();
+        Assert.Equal("Crítico", (await LevelService.ListAsync())[0].Name);
+
+        cut.Find("[data-testid=levels-restore-defaults]").Click();
+        cut.Find("[data-testid=levels-restore-yes]").Click();
         Assert.Equal(DefaultLevels.Create(), await LevelService.ListAsync());
     }
 }
