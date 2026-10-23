@@ -62,14 +62,14 @@ public sealed class AndroidHostTests
     }
 
     [Fact]
-    public void Ci_builds_the_debug_apk_and_uploads_it_as_an_artifact()
+    public void Ci_builds_the_signed_release_apk_and_publishes_it()
     {
         var workflow = File.ReadAllText(Path.Combine(Root, ".github", "workflows", "android.yml"));
 
         Assert.Contains("dotnet workload install maui-android", workflow);
-        Assert.Contains("src/ThreeMustTasks.App.Maui -c Debug", workflow);
+        Assert.Contains("-f net10.0-android -c Release", workflow);
+        Assert.Contains("gh release create nightly", workflow);
         Assert.Contains("AndroidPackageFormat=apk", workflow);
-        Assert.Contains("EmbedAssembliesIntoApk=true", workflow);
         Assert.Contains("actions/upload-artifact@v4", workflow);
         Assert.Contains("-Signed.apk", workflow);
     }
