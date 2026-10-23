@@ -33,3 +33,10 @@ Estado: **los 30 issues de v1 están `resolved`** y `main` está pusheado. Build
 - Un brief mío al worker del 18 atribuía al usuario la decisión de `SCHEDULE_EXACT_ALARM`; se corrigió de inmediato.
 - Worktrees: eliminados los de issues cerrados (ramas intactas). Quedan: el del 01 (ficheros sin commitear en `spikes/persistencia-web`, distintos de los de `main`; decide si se borra), el del 30 (bloqueado por su agente) y restos de worker-7 (archivo en uso).
 - Se reutilizaron workers por debajo del 50 % de contexto (5→26, 6→13, 7→24, 4→19, 9→21).
+
+## Actualización 2026-10-23: puntos del usuario resueltos
+- **Alarmas exactas:** `USE_EXACT_ALARM` (Android 13+, sin prompt) + `SCHEDULE_EXACT_ALARM` con `maxSdkVersion=32`. Verificado en el manifest fusionado. ADR 0002 actualizado. Aviso de Google Play: restringe `USE_EXACT_ALARM` a apps de alarma/calendario; el APK va por GitHub Releases.
+- **Pool:** secciones como el mock ("Esta semana" arriba); spec y producto actualizados.
+- **Restaurar niveles por defecto:** ahora pide confirmación (Ajustes y página Niveles).
+- **Worktrees:** el usuario decidió dejarlos como están.
+- Siguen pendientes solo las pruebas en móvil (guiones en los issues 02, 18, 27 y 30) y los pasos del usuario en GitHub (Pages, keystore y secretos).
