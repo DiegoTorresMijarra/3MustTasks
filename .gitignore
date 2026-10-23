@@ -12,3 +12,10 @@ coverage/
 publish/
 
 .idea/
+
+.secrets/
+
+# Claves de firma (nunca al repo)
+*.keystore
+*.jks
+*.pfx
