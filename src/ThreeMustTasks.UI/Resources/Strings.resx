@@ -192,6 +192,8 @@
   <data name="Levels_Max" xml:space="preserve"><value>Máximo (vacío = sin tope)</value></data>
   <data name="Levels_Enabled" xml:space="preserve"><value>Activo</value></data>
   <data name="Levels_Restore" xml:space="preserve"><value>Restaurar valores por defecto</value></data>
+  <data name="Levels_RestoreConfirm" xml:space="preserve"><value>¿Restaurar los niveles por defecto? Must, Recommended y Maybe vuelven a su configuración original; los niveles propios quedan desactivados.</value></data>
+  <data name="Levels_RestoreYes" xml:space="preserve"><value>Restaurar</value></data>
   <data name="Levels_RestoreHint" xml:space="preserve"><value>Vuelve Must, Recommended y Maybe a su configuración original. Los niveles propios se conservan pero quedan desactivados.</value></data>
   <data name="Levels_ErrName" xml:space="preserve"><value>Escribe un nombre.</value></data>
   <data name="Levels_ErrLong" xml:space="preserve"><value>El nombre admite como máximo {0} caracteres.</value></data>

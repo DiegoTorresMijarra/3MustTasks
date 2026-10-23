@@ -91,7 +91,20 @@
 
 <div class="tmt-form-label">@L["Levels_Restore"]</div>
 <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">@L["Levels_RestoreHint"]</MudText>
-<MudButton Variant="Variant.Outlined" OnClick="RestoreAsync" data-testid="levels-restore">@L["Levels_Restore"]</MudButton>
+@if (_confirmingRestore)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-2" data-testid="levels-restore-confirm">
+        @L["Levels_RestoreConfirm"]
+        <div class="mt-2 tmt-confirm-actions">
+            <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="RestoreAsync" data-testid="levels-restore-yes">@L["Levels_RestoreYes"]</MudButton>
+            <MudButton Variant="Variant.Text" OnClick="() => _confirmingRestore = false" data-testid="levels-restore-no">@L["Form_Cancel"]</MudButton>
+        </div>
+    </MudAlert>
+}
+else
+{
+    <MudButton Variant="Variant.Outlined" OnClick="() => _confirmingRestore = true" data-testid="levels-restore">@L["Levels_Restore"]</MudButton>
+}
 
 @code {
     private IReadOnlyList<Level> _levels = [];
@@ -196,8 +209,11 @@
         await MoveAsync(id.Value, targetIndex);
     }
 
+    private bool _confirmingRestore;
+
     private async Task RestoreAsync()
     {
+        _confirmingRestore = false;
         _editingForm = false;
         await Service.RestoreDefaultsAsync();
         Reset();
