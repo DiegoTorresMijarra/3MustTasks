@@ -7,10 +7,13 @@ using Android.Runtime;
 [assembly: UsesPermission(Manifest.Permission.ReceiveBootCompleted)]
 [assembly: UsesPermission(Manifest.Permission.WakeLock)]
 [assembly: UsesPermission(Manifest.Permission.Vibrate)]
-// SCHEDULE_EXACT_ALARM: si el usuario no lo concede, el aviso se programa inexacto y se informa en Ajustes.
-// Decisión provisional del PM, pendiente de decidir por el usuario. No se declara USE_EXACT_ALARM: Google Play
-// solo lo admite en apps de alarma o calendario.
-[assembly: UsesPermission("android.permission.SCHEDULE_EXACT_ALARM")]
+// Alarmas exactas (decisión del usuario, 2026-10-23; ADR 0002): USE_EXACT_ALARM se concede al instalar en Android 13+ sin
+// pedirlo al usuario. SCHEDULE_EXACT_ALARM solo se declara hasta la API 32 (Android 12/12L), donde sí requiere concesión;
+// si no se concede, el aviso se programa inexacto y se informa en Ajustes.
+// OJO: Google Play restringe USE_EXACT_ALARM a apps de alarma o calendario; el APK se reparte por GitHub Releases
+// (issue 29). Si algún día se publica en Play hay que justificarlo en la ficha o volver a alarmas inexactas.
+[assembly: UsesPermission("android.permission.USE_EXACT_ALARM")]
+[assembly: UsesPermission("android.permission.SCHEDULE_EXACT_ALARM", MaxSdkVersion = 32)]
 
 namespace ThreeMustTasks.App.Maui;
 

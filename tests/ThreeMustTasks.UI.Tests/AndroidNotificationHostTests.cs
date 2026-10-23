@@ -11,15 +11,15 @@ public sealed class AndroidNotificationHostTests
     private static string Maui(string relative) => File.ReadAllText(Path.Combine(Root, "src", "ThreeMustTasks.App.Maui", relative));
 
     [Fact]
-    public void Host_declares_the_notification_permissions_and_not_USE_EXACT_ALARM()
+    public void Host_declares_the_notification_permissions_and_exact_alarms_per_api_level()
     {
         var app = Maui(Path.Combine("Platforms", "Android", "MainApplication.cs"));
 
         Assert.Contains("Manifest.Permission.PostNotifications", app);
         Assert.Contains("Manifest.Permission.ReceiveBootCompleted", app);
-        Assert.Contains("\"android.permission.SCHEDULE_EXACT_ALARM\"", app);
-        Assert.DoesNotContain("UseExactAlarm", app);
-        Assert.DoesNotContain("\"android.permission.USE_EXACT_ALARM\"", app);
+        // USE_EXACT_ALARM (Android 13+, sin prompt) + SCHEDULE_EXACT_ALARM solo hasta la API 32.
+        Assert.Contains("UsesPermission(\"android.permission.USE_EXACT_ALARM\")", app);
+        Assert.Contains("\"android.permission.SCHEDULE_EXACT_ALARM\", MaxSdkVersion = 32", app);
     }
 
     [Fact]
